@@ -58,6 +58,11 @@ class Feature:
             file_handler.setFormatter(formatter)
             logger.addHandler(file_handler)
 
+        # Optionally, also add a stream handler to output to console
+        stream_handler = logging.StreamHandler()
+        stream_handler.setFormatter(formatter)
+        logger.addHandler(stream_handler)
+
         return logger
 
     def file_name(self) -> str:
@@ -107,8 +112,11 @@ class Feature:
         self.buildings.to_csv(self.file_path(), index=False)
 
     def create_feature(self):
-        if self.feature_exists() and not self.overwrite:
-            return
+        if self.feature_exists():
+            if self.overwrite:
+                self.logger.warning(f"Overwriting existing feature file: {self.file_path()}")
+            else:
+                return
 
         self._start_time = datetime.now()
         self._ingest_buildings()
