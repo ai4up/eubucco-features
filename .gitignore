@@ -119,3 +119,4 @@ fabric.properties
 test_data/logs/features.log
 test_data/logs/stats.csv
 test_data/logs/stats.lock
+.idea/*
