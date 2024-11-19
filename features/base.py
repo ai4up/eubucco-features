@@ -61,7 +61,7 @@ class Feature:
         return logger
 
     def file_name(self) -> str:
-        return f"{self.name}_{self.file_appendix}.csv"
+        return f"{self.city_name}_{self.file_appendix}.csv"
 
     def file_path(self) -> Path:
         return Path(f"{self.city_path}/{self.file_name()}")
