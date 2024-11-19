@@ -21,11 +21,12 @@ class Feature:
     comments: List[str] = []
     buildings: GeoDataFrame = None
 
-    def __init__(self, city_path: str, log_dir: Optional[str] = None):
+    def __init__(self, city_path: str, log_dir: Optional[str] = None, overwrite: bool = False):
         self.city_path = city_path
         self.city_name = city_path.split("/")[-1]
         self._start_time: Optional[datetime] = None
         self._end_time: Optional[datetime] = None
+        self.overwrite = overwrite
 
         if not self.name:
             raise ValueError("Feature name is not set")
@@ -106,7 +107,7 @@ class Feature:
         self.buildings.to_csv(self.file_path(), index=False)
 
     def create_feature(self):
-        if self.feature_exists():
+        if self.feature_exists() and not self.overwrite:
             return
 
         self._start_time = datetime.now()
