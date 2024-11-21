@@ -7,13 +7,13 @@ import h3
 import geopandas as gpd
 
 
-def calculate_h3_buffer_features(buildings: gpd.GeoDataFrame, buffer_fts: Dict[str, Tuple[str, Callable]], res: int, k: Union[int, List[int]]) -> gpd.GeoDataFrame:
+def calculate_h3_buffer_features(buildings: gpd.GeoDataFrame, operation: Dict[str, Tuple[str, Callable]], res: int, k: Union[int, List[int]]) -> gpd.GeoDataFrame:
     """
     Calculate buffer features for a GeoDataFrame based on H3 indexes.
 
     Parameters:
     - buildings (GeoDataFrame): A GeoDataFrame containing buildings.
-    - buffer_fts (dict): A dictionary specifying the buffer features to calculate. The keys are the names of the features, and the values are tuples specifying the column name and the aggregation function to use.
+    - operation (dict): A dictionary specifying aggregation operations for the buffer features. The keys are the names of the features, and the values are tuples specifying the column name and the aggregation function to use.
     - res (int): H3 resolution level.
     - k (int or List[int]): The number of hexagonal rings to include in the buffer. Can be a single value or a list of values.
 
@@ -22,15 +22,15 @@ def calculate_h3_buffer_features(buildings: gpd.GeoDataFrame, buffer_fts: Dict[s
 
     Example usage:
     ```
-    gdf = calculate_h3_buffer_features(gdf, buffer_fts, res, k)
+    gdf = calculate_h3_buffer_features(gdf, operation, res, k)
     ```
     """
     buildings['h3_index'] = _h3_index(buildings, res)
-    hex_grid = buildings.groupby('h3_index').agg(**buffer_fts)
-    nghb_agg = {ft_name: v[1] for ft_name, v in buffer_fts.items()}
+    hex_grid = buildings.groupby('h3_index').agg(**operation)
+    nbh_operation = {ft_name: v[1] for ft_name, v in operation.items()}
     hex_grid = pd.concat([
         _calcuate_hex_ring_aggregate(
-            hex_grid, j, nghb_agg
+            hex_grid, j, nbh_operation
         ).add_suffix(
             f'_within_{_calculate_buffer_area(res, j):.2f}_buffer'
         )
