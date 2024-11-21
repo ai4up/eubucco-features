@@ -2,8 +2,7 @@ from pathlib import Path
 
 from log import setup_logger, LoggingContext
 from util import load_buildings
-from to_refactor.momepy_functions import momepy_LongestAxisLength, momepy_Elongation, momepy_Convexeity, \
-    momepy_Orientation, momepy_Corners
+from momepy import longest_axis_length, elongation, convexity, orientation, corners
 
 
 def execute_feature_pipeline(city_path: Path, log_file: Path):
@@ -17,11 +16,11 @@ def execute_feature_pipeline(city_path: Path, log_file: Path):
         buildings['FootprintArea'] = buildings.geometry.area
         buildings['Perimeter'] = buildings.geometry.length
         buildings['Phi'] = building.calculate_phi(buildings)
-        buildings['LongestAxisLength'] = momepy_LongestAxisLength(buildings).series
-        buildings['Elongation'] = momepy_Elongation(buildings).series
-        buildings['Convexity'] = momepy_Convexeity(buildings).series
-        buildings['Orientation'] = momepy_Orientation(buildings).series
-        buildings['Corners'] = momepy_Corners(buildings).series
+        buildings['LongestAxisLength'] = longest_axis_length(buildings)
+        buildings['Elongation'] = elongation(buildings)
+        buildings['Convexity'] = convexity(buildings)
+        buildings['Orientation'] = orientation(buildings)
+        buildings['Corners'] = corners(buildings)
 
 
 if __name__ == "__main__":
