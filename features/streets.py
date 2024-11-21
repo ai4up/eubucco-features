@@ -45,6 +45,7 @@ def street_size_and_distance_to_closest_street(buildings: gpd.GeoDataFrame, stre
     streets['size'] = streets['highway'].apply(_preprocess_highway_type)
     buildings = buildings.sjoin_nearest(streets[['geometry', 'size']], how='left', distance_col='distance', max_distance=100)
     buildings = buildings.drop(columns='index_right')
+    buildings = buildings[~buildings.index.duplicated()]
     buildings['distance'] = buildings['distance'].fillna(100)
 
     return buildings[['size', 'distance']]
