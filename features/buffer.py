@@ -49,7 +49,7 @@ def _h3_index(gdf: Union[gpd.GeoSeries, gpd.GeoDataFrame], res: int) -> List[str
 
 def _calcuate_hex_ring_aggregate(gdf: gpd.GeoDataFrame, k: int, operation: Union[str, List, Dict, Callable[[float], float]]) -> gpd.GeoDataFrame:
     # Add column with neighboring hexagons
-    neighbors = gdf.h3.hex_ring(k=k)['h3_hex_ring']
+    neighbors = gdf.h3.k_ring(k=k)['h3_k_ring']
 
     # Add self to the neighbor list
     neighbors[:] = [[i] + n for i, n in zip(neighbors.index, neighbors)]
