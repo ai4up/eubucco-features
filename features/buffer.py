@@ -29,7 +29,11 @@ def calculate_h3_buffer_features(buildings: gpd.GeoDataFrame, buffer_fts: Dict[s
     hex_grid = buildings.groupby('h3_index').agg(**buffer_fts)
     nghb_agg = {ft_name: v[1] for ft_name, v in buffer_fts.items()}
     hex_grid = pd.concat([
-        _calcuate_hex_ring_aggregate(hex_grid, k=j, operation=nghb_agg).add_suffix(f'_within_h3_res{res}_buffer_k{j}')
+        _calcuate_hex_ring_aggregate(
+            hex_grid, j, nghb_agg
+        ).add_suffix(
+            f'_within_{_calculate_buffer_area(res, j):.2f}_buffer'
+        )
         for j in _ensure_iterable(k)
     ], axis=1)
     buildings = buildings.merge(hex_grid, left_on='h3_index', right_index=True, how='left')
@@ -59,8 +63,36 @@ def _calcuate_hex_ring_aggregate(gdf: gpd.GeoDataFrame, k: int, operation: Union
 
     return agg
 
+
 def _ensure_iterable(var):
     if isinstance(var, Iterable) and not isinstance(var, (str, bytes)):
         return var
 
     return [var]
+
+
+def _calculate_buffer_area(res, k):
+    # areas in km2, from https://h3geo.org/docs/core-library/restable/#average-area-in-km2
+    hex_areas = [
+        4.3574e+06,
+        6.0978e+05,
+        8.6801e+04,
+        1.2393e+04,
+        1.7703e+03,
+        2.5290e+02,
+        3.6129e+01,
+        5.1612e+00,
+        7.3732e-01,
+        1.0533e-01,
+        1.5047e-02,
+        2.1496e-03,
+        3.0709e-04,
+        4.3870e-05,
+        6.2671e-06,
+        8.9531e-07,
+    ]
+    k = k + 1
+    n_hex_cells = 3 * (k ** 2) - 3 * k + 1
+    buffer_area = n_hex_cells * hex_areas[res]
+
+    return buffer_area
