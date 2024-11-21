@@ -1,11 +1,13 @@
+from collections.abc import Iterable
+from typing import Callable, Dict, List, Tuple, Union
+
 import h3pandas
-import numpy as np
+import pandas as pd
 import h3
 import geopandas as gpd
-from typing import Callable, Dict, List, Union
 
 
-def calculate_h3_buffer_features(buildings, buffer_fts, res):
+def calculate_h3_buffer_features(buildings: gpd.GeoDataFrame, buffer_fts: Dict[str, Tuple[str, Callable]], res: int, k: Union[int, List[int]]) -> gpd.GeoDataFrame:
     """
     Calculate buffer features for a GeoDataFrame based on H3 indexes.
 
@@ -13,18 +15,23 @@ def calculate_h3_buffer_features(buildings, buffer_fts, res):
     - buildings (GeoDataFrame): A GeoDataFrame containing buildings.
     - buffer_fts (dict): A dictionary specifying the buffer features to calculate. The keys are the names of the features, and the values are tuples specifying the column name and the aggregation function to use.
     - res (int): H3 resolution level.
+    - k (int or List[int]): The number of hexagonal rings to include in the buffer. Can be a single value or a list of values.
 
     Returns:
     - gdf (GeoDataFrame): GeoDataFrame with the calculated buffer features added.
 
     Example usage:
     ```
-    gdf = calculate_h3_buffer_features(gdf, buffer_fts, res)
+    gdf = calculate_h3_buffer_features(gdf, buffer_fts, res, k)
     ```
     """
     buildings['h3_index'] = _h3_index(buildings, res)
     hex_grid = buildings.groupby('h3_index').agg(**buffer_fts)
-    hex_grid = _calcuate_hex_ring_aggregate(hex_grid, k=1, operation=np.nanmean)
+    nghb_agg = {ft_name: v[1] for ft_name, v in buffer_fts.items()}
+    hex_grid = pd.concat([
+        _calcuate_hex_ring_aggregate(hex_grid, k=j, operation=nghb_agg).add_suffix(f'_within_h3_res{res}_buffer_k{j}')
+        for j in _ensure_iterable(k)
+    ], axis=1)
     buildings = buildings.merge(hex_grid, left_on='h3_index', right_index=True, how='left')
 
     return buildings
@@ -51,3 +58,9 @@ def _calcuate_hex_ring_aggregate(gdf: gpd.GeoDataFrame, k: int, operation: Union
     agg = neighbors.apply(lambda x: gdf.reindex(x).agg(operation))
 
     return agg
+
+def _ensure_iterable(var):
+    if isinstance(var, Iterable) and not isinstance(var, (str, bytes)):
+        return var
+
+    return [var]
