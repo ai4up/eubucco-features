@@ -18,7 +18,7 @@ def load_csv(path: Path) -> gpd.GeoDataFrame:
     return gdf
 
 
-def load_buildings(city_path: Path) -> gpd.GeoDataFrame:
+def load_buildings(city_path: str) -> gpd.GeoDataFrame:
     city_name = city_path.split("/")[-1]
     buildings = load_csv(Path(f"{city_path}/{city_name}_geom.csv"))
     buffer_ = load_csv(Path(f"{city_path}/{city_name}_buffer.csv"))

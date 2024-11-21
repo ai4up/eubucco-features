@@ -5,7 +5,7 @@ from util import load_buildings
 from momepy import longest_axis_length, elongation, convexity, orientation, corners
 
 
-def execute_feature_pipeline(city_path: Path, log_file: Path):
+def execute_feature_pipeline(city_path: str, log_file: str):
     logger = setup_logger(log_file=log_file)
 
     buildings = load_buildings(city_path)
