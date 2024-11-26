@@ -7,14 +7,14 @@ import h3
 import geopandas as gpd
 
 
-def aggregate_to_h3_grid(gdf: gpd.GeoDataFrame, res: int, operation: Union[str, List, Dict, Callable[[float], float]]) -> gpd.GeoDataFrame:
+def aggregate_to_h3_grid(gdf: gpd.GeoDataFrame, operation: Dict[str, Tuple[str, Callable]], res: int) -> gpd.GeoDataFrame:
     """
     Aggregates a GeoDataFrame to a hexagonal H3-indexed grid.
 
     Args:
         gdf (gpd.GeoDataFrame): GeoDataFrame to be aggregated.
         res (int): Resolution of the hexagonal grid.
-        operation (Union[str, List, Dict, Callable[[float], float]]): Operation(s) to be applied during aggregation.
+        operation (dict): A dictionary specifying aggregation operations for the buffer features. The keys specify the new aggregated column names, and the values are tuples specifying the column name and the aggregation function to use.
 
     Returns:
         gpd.GeoDataFrame: Aggregated GeoDataFrame.
@@ -23,14 +23,12 @@ def aggregate_to_h3_grid(gdf: gpd.GeoDataFrame, res: int, operation: Union[str, 
         None
 
     """
-    # H3 operations require a lat/lon point geometry 
-    gdf = gdf.copy()
-    gdf['geometry'] = gdf.centroid.to_crs('EPSG:4326')
+    if 'h3_index' not in gdf.columns:
+        gdf['h3_index'] = h3_index(gdf, res)
 
-    # Aggregate data in hexagons
-    hex_gdf = gdf.h3.geo_to_h3_aggregate(res, operation, return_geometry=False)
+    hex_grid = gdf.groupby('h3_index').agg(**operation)
 
-    return hex_gdf
+    return hex_grid
 
 
 def calculate_h3_buffer_features(gdf: gpd.GeoDataFrame, operation: Dict[str, Tuple[str, Callable]], res: int, k: Union[int, List[int]]) -> gpd.GeoDataFrame:
@@ -51,10 +49,7 @@ def calculate_h3_buffer_features(gdf: gpd.GeoDataFrame, operation: Dict[str, Tup
     gdf = calculate_h3_buffer_features(gdf, operation, res, k)
     ```
     """
-    if 'h3_index' not in gdf.columns:
-        gdf['h3_index'] = h3_index(gdf, res)
-
-    hex_grid = gdf.groupby('h3_index').agg(**operation)
+    hex_grid = aggregate_to_h3_grid(gdf, operation, res)
     nbh_operation = {ft_name: v[1] for ft_name, v in operation.items()}
     hex_grid = pd.concat([
         _calcuate_hex_ring_aggregate(
