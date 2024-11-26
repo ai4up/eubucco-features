@@ -7,26 +7,54 @@ import h3
 import geopandas as gpd
 
 
-def calculate_h3_buffer_features(buildings: gpd.GeoDataFrame, operation: Dict[str, Tuple[str, Callable]], res: int, k: Union[int, List[int]]) -> gpd.GeoDataFrame:
+def aggregate_to_h3_grid(gdf: gpd.GeoDataFrame, res: int, operation: Union[str, List, Dict, Callable[[float], float]]) -> gpd.GeoDataFrame:
+    """
+    Aggregates a GeoDataFrame to a hexagonal H3-indexed grid.
+
+    Args:
+        gdf (gpd.GeoDataFrame): GeoDataFrame to be aggregated.
+        res (int): Resolution of the hexagonal grid.
+        operation (Union[str, List, Dict, Callable[[float], float]]): Operation(s) to be applied during aggregation.
+
+    Returns:
+        gpd.GeoDataFrame: Aggregated GeoDataFrame.
+
+    Raises:
+        None
+
+    """
+    # H3 operations require a lat/lon point geometry 
+    gdf = gdf.copy()
+    gdf['geometry'] = gdf.centroid.to_crs('EPSG:4326')
+
+    # Aggregate data in hexagons
+    hex_gdf = gdf.h3.geo_to_h3_aggregate(res, operation, return_geometry=False)
+
+    return hex_gdf
+
+
+def calculate_h3_buffer_features(gdf: gpd.GeoDataFrame, operation: Dict[str, Tuple[str, Callable]], res: int, k: Union[int, List[int]]) -> gpd.GeoDataFrame:
     """
     Calculate buffer features for a GeoDataFrame based on H3 indexes.
 
     Parameters:
-    - buildings (GeoDataFrame): A GeoDataFrame containing buildings.
+    - gdf (GeoDataFrame): A GeoDataFrame to be aggreated.
     - operation (dict): A dictionary specifying aggregation operations for the buffer features. The keys are the names of the features, and the values are tuples specifying the column name and the aggregation function to use.
     - res (int): H3 resolution level.
-    - k (int or List[int]): The number of hexagonal rings to include in the buffer. Can be a single value or a list of values.
+    - k (int or List[int]): The number of hexagonal rings to include in the buffer. Provide a list to calculate features for multiple buffer sizes.
 
     Returns:
-    - gdf (GeoDataFrame): GeoDataFrame with the calculated buffer features added.
+    - gdf (GeoDataFrame): A hexagonal grid with the calculated buffer features.
 
     Example usage:
     ```
     gdf = calculate_h3_buffer_features(gdf, operation, res, k)
     ```
     """
-    buildings['h3_index'] = _h3_index(buildings, res)
-    hex_grid = buildings.groupby('h3_index').agg(**operation)
+    if 'h3_index' not in gdf.columns:
+        gdf['h3_index'] = h3_index(gdf, res)
+
+    hex_grid = gdf.groupby('h3_index').agg(**operation)
     nbh_operation = {ft_name: v[1] for ft_name, v in operation.items()}
     hex_grid = pd.concat([
         _calcuate_hex_ring_aggregate(
@@ -36,12 +64,11 @@ def calculate_h3_buffer_features(buildings: gpd.GeoDataFrame, operation: Dict[st
         )
         for j in _ensure_iterable(k)
     ], axis=1)
-    buildings = buildings.merge(hex_grid, left_on='h3_index', right_index=True, how='left')
 
-    return buildings
+    return hex_grid
 
 
-def _h3_index(gdf: Union[gpd.GeoSeries, gpd.GeoDataFrame], res: int) -> List[str]:
+def h3_index(gdf: Union[gpd.GeoSeries, gpd.GeoDataFrame], res: int) -> List[str]:
     # H3 operations require a lat/lon point geometry
     centroids = gdf.centroid.to_crs('EPSG:4326')
     lngs = centroids.x
