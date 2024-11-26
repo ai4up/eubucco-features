@@ -12,16 +12,12 @@ def aggregate_to_h3_grid(gdf: gpd.GeoDataFrame, operation: Dict[str, Tuple[str, 
     Aggregates a GeoDataFrame to a hexagonal H3-indexed grid.
 
     Args:
-        gdf (gpd.GeoDataFrame): GeoDataFrame to be aggregated.
-        res (int): Resolution of the hexagonal grid.
-        operation (dict): A dictionary specifying aggregation operations for the buffer features. The keys specify the new aggregated column names, and the values are tuples specifying the column name and the aggregation function to use.
+        gdf: GeoDataFrame to be aggregated.
+        operation: A dictionary specifying aggregation operations for the buffer features. The keys specify the new aggregated column names, and the values are tuples specifying the column name and the aggregation function to use.
+        res: Resolution of the hexagonal grid.
 
     Returns:
-        gpd.GeoDataFrame: Aggregated GeoDataFrame.
-
-    Raises:
-        None
-
+        Aggregated GeoDataFrame.
     """
     if 'h3_index' not in gdf.columns:
         gdf['h3_index'] = h3_index(gdf, res)
@@ -35,19 +31,14 @@ def calculate_h3_buffer_features(gdf: gpd.GeoDataFrame, operation: Dict[str, Tup
     """
     Calculate buffer features for a GeoDataFrame based on H3 indexes.
 
-    Parameters:
-    - gdf (GeoDataFrame): A GeoDataFrame to be aggreated.
-    - operation (dict): A dictionary specifying aggregation operations for the buffer features. The keys are the names of the features, and the values are tuples specifying the column name and the aggregation function to use.
-    - res (int): H3 resolution level.
-    - k (int or List[int]): The number of hexagonal rings to include in the buffer. Provide a list to calculate features for multiple buffer sizes.
+    Args:
+        gdf: A GeoDataFrame to be aggreated.
+        operation: A dictionary specifying aggregation operations for the buffer features. The keys are the names of the features, and the values are tuples specifying the column name and the aggregation function to use.
+        res: H3 resolution level.
+        k: The number of hexagonal rings to include in the buffer. Provide a list to calculate features for multiple buffer sizes.
 
     Returns:
-    - gdf (GeoDataFrame): A hexagonal grid with the calculated buffer features.
-
-    Example usage:
-    ```
-    gdf = calculate_h3_buffer_features(gdf, operation, res, k)
-    ```
+        A hexagonal grid with the calculated buffer features.
     """
     hex_grid = aggregate_to_h3_grid(gdf, operation, res)
     nbh_operation = {ft_name: v[1] for ft_name, v in operation.items()}
