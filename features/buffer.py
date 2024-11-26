@@ -51,14 +51,7 @@ def calculate_h3_buffer_features(gdf: gpd.GeoDataFrame, operation: Dict[str, Tup
     """
     hex_grid = aggregate_to_h3_grid(gdf, operation, res)
     nbh_operation = {ft_name: v[1] for ft_name, v in operation.items()}
-    hex_grid = pd.concat([
-        _calcuate_hex_ring_aggregate(
-            hex_grid, j, nbh_operation
-        ).add_suffix(
-            f'_within_{_calculate_buffer_area(res, j):.2f}_buffer'
-        )
-        for j in _ensure_iterable(k)
-    ], axis=1)
+    hex_grid = _calcuate_hex_rings_aggregate(hex_grid, nbh_operation, res, k)
 
     return hex_grid
 
@@ -73,7 +66,21 @@ def h3_index(gdf: Union[gpd.GeoSeries, gpd.GeoDataFrame], res: int) -> List[str]
     return h3_idx
 
 
-def _calcuate_hex_ring_aggregate(gdf: gpd.GeoDataFrame, k: int, operation: Union[str, List, Dict, Callable[[float], float]]) -> gpd.GeoDataFrame:
+def _calcuate_hex_rings_aggregate(hex_grid: gpd.GeoDataFrame, operation: Union[str, List, Dict, Callable], res: int, k: Union[int, List[int]]) -> gpd.GeoDataFrame:
+    aggregates = []
+    hex_rings = _ensure_iterable(k)
+
+    # Calculate aggregate for each hex ring size / buffer size
+    for j in hex_rings:
+        buffer_area = _calculate_buffer_area(res, j)
+        ring_aggregate = _calcuate_hex_ring_aggregate(hex_grid, j, operation)
+        ring_aggregate = ring_aggregate.add_suffix(f'_within_{buffer_area:.2f}_buffer')
+        aggregates.append(ring_aggregate)
+
+    return pd.concat(aggregates, axis=1)
+
+
+def _calcuate_hex_ring_aggregate(gdf: gpd.GeoDataFrame, operation: Union[str, List, Dict, Callable], k: int) -> gpd.GeoDataFrame:
     # Add column with neighboring hexagons
     neighbors = gdf.h3.k_ring(k=k)['h3_k_ring']
 
