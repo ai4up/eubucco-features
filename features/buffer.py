@@ -1,6 +1,8 @@
 from collections.abc import Iterable
 from typing import Callable, Dict, List, Tuple, Union
 
+from shapely import Point
+from pyproj import Transformer
 import h3pandas
 import pandas as pd
 import h3
@@ -68,6 +70,16 @@ def calculate_h3_buffer_features(gdf: gpd.GeoDataFrame, operation: Dict[str, Tup
 
 
 def h3_index(gdf: Union[gpd.GeoSeries, gpd.GeoDataFrame], res: int) -> List[str]:
+    """
+    Generate H3 indexes for the geometries in a GeoDataFrame or GeoSeries.
+
+    Args:
+        gdf: A GeoSeries or GeoDataFrame.
+        res: The resolution of the H3 index.
+
+    Returns:
+        A list of H3 indexes corresponding to the input geometries.
+    """
     # H3 operations require a lat/lon point geometry
     centroids = gdf.centroid.to_crs('EPSG:4326')
     lngs = centroids.x
@@ -75,6 +87,25 @@ def h3_index(gdf: Union[gpd.GeoSeries, gpd.GeoDataFrame], res: int) -> List[str]
     h3_idx = [h3.geo_to_h3(lat, lng, res) for lat, lng in zip(lats, lngs)]
 
     return h3_idx
+
+
+def distance_to_h3_grid_max(gdf: gpd.GeoDataFrame, s: pd.Series):
+    """
+    Calculate the distance from each geometry in a GeoDataFrame to the geometry
+    corresponding to the maximum value in a given H3-indexed Series.
+
+    Args:
+        gdf: A GeoDataFrame.
+        s: A Series with an H3 index.
+
+    Returns:
+        A Series containing the distances to the location with the maximum value.
+    """
+    h3_peak = s.idxmax()
+    peak = _h3_to_geo(h3_peak, gdf.crs)
+    dis = gdf.distance(peak)
+
+    return dis
 
 
 def _calcuate_hex_rings_aggregate(hex_grid: gpd.GeoDataFrame, operation: Union[str, List, Dict, Callable], res: int, k: Union[int, List[int]]) -> gpd.GeoDataFrame:
@@ -102,6 +133,14 @@ def _calcuate_hex_ring_aggregate(gdf: gpd.GeoDataFrame, operation: Union[str, Li
     agg = neighbors.apply(lambda x: gdf.reindex(x).agg(operation))
 
     return agg
+
+
+def _h3_to_geo(h: str, crs: str = 'EPSG:4326') -> Point:
+    lat, lng = h3.h3_to_geo(h)
+    transformer = Transformer.from_crs('EPSG:4326', crs, always_xy=True)
+    x, y = transformer.transform(lng, lat)
+
+    return Point(x, y)
 
 
 def _ensure_iterable(var):
