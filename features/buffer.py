@@ -63,7 +63,7 @@ def calculate_h3_buffer_features(gdf: gpd.GeoDataFrame, operation: Dict[str, Tup
         A hexagonal grid with the calculated buffer features.
     """
     hex_grid = aggregate_to_h3_grid(gdf, operation, res)
-    nbh_operation = {ft_name: v[1] for ft_name, v in operation.items()}
+    nbh_operation = _determine_neighborhood_agg_operation(operation)
     hex_grid = _calcuate_hex_rings_aggregate(hex_grid, nbh_operation, res, k)
 
     return hex_grid
@@ -148,6 +148,26 @@ def _ensure_iterable(var):
         return var
 
     return [var]
+
+
+def _determine_neighborhood_agg_operation(op):
+    # The two-step aggregation approach does not allow for exact calculation of some aggregates (e.g. std).
+    # We need approximate these using the mean, while others can be calculated exactly with another operation (e.g. count -> sum).
+    operation_mapping = {
+        'std': 'mean',
+        'nunique': 'mean',
+        'count': 'sum',
+        'sum': 'sum',
+        'mean': 'mean',
+        }
+    try:
+        for k, v in op.items():
+            op[k] = operation_mapping[v[1]]
+
+    except KeyError as e:
+        raise Exception('Specific aggregation operation not (yet) supported.') from e
+
+    return op
 
 
 def _calculate_buffer_area(res, k):
