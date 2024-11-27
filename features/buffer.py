@@ -27,6 +27,26 @@ def aggregate_to_h3_grid(gdf: gpd.GeoDataFrame, operation: Dict[str, Tuple[str, 
     return hex_grid
 
 
+def calculate_h3_grid_shares(gdf: gpd.GeoDataFrame, col: str, res: int) -> gpd.GeoDataFrame:
+    """
+    Calculate the proportions of unique values in a column for each H3 hexagonal grid cell.
+
+    Args:
+        gdf: A GeoDataFrame containing the geometries and data.
+        col: The column name to calculate proportions for.
+        res: The resolution of the H3 hexagonal grid.
+
+    Returns:
+        A GeoDataFrame with the unique value shares of the specified column within each H3 hexagonal grid cell.
+    """
+    if 'h3_index' not in gdf.columns:
+        gdf['h3_index'] = h3_index(gdf, res)
+
+    hex_grid = gdf.groupby(['h3_index', col]).size() / gdf.groupby('h3_index').size()
+
+    return hex_grid
+
+
 def calculate_h3_buffer_features(gdf: gpd.GeoDataFrame, operation: Dict[str, Tuple[str, Callable]], res: int, k: Union[int, List[int]]) -> gpd.GeoDataFrame:
     """
     Calculate buffer features for a GeoDataFrame based on H3 indexes.
