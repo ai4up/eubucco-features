@@ -3,6 +3,8 @@ from typing import Dict, Union, List
 import geopandas as gpd
 import numpy as np
 
+import util
+
 ROAD_SIZE: Dict[str, int] = {
     'motorway': 7,
     'trunk': 6,
@@ -43,10 +45,7 @@ def street_size_and_distance_to_closest_street(buildings: gpd.GeoDataFrame, stre
         A GeoDataFrame with the calculated size of the closest street and the distance to the closest street for each building.
     """
     streets['size'] = streets['highway'].apply(_preprocess_highway_type)
-    buildings = buildings.sjoin_nearest(streets[['geometry', 'size']], how='left', distance_col='distance', max_distance=100)
-    buildings = buildings.drop(columns='index_right')
-    buildings = buildings[~buildings.index.duplicated()]
-    buildings['distance'] = buildings['distance'].fillna(100)
+    buildings = util.sjoin_nearest_cols(buildings, streets, cols=['size'], distance_col='distance', max_distance=100)
 
     return buildings[['size', 'distance']]
 
