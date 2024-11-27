@@ -1,5 +1,6 @@
 import math
 
+import numpy as np
 import geopandas as gpd
 
 def calculate_phi(buildings):
@@ -19,4 +20,4 @@ def calculate_norm_perimeter(buildings):
 
 
 def _circle_perimeter(area):
-    return 2 * math.sqrt(area * math.pi)
+    return 2 * np.sqrt(area * math.pi)
