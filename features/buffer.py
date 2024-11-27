@@ -115,7 +115,7 @@ def _calcuate_hex_rings_aggregate(hex_grid: gpd.GeoDataFrame, operation: Union[s
     # Calculate aggregate for each hex ring size / buffer size
     for j in hex_rings:
         buffer_area = _calculate_buffer_area(res, j)
-        ring_aggregate = _calcuate_hex_ring_aggregate(hex_grid, j, operation)
+        ring_aggregate = _calcuate_hex_ring_aggregate(hex_grid, operation, j)
         ring_aggregate = ring_aggregate.add_suffix(f'_within_{buffer_area:.2f}_buffer')
         aggregates.append(ring_aggregate)
 
