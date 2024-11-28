@@ -1,4 +1,4 @@
-from momepy import longest_axis_length, elongation, convexity, equivalent_rectangular_index, orientation, corners, shared_walls
+from momepy import longest_axis_length, elongation, convexity, equivalent_rectangular_index, orientation, corners, shared_walls, courtyard_area
 import numpy as np
 import geopandas as gpd
 
@@ -49,6 +49,7 @@ def _calculate_building_features(buildings: gpd.GeoDataFrame):
         buildings['orientation'] = orientation(buildings)
         buildings['corners'] = corners(buildings)
         buildings['shared_wall_length'] = shared_walls(buildings)
+        buildings['rel_courtyard_size'] = courtyard_area(buildings) / buildings.area
         buildings['touches'] = building.calculate_touches(buildings)
 
         return buildings
