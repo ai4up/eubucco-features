@@ -92,6 +92,7 @@ def _calculate_street_features(buildings: gpd.GeoDataFrame, city_path: str):
     streets = load_streets(city_path)
 
     buildings[['size_of_closest_street', 'distance_to_closest_street']] = street.street_size_and_distance_to_closest_street(buildings, streets)
+    buildings['distance_to_closest_built_environment'] = buildings[['distance_to_closest_building', 'distance_to_closest_street']].min(axis=1)
 
     return buildings
 
