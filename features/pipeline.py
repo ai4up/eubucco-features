@@ -58,16 +58,22 @@ def _calculate_buffer_features(buildings: gpd.GeoDataFrame):
     buffer_fts = {
         'avg_footprint_area': ('footprint_area', 'mean'),
         'std_footprint_area': ('footprint_area', 'std'),
+        'max_footprint_area': ('footprint_area', 'max'),
         'avg_elongation': ('elongation', 'mean'),
         'std_elongation': ('elongation', 'std'),
+        'max_elongation': ('elongation', 'max'),
         'avg_convexity': ('convexity', 'mean'),
         'std_convexity': ('convexity', 'std'),
+        'max_convexity': ('convexity', 'max'),
         'avg_orientation': ('orientation', 'mean'),
         'std_orientation': ('orientation', 'std'),
+        'max_orientation': ('orientation', 'max'),
         'avg_size_of_closest_street': ('size_of_closest_street', 'mean'),
         'std_size_of_closest_street': ('size_of_closest_street', 'std'),
+        'max_size_of_closest_street': ('size_of_closest_street', 'max'),
         'avg_distance_to_closest_street': ('distance_to_closest_street', 'mean'),
         'std_distance_to_closest_street': ('distance_to_closest_street', 'std'),
+        'max_distance_to_closest_street': ('distance_to_closest_street', 'max'),
         'total_footprint_area': ('footprint_area', 'sum'),
         'n_buildings': ('footprint_area', 'count'),
     }
@@ -127,6 +133,7 @@ def _calculate_osm_buildings_features(buildings: gpd.GeoDataFrame, city_path: st
     buffer_fts = {
         'osm_avg_height': ('height', 'mean'),
         'osm_std_height': ('height', 'std'),
+        'osm_max_height': ('height', 'max'),
         'osm_type_variety': ('type', 'nunique'),
     }
     hex_grid = buffer.calculate_h3_buffer_features(osm_buildings, buffer_fts, H3_RES, H3_BUFFER_SIZES)
