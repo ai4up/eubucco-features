@@ -159,6 +159,7 @@ def _determine_neighborhood_agg_operation(op):
         'count': 'sum',
         'sum': 'sum',
         'mean': 'mean',
+        'max': 'max',
         }
     try:
         for k, v in op.items():
