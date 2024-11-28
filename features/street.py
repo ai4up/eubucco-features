@@ -2,7 +2,7 @@ from typing import Dict, Union, List
 
 import geopandas as gpd
 import numpy as np
-
+import momepy
 import util
 
 ROAD_SIZE: Dict[str, int] = {
@@ -30,24 +30,34 @@ def distance_to_closest_street(buildings: gpd.GeoDataFrame, streets: gpd.GeoData
     """
     street_network = streets.geometry.union_all()
     dis = buildings.distance(street_network)
+
     return dis
 
 
-def street_size_and_distance_to_closest_street(buildings: gpd.GeoDataFrame, streets: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+def closest_street_features(buildings: gpd.GeoDataFrame, streets: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """
-    Calculates the size of the closest street to each building (ranging from 0 to 7, with 7 being the largest) and the distance between the building and the closest street.
+    Calculates the size of the closest street to each building (ranging from 0 to 7, with 7 being the largest),
+    the distance between the building and the closest street,
+    and the deviation of the building's orientation from the street's orientation.
 
     Args:
         buildings: A GeoDataFrame containing the buildings.
         streets: A GeoDataFrame containing the streets.
 
     Returns:
-        A GeoDataFrame with the calculated size of the closest street and the distance to the closest street for each building.
+        A GeoDataFrame containing the calculated size of the closest street and the distance to the closest street,
+        and the orientation to the closest street for each building.
     """
-    streets['size'] = streets['highway'].apply(_preprocess_highway_type)
-    buildings = util.sjoin_nearest_cols(buildings, streets, cols=['size'], distance_col='distance', max_distance=100)
+    if 'street_orientation' not in streets.columns:
+        streets['street_orientation'] = momepy.orientation(streets)
+    if 'orientation' not in buildings.columns:
+        buildings['orientation'] = momepy.orientation(buildings)
 
-    return buildings[['size', 'distance']]
+    streets['size'] = streets['highway'].apply(_preprocess_highway_type)
+    buildings = util.sjoin_nearest_cols(buildings, streets, cols=['size', 'street_orientation'], distance_col='distance', max_distance=100)
+    buildings['street_alignment'] = (buildings['orientation'] - buildings['street_orientation']).abs()
+
+    return buildings[['size', 'distance', 'street_alignment']]
 
 
 def _preprocess_highway_type(category: Union[str, List[str]]) -> float:
