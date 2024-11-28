@@ -42,7 +42,7 @@ def _calculate_building_features(buildings: gpd.GeoDataFrame):
         buildings['normalized_perimeter_index'] = building.calculate_norm_perimeter(buildings)
         buildings['area_perimeter_ratio'] = buildings['footprint_area'] / buildings['perimeter']
         buildings['phi'] = building.calculate_phi(buildings)
-        buildings['longestAxisLength'] = longest_axis_length(buildings)
+        buildings['longest_axis_length'] = longest_axis_length(buildings)
         buildings['elongation'] = elongation(buildings)
         buildings['convexity'] = convexity(buildings)
         buildings['rectangularity'] = equivalent_rectangular_index(buildings)
