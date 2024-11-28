@@ -4,6 +4,8 @@ import numpy as np
 import geopandas as gpd
 import pandas as pd
 
+import util
+
 
 def calculate_phi(buildings: gpd.GeoDataFrame) -> pd.Series:
     max_dist = buildings.geometry.map(lambda g: g.centroid.hausdorff_distance(g.exterior))
@@ -23,3 +25,7 @@ def calculate_norm_perimeter(buildings: gpd.GeoDataFrame) -> pd.Series:
 
 def _circle_perimeter(area: pd.Series) -> pd.Series:
     return 2 * np.sqrt(area * math.pi)
+
+
+def calculate_distance_to_closest_building(buildings: gpd.GeoDataFrame) -> pd.Series:
+    return util.distance_nearest(buildings, buildings, max_distance=100)

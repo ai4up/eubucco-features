@@ -51,6 +51,7 @@ def _calculate_building_features(buildings: gpd.GeoDataFrame):
         buildings['shared_wall_length'] = shared_walls(buildings)
         buildings['rel_courtyard_size'] = courtyard_area(buildings) / buildings.area
         buildings['touches'] = building.calculate_touches(buildings)
+        buildings['distance_to_closest_building'] = building.calculate_distance_to_closest_building(buildings)
 
         return buildings
 
@@ -69,12 +70,15 @@ def _calculate_buffer_features(buildings: gpd.GeoDataFrame):
         'avg_orientation': ('orientation', 'mean'),
         'std_orientation': ('orientation', 'std'),
         'max_orientation': ('orientation', 'max'),
-        'avg_size_of_closest_street': ('size_of_closest_street', 'mean'),
-        'std_size_of_closest_street': ('size_of_closest_street', 'std'),
-        'max_size_of_closest_street': ('size_of_closest_street', 'max'),
+        'avg_distance_to_closest_building': ('distance_to_closest_building', 'mean'),
+        'std_distance_to_closest_building': ('distance_to_closest_building', 'std'),
+        'max_distance_to_closest_building': ('distance_to_closest_building', 'max'),
         'avg_distance_to_closest_street': ('distance_to_closest_street', 'mean'),
         'std_distance_to_closest_street': ('distance_to_closest_street', 'std'),
         'max_distance_to_closest_street': ('distance_to_closest_street', 'max'),
+        'avg_size_of_closest_street': ('size_of_closest_street', 'mean'),
+        'std_size_of_closest_street': ('size_of_closest_street', 'std'),
+        'max_size_of_closest_street': ('size_of_closest_street', 'max'),
         'total_footprint_area': ('footprint_area', 'sum'),
         'n_buildings': ('footprint_area', 'count'),
     }
