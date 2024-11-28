@@ -5,8 +5,8 @@ import geopandas as gpd
 
 def calculate_phi(buildings):
     max_dist = buildings.geometry.map(lambda g: g.centroid.hausdorff_distance(g.exterior))
-    circle_area = buildings.geometry.centroid.buffer(max_dist).area
-    return buildings.geometry.area / circle_area
+    circle_area = buildings.centroid.buffer(max_dist).area
+    return buildings.area / circle_area
 
 
 def calculate_touches(buildings):
@@ -16,7 +16,7 @@ def calculate_touches(buildings):
 
 
 def calculate_norm_perimeter(buildings):
-    return _circle_perimeter(buildings.geometry.area) / buildings.geometry.length
+    return _circle_perimeter(buildings.area) / buildings.length
 
 
 def _circle_perimeter(area):

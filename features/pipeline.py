@@ -37,8 +37,8 @@ def execute_feature_pipeline(city_path: str, log_file: str, lu_path: str):
 
 
 def _calculate_building_features(buildings: gpd.GeoDataFrame):
-        buildings['footprint_area'] = buildings.geometry.area
-        buildings['perimeter'] = buildings.geometry.length
+        buildings['footprint_area'] = buildings.area
+        buildings['perimeter'] = buildings.length
         buildings['normalized_perimeter_index'] = building.calculate_norm_perimeter(buildings)
         buildings['area_perimeter_ratio'] = buildings['footprint_area'] / buildings['perimeter']
         buildings['phi'] = building.calculate_phi(buildings)
