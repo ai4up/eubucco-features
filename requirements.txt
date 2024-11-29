@@ -2,3 +2,6 @@ filelock==3.16.1
 geopandas==1.0.1
 matplotlib==3.9.2
 momepy==0.8.1
+osmnx==1.9.3
+h3pandas==0.2.6
+h3==3.7.7
