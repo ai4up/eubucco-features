@@ -39,6 +39,9 @@ def execute_feature_pipeline(city_path: str, log_file: str, lu_path: str, topo_p
     with LoggingContext(logger, feature_name='buffer'):
         buildings = _calculate_buffer_features(buildings)
 
+    with LoggingContext(logger, feature_name='interaction'):
+        buildings = _calculate_interaction_features(buildings)
+
     store_features(buildings, city_path)
 
 
@@ -98,7 +101,6 @@ def _calculate_street_features(buildings: gpd.GeoDataFrame, city_path: str):
     streets = load_streets(city_path)
 
     buildings[['size_of_closest_street', 'distance_to_closest_street', 'street_alignment']] = street.closest_street_features(buildings, streets)
-    buildings['distance_to_closest_built_environment'] = buildings[['distance_to_closest_building', 'distance_to_closest_street']].min(axis=1)
 
     return buildings
 
@@ -164,6 +166,14 @@ def _calculate_osm_buildings_features(buildings: gpd.GeoDataFrame, city_path: st
     }
     hex_grid = buffer.calculate_h3_buffer_features(osm_buildings, buffer_fts, H3_RES, H3_BUFFER_SIZES)
     buildings = buildings.merge(hex_grid, left_on='h3_index', right_index=True, how='left')
+
+    return buildings
+
+
+def _calculate_interaction_features(buildings: gpd.GeoDataFrame):
+    buildings['distance_to_closest_built_environment'] = buildings[['distance_to_closest_building', 'distance_to_closest_street']].min(axis=1)
+    buildings['distance_to_closest_built_environment_interact_total_footprint_area'] = buildings['distance_to_closest_building'] * buildings['total_footprint_area_within_0.92_buffer']
+    buildings['population_per_footprint_area'] = buildings['population_within_buffer'] / buildings['total_footprint_area_within_0.92_buffer']
 
     return buildings
 
