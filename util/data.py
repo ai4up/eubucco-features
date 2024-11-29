@@ -46,6 +46,14 @@ def load_osm_buildings(city_path: str) -> gpd.GeoDataFrame:
     return buildings
 
 
+def load_population(population_file: str, area: gpd.GeoSeries, point_geom: bool) -> gpd.GeoDataFrame:
+    population_raster, city_meta = util.read_area(population_file, area)
+    population = util.raster_to_gdf(population_raster[0], city_meta, point=point_geom)
+    population = population.rename(columns={'values': 'population'})
+
+    return population
+
+
 def load_elevation(elevation_file: str, area: gpd.GeoSeries, point_geom: bool) -> gpd.GeoDataFrame:
     elevation_raster, city_meta = util.read_area(elevation_file, area)
     elevation = util.raster_to_gdf(elevation_raster[0], city_meta, point=point_geom)
