@@ -9,7 +9,7 @@ from features import building, buffer, street, poi, osm, landuse, topography, po
 H3_RES = 10
 H3_BUFFER_SIZES = [1, 4] # corresponds to a buffer of 0.1 and 0.9 km^2
 
-def execute_feature_pipeline(city_path: str, log_file: str, built_up_path: str, lu_path: str, topo_path: str, pop_path: str):
+def execute_feature_pipeline(city_path: str, log_file: str, built_up_path: str, lu_path: str, topo_path: str, pop_path: str) -> None:
     logger = setup_logger(log_file=log_file)
 
     buildings = load_buildings(city_path)
@@ -48,7 +48,7 @@ def execute_feature_pipeline(city_path: str, log_file: str, built_up_path: str, 
     store_features(buildings, city_path)
 
 
-def _calculate_building_features(buildings: gpd.GeoDataFrame):
+def _calculate_building_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         buildings['footprint_area'] = buildings.area
         buildings['perimeter'] = buildings.length
         buildings['normalized_perimeter_index'] = building.calculate_norm_perimeter(buildings)
@@ -68,7 +68,7 @@ def _calculate_building_features(buildings: gpd.GeoDataFrame):
         return buildings
 
 
-def _calculate_buffer_features(buildings: gpd.GeoDataFrame):
+def _calculate_buffer_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     buffer_fts = {
         'avg_footprint_area': ('footprint_area', 'mean'),
         'std_footprint_area': ('footprint_area', 'std'),
@@ -100,7 +100,7 @@ def _calculate_buffer_features(buildings: gpd.GeoDataFrame):
     return buildings
 
 
-def _calculate_street_features(buildings: gpd.GeoDataFrame, city_path: str):
+def _calculate_street_features(buildings: gpd.GeoDataFrame, city_path: str) -> gpd.GeoDataFrame:
     streets = load_streets(city_path)
 
     buildings[['size_of_closest_street', 'distance_to_closest_street', 'street_alignment']] = street.closest_street_features(buildings, streets)
@@ -108,7 +108,7 @@ def _calculate_street_features(buildings: gpd.GeoDataFrame, city_path: str):
     return buildings
 
 
-def _calculate_poi_features(buildings: gpd.GeoDataFrame, city_path: str):
+def _calculate_poi_features(buildings: gpd.GeoDataFrame, city_path: str) -> gpd.GeoDataFrame:
     pois = load_pois(city_path)
 
     buildings['distance_to_closest_poi'] = poi.distance_to_closest_poi(buildings, pois)
@@ -123,28 +123,28 @@ def _calculate_poi_features(buildings: gpd.GeoDataFrame, city_path: str):
     return buildings
 
 
-def _calculate_landuse_features(buildings: gpd.GeoDataFrame, lu_path: str):
+def _calculate_landuse_features(buildings: gpd.GeoDataFrame, lu_path: str) -> gpd.GeoDataFrame:
     buildings['lu_distance_to_industry'] = landuse.distance_to_landuse(buildings, 'industrial', lu_path)
     buildings['lu_distance_to_agriculture'] = landuse.distance_to_landuse(buildings, 'agricultural', lu_path)
 
     return buildings
 
 
-def _calculate_topography_features(buildings: gpd.GeoDataFrame, topo_file: str):
+def _calculate_topography_features(buildings: gpd.GeoDataFrame, topo_file: str) -> gpd.GeoDataFrame:
     buildings['elevation'] = topography.calculate_elevation(buildings, topo_file)
     buildings['ruggedness'] = topography.calculate_ruggedness(buildings, topo_file, H3_RES - 2)
 
     return buildings
 
 
-def _calculate_population_features(buildings: gpd.GeoDataFrame, pop_file: str):
+def _calculate_population_features(buildings: gpd.GeoDataFrame, pop_file: str) -> gpd.GeoDataFrame:
     buildings['population'] = population.count_local_population(buildings, pop_file)
     buildings['population_within_buffer'] = population.count_population_in_buffer(buildings, pop_file, H3_RES - 2)
 
     return buildings
 
 
-def _calculate_osm_buildings_features(buildings: gpd.GeoDataFrame, city_path: str):
+def _calculate_osm_buildings_features(buildings: gpd.GeoDataFrame, city_path: str) -> gpd.GeoDataFrame:
     osm_buildings = load_osm_buildings(city_path)
 
     buildings = osm.closest_building_attributes(buildings, osm_buildings, {'type': 'osm_closest_building_type', 'height': 'osm_closest_building_height'})
@@ -173,7 +173,7 @@ def _calculate_osm_buildings_features(buildings: gpd.GeoDataFrame, city_path: st
     return buildings
 
 
-def _calculate_GHS_built_up_features(buildings: gpd.GeoDataFrame, built_up_file: str):
+def _calculate_GHS_built_up_features(buildings: gpd.GeoDataFrame, built_up_file: str) -> gpd.GeoDataFrame:
     area = bbox(buildings, buffer=1000)
     built_up = load_GHS_built_up(built_up_file, area)
     built_up = built_up.to_crs(buildings.crs)
@@ -196,7 +196,7 @@ def _calculate_GHS_built_up_features(buildings: gpd.GeoDataFrame, built_up_file:
     return buildings
 
 
-def _calculate_interaction_features(buildings: gpd.GeoDataFrame):
+def _calculate_interaction_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     buildings['distance_to_closest_built_environment'] = buildings[['distance_to_closest_building', 'distance_to_closest_street']].min(axis=1)
     buildings['distance_to_closest_built_environment_interact_total_footprint_area'] = buildings['distance_to_closest_building'] * buildings['total_footprint_area_within_0.92_buffer']
     buildings['population_per_footprint_area'] = buildings['population_within_buffer'] / buildings['total_footprint_area_within_0.92_buffer']
