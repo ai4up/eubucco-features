@@ -1,7 +1,10 @@
+from pathlib import Path
+
 import pandas as pd
 import geopandas as gpd
 from shapely import wkt
-from pathlib import Path
+
+import util
 
 CRS_UNI = 'EPSG:3035'
 geometry_col = 'geometry'
@@ -41,6 +44,14 @@ def load_osm_buildings(city_path: str) -> gpd.GeoDataFrame:
     city_name = city_path.split("/")[-1]
     buildings = gpd.read_file(Path(f"{city_path}/{city_name}_osm_bldgs.gpkg"))
     return buildings
+
+
+def load_elevation(elevation_file: str, area: gpd.GeoSeries, point_geom: bool) -> gpd.GeoDataFrame:
+    elevation_raster, city_meta = util.read_area(elevation_file, area)
+    elevation = util.raster_to_gdf(elevation_raster[0], city_meta, point=point_geom)
+    elevation = elevation.rename(columns={'values': 'elevation'})
+
+    return elevation
 
 
 def store_features(buildings: gpd.GeoDataFrame, city_path: str):

@@ -4,12 +4,12 @@ import geopandas as gpd
 
 from log import setup_logger, LoggingContext
 from util import load_buildings, load_osm_buildings, load_streets, load_pois, store_features
-from features import building, buffer, street, poi, osm, landuse
+from features import building, buffer, street, poi, osm, landuse, topography
 
 H3_RES = 10
 H3_BUFFER_SIZES = [1, 4] # corresponds to a buffer of 0.1 and 0.9 km^2
 
-def execute_feature_pipeline(city_path: str, log_file: str, lu_path: str):
+def execute_feature_pipeline(city_path: str, log_file: str, lu_path: str, topo_path: str):
     logger = setup_logger(log_file=log_file)
 
     buildings = load_buildings(city_path)
@@ -29,6 +29,9 @@ def execute_feature_pipeline(city_path: str, log_file: str, lu_path: str):
 
     with LoggingContext(logger, feature_name='landuse'):
         buildings = _calculate_landuse_features(buildings, lu_path)
+
+    with LoggingContext(logger, feature_name='topography'):
+        buildings = _calculate_topography_features(buildings, topo_path)
 
     with LoggingContext(logger, feature_name='buffer'):
         buildings = _calculate_buffer_features(buildings)
@@ -119,6 +122,13 @@ def _calculate_landuse_features(buildings: gpd.GeoDataFrame, lu_path: str):
     return buildings
 
 
+def _calculate_topography_features(buildings: gpd.GeoDataFrame, topo_file: str):
+    buildings['elevation'] = topography.calculate_elevation(buildings, topo_file)
+    buildings['ruggedness'] = topography.calculate_ruggedness(buildings, topo_file, H3_RES - 2)
+
+    return buildings
+
+
 def _calculate_osm_buildings_features(buildings: gpd.GeoDataFrame, city_path: str):
     osm_buildings = load_osm_buildings(city_path)
 
@@ -152,5 +162,6 @@ if __name__ == '__main__':
     city_path = 'test_data/Toulouse'
     log_file = 'test_data/logs/features.log'
     corine_lu_path = 'test_data/U2018_CLC2018_V2020_20u1.gpkg'
+    topo_path = 'test_data/gmted2010-mea075.tif'
 
-    execute_feature_pipeline(city_path, log_file, corine_lu_path)
+    execute_feature_pipeline(city_path, log_file, corine_lu_path, topo_path)

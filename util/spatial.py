@@ -2,6 +2,7 @@ from typing import Union, List, Dict
 
 import pandas as pd
 import geopandas as gpd
+from shapely.geometry import box
 
 
 def sjoin_nearest_cols(gdf1: gpd.GeoDataFrame, gdf2: gpd.GeoDataFrame, cols: Union[List[str], Dict[str, str]], distance_col: str = None, max_distance: float = None) -> gpd.GeoDataFrame:
@@ -27,3 +28,9 @@ def distance_nearest(left: gpd.GeoDataFrame, right: gpd.GeoDataFrame, max_distan
     s.iloc[left_i] = dis
 
     return s
+
+
+def bbox(geom: Union[gpd.GeoSeries, gpd.GeoDataFrame], buffer: float = 0) -> gpd.GeoSeries:
+    bounds = geom.total_bounds
+    buffered_box = box(*bounds).buffer(buffer)
+    return gpd.GeoSeries([buffered_box], crs=geom.crs)
