@@ -3,13 +3,13 @@ import numpy as np
 import geopandas as gpd
 
 from log import setup_logger, LoggingContext
-from util import load_buildings, load_osm_buildings, load_streets, load_pois, store_features
+from util import load_buildings, load_osm_buildings, load_streets, load_pois, load_GHS_built_up, store_features, distance_nearest, snearest_attr, bbox
 from features import building, buffer, street, poi, osm, landuse, topography, population
 
 H3_RES = 10
 H3_BUFFER_SIZES = [1, 4] # corresponds to a buffer of 0.1 and 0.9 km^2
 
-def execute_feature_pipeline(city_path: str, log_file: str, lu_path: str, topo_path: str, pop_path: str):
+def execute_feature_pipeline(city_path: str, log_file: str, built_up_path: str, lu_path: str, topo_path: str, pop_path: str):
     logger = setup_logger(log_file=log_file)
 
     buildings = load_buildings(city_path)
@@ -26,6 +26,9 @@ def execute_feature_pipeline(city_path: str, log_file: str, lu_path: str, topo_p
 
     with LoggingContext(logger, feature_name='osm_buildings'):
         buildings = _calculate_osm_buildings_features(buildings, city_path)
+
+    with LoggingContext(logger, feature_name='GHS_built_up'):
+        buildings = _calculate_GHS_built_up_features(buildings, built_up_path)
 
     with LoggingContext(logger, feature_name='landuse'):
         buildings = _calculate_landuse_features(buildings, lu_path)
@@ -170,6 +173,29 @@ def _calculate_osm_buildings_features(buildings: gpd.GeoDataFrame, city_path: st
     return buildings
 
 
+def _calculate_GHS_built_up_features(buildings: gpd.GeoDataFrame, built_up_file: str):
+    area = bbox(buildings, buffer=1000)
+    built_up = load_GHS_built_up(built_up_file, area)
+    built_up = built_up.to_crs(buildings.crs)
+
+    nearest = snearest_attr(buildings, built_up, attr=['use_type', 'height'], max_distance=100)
+    buildings['GHS_nearest_use_type'] = nearest['use_type']
+    buildings['GHS_nearest_height'] = nearest['height']
+
+    high_rise_areas = built_up[built_up['high_rise']]
+    buildings['GHS_distance_high_rise'] = distance_nearest(buildings, high_rise_areas, max_distance=1000)
+
+    # Note: could be calculated separately since classes are mutually exclusive, so likely no performance gain here
+    buffer_fts = {
+        'GHS_greenness': ('NDVI', 'mean'),
+        'GHS_height': ('height', 'mean'),
+    }
+    hex_grid = buffer.calculate_h3_buffer_features(built_up, buffer_fts, H3_RES, H3_BUFFER_SIZES)
+    buildings = buildings.merge(hex_grid, left_on='h3_index', right_index=True, how='left')
+
+    return buildings
+
+
 def _calculate_interaction_features(buildings: gpd.GeoDataFrame):
     buildings['distance_to_closest_built_environment'] = buildings[['distance_to_closest_building', 'distance_to_closest_street']].min(axis=1)
     buildings['distance_to_closest_built_environment_interact_total_footprint_area'] = buildings['distance_to_closest_building'] * buildings['total_footprint_area_within_0.92_buffer']
@@ -181,8 +207,9 @@ def _calculate_interaction_features(buildings: gpd.GeoDataFrame):
 if __name__ == '__main__':
     city_path = 'test_data/Toulouse'
     log_file = 'test_data/logs/features.log'
+    GHS_built_up_path = 'test_data/GHS_BUILT_C_MSZ_E2018_GLOBE_R2023A_54009_10_V1_0_R4_C19.tif'
     corine_lu_path = 'test_data/U2018_CLC2018_V2020_20u1.gpkg'
     topo_path = 'test_data/gmted2010-mea075.tif'
     GHS_pop_path = 'test_data/GHS_POP_E2020_GLOBE_R2023A_54009_100_V1_0.tif'
 
-    execute_feature_pipeline(city_path, log_file, corine_lu_path, topo_path, GHS_pop_path)
+    execute_feature_pipeline(city_path, log_file, GHS_built_up_path, corine_lu_path, topo_path, GHS_pop_path)
