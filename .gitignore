@@ -126,3 +126,9 @@ test_data/Vaugneray/*
 !test_data/Vaugneray/Vaugneray_attrib.csv
 !test_data/Vaugneray/Vaugneray_buffer.csv
 !test_data/Vaugneray/Vaugneray_geom.csv
+
+# OSM download cache
+cache/
+
+# VSCode
+.vscode/
