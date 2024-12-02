@@ -22,6 +22,23 @@ def execute_feature_pipeline(city_path: str, log_file: str):
         buildings['SharedWallLength'] = shared_walls(buildings)
         buildings['Touches'] = building.calculate_touches(buildings)
 
+    with LoggingContext(logger, feature_name="Blocks"):
+        from features import block
+
+        blocks = block.generate_blocks(buildings)
+        blocks['BlockLength'] = blocks.building_ids.apply(len)
+        blocks['BlockTotalFootprintArea'] = blocks.geometry.apply(lambda g: g.area)
+        blocks['AvBlockFootprintArea'] = blocks.block_buildings.apply(lambda b: b.area.mean())
+        blocks['StBlockFootprintArea'] = blocks.block_buildings.apply(lambda b: b.area.std())
+        blocks['BlockPerimeter'] = blocks.length
+        blocks['BlockLongestAxisLength'] = longest_axis_length(blocks)
+        blocks['BlockElongation'] = elongation(blocks)
+        blocks['BlockConvexity'] = convexity(blocks)
+        blocks['BlockOrientation'] = orientation(blocks)
+        blocks['BlockCorners'] = corners(blocks.convex_hull)
+
+        buildings = block.merge_blocks_and_buildings(blocks, buildings)
+
 
 if __name__ == "__main__":
     city_path = "test_data/Vaugneray"

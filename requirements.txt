@@ -2,3 +2,4 @@ filelock==3.16.1
 geopandas==1.0.1
 matplotlib==3.9.2
 momepy==0.8.1
+networkx==3.4.2
