@@ -6,4 +6,4 @@ networkx==3.4.2
 osmnx==1.9.3
 h3pandas==0.2.6
 h3==3.7.7
-reasterio==1.4.2
+rasterio==1.4.3
