@@ -4,7 +4,7 @@ import geopandas as gpd
 
 from log import setup_logger, LoggingContext
 from util import load_buildings, load_osm_buildings, load_streets, load_pois, load_GHS_built_up, store_features, distance_nearest, snearest_attr, bbox
-from features import building, buffer, street, poi, osm, landuse, topography, population
+from features import building, block, buffer, street, poi, osm, landuse, topography, population
 
 H3_RES = 10
 H3_BUFFER_SIZES = [1, 4] # corresponds to a buffer of 0.1 and 0.9 km^2
@@ -17,6 +17,9 @@ def execute_feature_pipeline(city_path: str, log_file: str, built_up_path: str, 
 
     with LoggingContext(logger, feature_name='building'):
         buildings = _calculate_building_features(buildings)
+
+    with LoggingContext(logger, feature_name="Blocks"):
+        buildings = _calculate_block_features(buildings)
 
     with LoggingContext(logger, feature_name='street'):
         buildings = _calculate_street_features(buildings, city_path)
@@ -47,42 +50,42 @@ def execute_feature_pipeline(city_path: str, log_file: str, built_up_path: str, 
 
     store_features(buildings, city_path)
 
-    with LoggingContext(logger, feature_name="Blocks"):
-        from features import block
-
-        blocks = block.generate_blocks(buildings)
-        blocks['BlockLength'] = blocks.building_ids.apply(len)
-        blocks['BlockTotalFootprintArea'] = blocks.geometry.apply(lambda g: g.area)
-        blocks['AvBlockFootprintArea'] = blocks.block_buildings.apply(lambda b: b.area.mean())
-        blocks['StBlockFootprintArea'] = blocks.block_buildings.apply(lambda b: b.area.std())
-        blocks['BlockPerimeter'] = blocks.length
-        blocks['BlockLongestAxisLength'] = longest_axis_length(blocks)
-        blocks['BlockElongation'] = elongation(blocks)
-        blocks['BlockConvexity'] = convexity(blocks)
-        blocks['BlockOrientation'] = orientation(blocks)
-        blocks['BlockCorners'] = corners(blocks.convex_hull)
-
-        buildings = block.merge_blocks_and_buildings(blocks, buildings)
-
 
 def _calculate_building_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
-        buildings['footprint_area'] = buildings.area
-        buildings['perimeter'] = buildings.length
-        buildings['normalized_perimeter_index'] = building.calculate_norm_perimeter(buildings)
-        buildings['area_perimeter_ratio'] = buildings['footprint_area'] / buildings['perimeter']
-        buildings['phi'] = building.calculate_phi(buildings)
-        buildings['longest_axis_length'] = longest_axis_length(buildings)
-        buildings['elongation'] = elongation(buildings)
-        buildings['convexity'] = convexity(buildings)
-        buildings['rectangularity'] = equivalent_rectangular_index(buildings)
-        buildings['orientation'] = orientation(buildings)
-        buildings['corners'] = corners(buildings)
-        buildings['shared_wall_length'] = shared_walls(buildings)
-        buildings['rel_courtyard_size'] = courtyard_area(buildings) / buildings.area
-        buildings['touches'] = building.calculate_touches(buildings)
-        buildings['distance_to_closest_building'] = building.calculate_distance_to_closest_building(buildings)
+    buildings['footprint_area'] = buildings.area
+    buildings['perimeter'] = buildings.length
+    buildings['normalized_perimeter_index'] = building.calculate_norm_perimeter(buildings)
+    buildings['area_perimeter_ratio'] = buildings['footprint_area'] / buildings['perimeter']
+    buildings['phi'] = building.calculate_phi(buildings)
+    buildings['longest_axis_length'] = longest_axis_length(buildings)
+    buildings['elongation'] = elongation(buildings)
+    buildings['convexity'] = convexity(buildings)
+    buildings['rectangularity'] = equivalent_rectangular_index(buildings)
+    buildings['orientation'] = orientation(buildings)
+    buildings['corners'] = corners(buildings)
+    buildings['shared_wall_length'] = shared_walls(buildings)
+    buildings['rel_courtyard_size'] = courtyard_area(buildings) / buildings.area
+    buildings['touches'] = building.calculate_touches(buildings)
+    buildings['distance_to_closest_building'] = building.calculate_distance_to_closest_building(buildings)
 
-        return buildings
+    return buildings
+
+
+def _calculate_block_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    blocks = block.generate_blocks(buildings)
+    blocks['BlockLength'] = blocks.building_ids.apply(len)
+    blocks['BlockTotalFootprintArea'] = blocks.geometry.apply(lambda g: g.area)
+    blocks['AvBlockFootprintArea'] = blocks.block_buildings.apply(lambda b: b.area.mean())
+    blocks['StBlockFootprintArea'] = blocks.block_buildings.apply(lambda b: b.area.std())
+    blocks['BlockPerimeter'] = blocks.length
+    blocks['BlockLongestAxisLength'] = longest_axis_length(blocks)
+    blocks['BlockElongation'] = elongation(blocks)
+    blocks['BlockConvexity'] = convexity(blocks)
+    blocks['BlockOrientation'] = orientation(blocks)
+    blocks['BlockCorners'] = corners(blocks.convex_hull)
+
+    buildings = block.merge_blocks_and_buildings(blocks, buildings)
+    return buildings
 
 
 def _calculate_buffer_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
