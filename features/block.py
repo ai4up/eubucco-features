@@ -1,17 +1,9 @@
-import momepy
 import geopandas as gpd
 import networkx as nx
-import pandas as pd
 
 
-def calculate_tesselation(buildings):
-    limit = momepy.buffered_limit(buildings, buffer=100)
-    tessellation = momepy.morphological_tessellation(buildings, clip=limit)
-    return tessellation
-
-
-def generate_blocks(buildings) -> gpd.GeoDataFrame:
-    working_copy = buildings[['id', 'geometry']].copy(deep=True)
+def generate_blocks(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    working_copy = buildings[['id', 'geometry']]
     touching = gpd.sjoin(working_copy, working_copy, predicate='touches')
 
     graph = nx.Graph()
@@ -34,7 +26,7 @@ def generate_blocks(buildings) -> gpd.GeoDataFrame:
     return blocks_gdf
 
 
-def merge_blocks_and_buildings(blocks, buildings):
+def merge_blocks_and_buildings(blocks: gpd.GeoDataFrame, buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     blocks = blocks.drop(columns=['geometry', 'block_buildings'])
     blocks = blocks.explode('building_ids')
     buildings = buildings.merge(blocks, left_on='id', right_on='building_ids', how='left')
