@@ -19,7 +19,33 @@ def sjoin_nearest_cols(gdf1: gpd.GeoDataFrame, gdf2: gpd.GeoDataFrame, cols: Uni
     return gdf1
 
 
-def distance_nearest(left: gpd.GeoDataFrame, right: gpd.GeoDataFrame, max_distance: float) -> pd.DataFrame:
+def snearest_attr(left: gpd.GeoDataFrame, right: gpd.GeoDataFrame, attr: str, max_distance: float = None) -> pd.DataFrame:
+    right = right.dropna(subset=attr)
+
+    (left_i, right_i), dis = right.sindex.nearest(
+        left.geometry, return_all=False, return_distance=True, max_distance=max_distance
+    )
+
+    nearest = right.iloc[right_i][attr].reset_index()
+    nearest.index = left.index[left_i]
+    nearest['distance'] = dis
+
+    return nearest
+
+
+def snearest(left: gpd.GeoDataFrame, right: gpd.GeoDataFrame, max_distance: float = None) -> pd.DataFrame:
+    (left_i, right_i), dis = right.sindex.nearest(
+        left.geometry, return_all=False, return_distance=True, max_distance=max_distance
+    )
+
+    nearest = right.iloc[right_i].reset_index()
+    nearest.index = left.index[left_i]
+    nearest['distance'] = dis
+
+    return nearest
+
+
+def distance_nearest(left: gpd.GeoDataFrame, right: gpd.GeoDataFrame, max_distance: float = None) -> pd.DataFrame:
     (left_i, _), dis = right.sindex.nearest(
         left.geometry, return_all=False, return_distance=True, max_distance=max_distance
     )
