@@ -11,7 +11,7 @@ def calculate_tesselation(buildings):
 
 
 def generate_blocks(buildings) -> gpd.GeoDataFrame:
-    working_copy = buildings[["id", "geometry"]].copy(deep=True)
+    working_copy = buildings[['id', 'geometry']].copy(deep=True)
     touching = gpd.sjoin(working_copy, working_copy, predicate='touches')
 
     graph = nx.Graph()
@@ -19,7 +19,7 @@ def generate_blocks(buildings) -> gpd.GeoDataFrame:
 
     connected_components = list(nx.connected_components(graph))
 
-    working_copy.set_index("id", inplace=True)
+    working_copy.set_index('id', inplace=True)
 
     blocks = []
     for component in connected_components:
@@ -27,7 +27,7 @@ def generate_blocks(buildings) -> gpd.GeoDataFrame:
         block_geometry = block_buildings.union_all()
         block_indices = list(component)
         blocks.append(
-            {'geometry': block_geometry, 'building_ids': block_indices, "block_buildings": block_buildings.values})
+            {'geometry': block_geometry, 'building_ids': block_indices, 'block_buildings': block_buildings.values})
 
     blocks_gdf = gpd.GeoDataFrame(blocks, geometry='geometry', crs=buildings.crs)
 

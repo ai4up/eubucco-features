@@ -18,7 +18,7 @@ def execute_feature_pipeline(city_path: str, log_file: str, built_up_path: str, 
     with LoggingContext(logger, feature_name='building'):
         buildings = _calculate_building_features(buildings)
 
-    with LoggingContext(logger, feature_name="Blocks"):
+    with LoggingContext(logger, feature_name='blocks'):
         buildings = _calculate_block_features(buildings)
 
     with LoggingContext(logger, feature_name='street'):
@@ -73,16 +73,16 @@ def _calculate_building_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFram
 
 def _calculate_block_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     blocks = block.generate_blocks(buildings)
-    blocks['BlockLength'] = blocks.building_ids.apply(len)
-    blocks['BlockTotalFootprintArea'] = blocks.geometry.apply(lambda g: g.area)
-    blocks['AvBlockFootprintArea'] = blocks.block_buildings.apply(lambda b: b.area.mean())
-    blocks['StBlockFootprintArea'] = blocks.block_buildings.apply(lambda b: b.area.std())
-    blocks['BlockPerimeter'] = blocks.length
-    blocks['BlockLongestAxisLength'] = longest_axis_length(blocks)
-    blocks['BlockElongation'] = elongation(blocks)
-    blocks['BlockConvexity'] = convexity(blocks)
-    blocks['BlockOrientation'] = orientation(blocks)
-    blocks['BlockCorners'] = corners(blocks.convex_hull)
+    blocks['block_length'] = blocks.building_ids.apply(len)
+    blocks['block_total_footprint_area'] = blocks.geometry.apply(lambda g: g.area)
+    blocks['av_block_footprint_area'] = blocks.block_buildings.apply(lambda b: b.area.mean())
+    blocks['st_block_footprint_area'] = blocks.block_buildings.apply(lambda b: b.area.std())
+    blocks['block_perimeter'] = blocks.length
+    blocks['block_longest_axis_length'] = longest_axis_length(blocks)
+    blocks['block_elongation'] = elongation(blocks)
+    blocks['block_convexity'] = convexity(blocks)
+    blocks['block_orientation'] = orientation(blocks)
+    blocks['block_corners'] = corners(blocks.convex_hull)
 
     buildings = block.merge_blocks_and_buildings(blocks, buildings)
     return buildings
