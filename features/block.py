@@ -3,23 +3,20 @@ import networkx as nx
 
 
 def generate_blocks(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
-    working_copy = buildings[['id', 'geometry']]
-    touching = gpd.sjoin(working_copy, working_copy, predicate='touches')
+    geom = buildings[['geometry']]
+    touching = gpd.sjoin(geom, geom, predicate='touches')
 
     graph = nx.Graph()
-    graph.add_edges_from(zip(touching['id_left'], touching['id_right']))
-
+    graph.add_edges_from(zip(touching.index, touching['index_right']))
     connected_components = list(nx.connected_components(graph))
-
-    working_copy.set_index('id', inplace=True)
 
     blocks = []
     for component in connected_components:
-        block_buildings = working_copy.loc[list(component), 'geometry']
+        block_buildings = buildings.loc[list(component), 'geometry']
         block_geometry = block_buildings.union_all()
-        block_indices = list(component)
+        building_ids = buildings.loc[list(component), 'id']
         blocks.append(
-            {'geometry': block_geometry, 'building_ids': block_indices, 'block_buildings': block_buildings.values})
+            {'geometry': block_geometry, 'building_ids': building_ids.values, 'block_buildings': block_buildings.values})
 
     blocks_gdf = gpd.GeoDataFrame(blocks, geometry='geometry', crs=buildings.crs)
 
