@@ -35,17 +35,8 @@ def generate_blocks(buildings) -> gpd.GeoDataFrame:
 
 
 def merge_blocks_and_buildings(blocks, buildings):
-    block_mapping = []
-    for block_id, row in blocks.iterrows():
-        for building_index in row['building_ids']:
-            block_mapping.append({'building_index': building_index, 'block_id': block_id})
+    blocks = blocks.drop(columns=['geometry', 'block_buildings'])
+    blocks = blocks.explode('building_ids')
+    buildings = buildings.merge(blocks, left_on='id', right_on='building_ids', how='left')
 
-    block_mapping_df = pd.DataFrame(block_mapping)
-
-    block_mapping_df = block_mapping_df.merge(blocks.drop(columns=['geometry', 'building_ids']),
-                                              left_on='block_id',
-                                              right_index=True)
-
-    buildings = buildings.merge(block_mapping_df, left_on='id', right_on='building_index', how='left')
-    buildings.drop(columns=['building_index', 'block_id', 'block_buildings'], inplace=True)
     return buildings
