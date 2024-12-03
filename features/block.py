@@ -4,7 +4,8 @@ import networkx as nx
 
 def generate_blocks(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     geom = buildings[['geometry']]
-    touching = gpd.sjoin(geom, geom, predicate='touches')
+    touching = gpd.sjoin(geom, geom, predicate='intersects')
+    touching = touching[touching.index != touching['index_right']]
 
     graph = nx.Graph()
     graph.add_edges_from(zip(touching.index, touching['index_right']))
@@ -19,6 +20,7 @@ def generate_blocks(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
             {'geometry': block_geometry, 'building_ids': building_ids.values, 'block_buildings': block_buildings.values})
 
     blocks_gdf = gpd.GeoDataFrame(blocks, geometry='geometry', crs=buildings.crs)
+    print(f"Generated {len(blocks_gdf)} blocks with on average {blocks_gdf['building_ids'].apply(len).mean():.1f} buildings.")
 
     return blocks_gdf
 
