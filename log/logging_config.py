@@ -11,9 +11,7 @@ class DefaultFeatureNameFilter(logging.Filter):
 
 
 def setup_logger(log_file: Path = None) -> logging.Logger:
-    formatter = logging.Formatter(
-        fmt="%(asctime)s - %(levelname)s - %(feature_name)s - %(message)s"
-    )
+    formatter = logging.Formatter(fmt="%(asctime)s - %(levelname)s - %(feature_name)s - %(message)s")
 
     # Stream handler for console output
     stream_handler = logging.StreamHandler()

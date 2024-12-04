@@ -1,7 +1,7 @@
 import math
 
-import numpy as np
 import geopandas as gpd
+import numpy as np
 import pandas as pd
 
 import util
@@ -14,9 +14,9 @@ def calculate_phi(buildings: gpd.GeoDataFrame) -> pd.Series:
 
 
 def calculate_touches(buildings: gpd.GeoDataFrame) -> pd.Series:
-    touching_pairs = gpd.sjoin(buildings, buildings, predicate='intersects')
-    touches = touching_pairs.groupby('id_left').size() - 1
-    return buildings['id'].map(touches).fillna(0).astype(int)
+    touching_pairs = gpd.sjoin(buildings, buildings, predicate="intersects")
+    touches = touching_pairs.groupby("id_left").size() - 1
+    return buildings["id"].map(touches).fillna(0).astype(int)
 
 
 def calculate_norm_perimeter(buildings: gpd.GeoDataFrame) -> pd.Series:

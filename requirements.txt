@@ -1,9 +1,9 @@
 filelock==3.16.1
 geopandas==1.0.1
+h3==3.7.7
+h3pandas==0.2.6
 matplotlib==3.9.2
 momepy==0.8.1
 networkx==3.4.2
 osmnx==1.9.3
-h3pandas==0.2.6
-h3==3.7.7
 rasterio==1.4.3

@@ -1,5 +1,5 @@
-from datetime import datetime
 import logging
+from datetime import datetime
 
 
 class LoggingContext:
@@ -30,6 +30,7 @@ class LoggingContext:
 
     def _create_filter(self):
         """Creates a filter that dynamically injects the feature_name into log records."""
+
         class FeatureNameFilter(logging.Filter):
             def __init__(self, feature_name: str):
                 super().__init__()

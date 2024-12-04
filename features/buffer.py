@@ -1,30 +1,33 @@
 from collections.abc import Iterable
 from typing import Callable, Dict, List, Tuple, Union
 
-from shapely import Point
-from pyproj import Transformer
-import h3pandas
-import pandas as pd
-import h3
 import geopandas as gpd
+import h3
+import pandas as pd
+from pyproj import Transformer
+from shapely import Point
 
 
-def aggregate_to_h3_grid(gdf: gpd.GeoDataFrame, operation: Dict[str, Tuple[str, Callable]], res: int) -> gpd.GeoDataFrame:
+def aggregate_to_h3_grid(
+    gdf: gpd.GeoDataFrame, operation: Dict[str, Tuple[str, Callable]], res: int
+) -> gpd.GeoDataFrame:
     """
     Aggregates a GeoDataFrame to a hexagonal H3-indexed grid.
 
     Args:
         gdf: GeoDataFrame to be aggregated.
-        operation: A dictionary specifying aggregation operations for the buffer features. The keys specify the new aggregated column names, and the values are tuples specifying the column name and the aggregation function to use.
+        operation:  A dictionary specifying aggregation operations for the buffer features. The keys specify
+                    the new aggregated column names, and the values are tuples specifying the column name
+                    and the aggregation function to use.
         res: Resolution of the hexagonal grid.
 
     Returns:
         Aggregated GeoDataFrame.
     """
-    if 'h3_index' not in gdf.columns:
-        gdf['h3_index'] = h3_index(gdf, res)
+    if "h3_index" not in gdf.columns:
+        gdf["h3_index"] = h3_index(gdf, res)
 
-    hex_grid = gdf.groupby('h3_index').agg(**operation)
+    hex_grid = gdf.groupby("h3_index").agg(**operation)
 
     return hex_grid
 
@@ -41,23 +44,28 @@ def calculate_h3_grid_shares(gdf: gpd.GeoDataFrame, col: str, res: int) -> gpd.G
     Returns:
         A GeoDataFrame with the unique value shares of the specified column within each H3 hexagonal grid cell.
     """
-    if 'h3_index' not in gdf.columns:
-        gdf['h3_index'] = h3_index(gdf, res)
+    if "h3_index" not in gdf.columns:
+        gdf["h3_index"] = h3_index(gdf, res)
 
-    hex_grid = gdf.groupby(['h3_index', col]).size() / gdf.groupby('h3_index').size()
+    hex_grid = gdf.groupby(["h3_index", col]).size() / gdf.groupby("h3_index").size()
 
     return hex_grid
 
 
-def calculate_h3_buffer_features(gdf: gpd.GeoDataFrame, operation: Dict[str, Tuple[str, Callable]], res: int, k: Union[int, List[int]]) -> gpd.GeoDataFrame:
+def calculate_h3_buffer_features(
+    gdf: gpd.GeoDataFrame, operation: Dict[str, Tuple[str, Callable]], res: int, k: Union[int, List[int]]
+) -> gpd.GeoDataFrame:
     """
     Calculate buffer features for a GeoDataFrame based on H3 indexes.
 
     Args:
         gdf: A GeoDataFrame to be aggreated.
-        operation: A dictionary specifying aggregation operations for the buffer features. The keys are the names of the features, and the values are tuples specifying the column name and the aggregation function to use.
+        operation:  A dictionary specifying aggregation operations for the buffer features. The keys are the names
+                    of the features, and the values are tuples specifying the column name and the
+                    aggregation function to use.
         res: H3 resolution level.
-        k: The number of hexagonal rings to include in the buffer. Provide a list to calculate features for multiple buffer sizes.
+        k:  The number of hexagonal rings to include in the buffer. Provide a list to calculate features
+            for multiple buffer sizes.
 
     Returns:
         A hexagonal grid with the calculated buffer features.
@@ -81,7 +89,7 @@ def h3_index(gdf: Union[gpd.GeoSeries, gpd.GeoDataFrame], res: int) -> List[str]
         A list of H3 indexes corresponding to the input geometries.
     """
     # H3 operations require a lat/lon point geometry
-    centroids = gdf.centroid.to_crs('EPSG:4326')
+    centroids = gdf.centroid.to_crs("EPSG:4326")
     lngs = centroids.x
     lats = centroids.y
     h3_idx = [h3.geo_to_h3(lat, lng, res) for lat, lng in zip(lats, lngs)]
@@ -108,7 +116,9 @@ def distance_to_h3_grid_max(gdf: gpd.GeoDataFrame, s: pd.Series):
     return dis
 
 
-def _calcuate_hex_rings_aggregate(hex_grid: gpd.GeoDataFrame, operation: Union[str, List, Dict, Callable], res: int, k: Union[int, List[int]]) -> gpd.GeoDataFrame:
+def _calcuate_hex_rings_aggregate(
+    hex_grid: gpd.GeoDataFrame, operation: Union[str, List, Dict, Callable], res: int, k: Union[int, List[int]]
+) -> gpd.GeoDataFrame:
     aggregates = []
     hex_rings = _ensure_iterable(k)
 
@@ -116,15 +126,17 @@ def _calcuate_hex_rings_aggregate(hex_grid: gpd.GeoDataFrame, operation: Union[s
     for j in hex_rings:
         buffer_area = _calculate_buffer_area(res, j)
         ring_aggregate = _calcuate_hex_ring_aggregate(hex_grid, operation, j)
-        ring_aggregate = ring_aggregate.add_suffix(f'_within_{buffer_area:.2f}_buffer')
+        ring_aggregate = ring_aggregate.add_suffix(f"_within_{buffer_area:.2f}_buffer")
         aggregates.append(ring_aggregate)
 
     return pd.concat(aggregates, axis=1)
 
 
-def _calcuate_hex_ring_aggregate(gdf: gpd.GeoDataFrame, operation: Union[str, List, Dict, Callable], k: int) -> gpd.GeoDataFrame:
+def _calcuate_hex_ring_aggregate(
+    gdf: gpd.GeoDataFrame, operation: Union[str, List, Dict, Callable], k: int
+) -> gpd.GeoDataFrame:
     # Add column with neighboring hexagons
-    neighbors = gdf.h3.k_ring(k=k)['h3_k_ring']
+    neighbors = gdf.h3.k_ring(k=k)["h3_k_ring"]
 
     # Add self to the neighbor list
     neighbors[:] = [[i] + n for i, n in zip(neighbors.index, neighbors)]
@@ -135,9 +147,9 @@ def _calcuate_hex_ring_aggregate(gdf: gpd.GeoDataFrame, operation: Union[str, Li
     return agg
 
 
-def _h3_to_geo(h: str, crs: str = 'EPSG:4326') -> Point:
+def _h3_to_geo(h: str, crs: str = "EPSG:4326") -> Point:
     lat, lng = h3.h3_to_geo(h)
-    transformer = Transformer.from_crs('EPSG:4326', crs, always_xy=True)
+    transformer = Transformer.from_crs("EPSG:4326", crs, always_xy=True)
     x, y = transformer.transform(lng, lat)
 
     return Point(x, y)
@@ -152,21 +164,22 @@ def _ensure_iterable(var):
 
 def _determine_neighborhood_agg_operation(op):
     # The two-step aggregation approach does not allow for exact calculation of some aggregates (e.g. std).
-    # We need approximate these using the mean, while others can be calculated exactly with another operation (e.g. count -> sum).
+    # We need approximate these using the mean, while others can be calculated
+    # exactly with another operation (e.g. count -> sum).
     operation_mapping = {
-        'std': 'mean',
-        'nunique': 'mean',
-        'count': 'sum',
-        'sum': 'sum',
-        'mean': 'mean',
-        'max': 'max',
-        }
+        "std": "mean",
+        "nunique": "mean",
+        "count": "sum",
+        "sum": "sum",
+        "mean": "mean",
+        "max": "max",
+    }
     try:
         for k, v in op.items():
             op[k] = operation_mapping[v[1]]
 
     except KeyError as e:
-        raise Exception('Specific aggregation operation not (yet) supported.') from e
+        raise Exception("Specific aggregation operation not (yet) supported.") from e
 
     return op
 
@@ -174,14 +187,14 @@ def _determine_neighborhood_agg_operation(op):
 def _calculate_buffer_area(res, k):
     # areas in km2, from https://h3geo.org/docs/core-library/restable/#average-area-in-km2
     hex_areas = [
-        4.3574e+06,
-        6.0978e+05,
-        8.6801e+04,
-        1.2393e+04,
-        1.7703e+03,
-        2.5290e+02,
-        3.6129e+01,
-        5.1612e+00,
+        4.3574e06,
+        6.0978e05,
+        8.6801e04,
+        1.2393e04,
+        1.7703e03,
+        2.5290e02,
+        3.6129e01,
+        5.1612e00,
         7.3732e-01,
         1.0533e-01,
         1.5047e-02,
@@ -192,7 +205,7 @@ def _calculate_buffer_area(res, k):
         8.9531e-07,
     ]
     k = k + 1
-    n_hex_cells = 3 * (k ** 2) - 3 * k + 1
+    n_hex_cells = 3 * (k**2) - 3 * k + 1
     buffer_area = n_hex_cells * hex_areas[res]
 
     return buffer_area

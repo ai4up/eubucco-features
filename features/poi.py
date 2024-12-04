@@ -1,53 +1,51 @@
 from collections import defaultdict
 
 import geopandas as gpd
-import pandas as pd
 import osmnx as ox
+import pandas as pd
 
 _education = [
-    'university',
-    'school',
-    'kindergarten',
+    "university",
+    "school",
+    "kindergarten",
 ]
 _healthcare = [
-    'veterinary',
-    'clinic',
-    'dentist',
-    'pharmacy',
-    'doctors',
+    "veterinary",
+    "clinic",
+    "dentist",
+    "pharmacy",
+    "doctors",
 ]
 _necessities = [
-    'post_office',
-    'fuel',
-    'atm',
-    'bank',
-    'library',
+    "post_office",
+    "fuel",
+    "atm",
+    "bank",
+    "library",
 ]
 _third_places = [
-    'place_of_worship',
-    'nightclub',
-    'theatre',
-    'bar',
-    'cafe',
-    'restaurant',
-    'pub',
-    'community_centre',
-    'social_facility',
+    "place_of_worship",
+    "nightclub",
+    "theatre",
+    "bar",
+    "cafe",
+    "restaurant",
+    "pub",
+    "community_centre",
+    "social_facility",
 ]
 OSM_TAGS = {
-    'commercial': {
-        'amenity': _third_places + _necessities + _healthcare,
-        'shop': True,
+    "commercial": {
+        "amenity": _third_places + _necessities + _healthcare,
+        "shop": True,
     },
-    'office': {
-
+    "office": {},
+    "industrial": {
+        "industrial": True,
+        "landuse": ["industrial"],
     },
-    'industrial': {
-        'industrial': True,
-        'landuse': ['industrial'],
-    },
-    'education': {
-        'amenity': _education,
+    "education": {
+        "amenity": _education,
     },
 }
 
@@ -64,10 +62,10 @@ def download(area: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     ox.config(timeout=1000)
     tags = _merge_tags(*OSM_TAGS.values())
 
-    east, south, west, north = area.to_crs('EPSG:4326').total_bounds
+    east, south, west, north = area.to_crs("EPSG:4326").total_bounds
     pois = ox.geometries.geometries_from_bbox(north, south, east, west, tags)
 
-    pois = pois[['geometry'] + list(tags.keys())]
+    pois = pois[["geometry"] + list(tags.keys())]
     pois = pois.to_crs(area.crs)
 
     return pois
@@ -102,7 +100,7 @@ def _merge_tags(*dicts):
             elif isinstance(value, bool):
                 merged_dict[key] = value
             else:
-                raise ValueError(f'Merging dicts failed due to unsupported value type: {type(value)}')
+                raise ValueError(f"Merging dicts failed due to unsupported value type: {type(value)}")
 
     return dict(merged_dict)
 
@@ -115,6 +113,6 @@ def _filter(df, tags):
         elif value is True:
             mask &= df[col].notna()
         else:
-            raise ValueError(f'Creating filter mask failed due to unsupported value type: {type(value)}')
+            raise ValueError(f"Creating filter mask failed due to unsupported value type: {type(value)}")
 
     return df[mask]

@@ -1,9 +1,10 @@
 import csv
+
 from filelock import FileLock
 
 
 class StatsLogger:
-    fieldnames = ['city', 'feature', 'start_time', 'end_time', 'duration', 'buildings', 'comments']
+    fieldnames = ["city", "feature", "start_time", "end_time", "duration", "buildings", "comments"]
 
     def __init__(self, log_path):
         self.lock_path = log_path
@@ -13,7 +14,7 @@ class StatsLogger:
 
     def _initialize_csv(self):
         try:
-            with open(self.log_file, mode='x', newline='') as file:
+            with open(self.log_file, mode="x", newline="") as file:
                 writer = csv.DictWriter(file, fieldnames=self.fieldnames)
                 writer.writeheader()  # Write the header if the file is created
         except FileExistsError:
@@ -21,15 +22,15 @@ class StatsLogger:
 
     def log(self, city, feature, start_time, end_time, duration, buildings, comments):
         data = {
-            'city': city,
-            'feature': feature,
-            'start_time': start_time,
-            'end_time': end_time,
-            'duration': duration,
-            'buildings': buildings,
-            'comments': comments
+            "city": city,
+            "feature": feature,
+            "start_time": start_time,
+            "end_time": end_time,
+            "duration": duration,
+            "buildings": buildings,
+            "comments": comments,
         }
         with self.lock:
-            with open(self.log_file, mode='a', newline='') as file:
+            with open(self.log_file, mode="a", newline="") as file:
                 writer = csv.DictWriter(file, fieldnames=self.fieldnames)
                 writer.writerow(data)

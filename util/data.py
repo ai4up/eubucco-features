@@ -1,22 +1,18 @@
 from pathlib import Path
 
-import pandas as pd
 import geopandas as gpd
+import pandas as pd
 from shapely import wkt
 
 import util
 
-CRS_UNI = 'EPSG:3035'
-geometry_col = 'geometry'
+CRS_UNI = "EPSG:3035"
+geometry_col = "geometry"
 
 
 def load_csv(path: Path) -> gpd.GeoDataFrame:
     df = pd.read_csv(path)
-    gdf = gpd.GeoDataFrame(
-        df,
-        geometry=df[geometry_col].apply(wkt.loads),
-        crs=CRS_UNI
-    )
+    gdf = gpd.GeoDataFrame(df, geometry=df[geometry_col].apply(wkt.loads), crs=CRS_UNI)
     return gdf
 
 
@@ -49,7 +45,7 @@ def load_osm_buildings(city_path: str) -> gpd.GeoDataFrame:
 def load_population(population_file: str, area: gpd.GeoSeries, point_geom: bool) -> gpd.GeoDataFrame:
     population_raster, city_meta = util.read_area(population_file, area)
     population = util.raster_to_gdf(population_raster[0], city_meta, point=point_geom)
-    population = population.rename(columns={'values': 'population'})
+    population = population.rename(columns={"values": "population"})
 
     return population
 
@@ -57,7 +53,7 @@ def load_population(population_file: str, area: gpd.GeoSeries, point_geom: bool)
 def load_elevation(elevation_file: str, area: gpd.GeoSeries, point_geom: bool) -> gpd.GeoDataFrame:
     elevation_raster, city_meta = util.read_area(elevation_file, area)
     elevation = util.raster_to_gdf(elevation_raster[0], city_meta, point=point_geom)
-    elevation = elevation.rename(columns={'values': 'elevation'})
+    elevation = elevation.rename(columns={"values": "elevation"})
 
     return elevation
 
@@ -65,11 +61,11 @@ def load_elevation(elevation_file: str, area: gpd.GeoSeries, point_geom: bool) -
 def load_GHS_built_up(built_up_file: str, area: gpd.GeoSeries) -> gpd.GeoDataFrame:
     built_up_raster, city_meta = util.read_area(built_up_file, area)
     built_up = util.raster_to_gdf(built_up_raster[0], city_meta)
-    built_up = built_up.rename(columns={'values': 'class'})
+    built_up = built_up.rename(columns={"values": "class"})
 
     use_types = {
-        'residential': [11, 12, 13, 14, 15],
-        'non-residential': [21, 22, 23, 24, 25],
+        "residential": [11, 12, 13, 14, 15],
+        "non-residential": [21, 22, 23, 24, 25],
     }
     heights = {
         4.5: [12, 22],  # 3-6m
@@ -85,14 +81,14 @@ def load_GHS_built_up(built_up_file: str, area: gpd.GeoSeries) -> gpd.GeoDataFra
     def reverse(d):
         return {value: key for key, values in d.items() for value in values}
 
-    built_up['height'] = built_up['class'].map(reverse(heights))
-    built_up['high_rise'] = built_up['class'].isin([15, 25])
-    built_up['use_type'] = built_up['class'].map(reverse(use_types))
-    built_up['NDVI'] = built_up['class'].map(greeness_NDVI)
+    built_up["height"] = built_up["class"].map(reverse(heights))
+    built_up["high_rise"] = built_up["class"].isin([15, 25])
+    built_up["use_type"] = built_up["class"].map(reverse(use_types))
+    built_up["NDVI"] = built_up["class"].map(greeness_NDVI)
 
     return built_up
 
 
 def store_features(buildings: gpd.GeoDataFrame, city_path: str):
     city_name = city_path.split("/")[-1]
-    buildings.to_file(Path(f"{city_path}/{city_name}_features.gpkg"), driver='GPKG')
+    buildings.to_file(Path(f"{city_path}/{city_name}_features.gpkg"), driver="GPKG")
