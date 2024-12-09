@@ -3,6 +3,7 @@ from typing import Callable, Dict, List, Tuple, Union
 
 import geopandas as gpd
 import h3
+import h3pandas  # noqa
 import pandas as pd
 from pyproj import Transformer
 from shapely import Point
