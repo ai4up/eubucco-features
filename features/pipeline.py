@@ -259,6 +259,18 @@ def _calculate_interaction_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataF
         buildings["population_within_buffer"] / buildings["total_footprint_area_within_0.92_buffer"]
     )
 
+    for ft in [
+        "footprint_area",
+        "elongation",
+        "convexity",
+        "orientation",
+        "distance_to_closest_building",
+        "distance_to_closest_street",
+        "size_of_closest_street",
+    ]:
+        for buf in ["within_0.11_buffer", "within_0.92_buffer"]:
+            buildings[f"deviation_{ft}_{buf}"] = buildings[f"avg_{ft}_{buf}"] - buildings[ft]
+
     return buildings
 
 
