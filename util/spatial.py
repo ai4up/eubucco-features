@@ -66,7 +66,14 @@ def distance_nearest(left: gpd.GeoDataFrame, right: gpd.GeoDataFrame, max_distan
     return s
 
 
-def bbox(geom: Union[gpd.GeoSeries, gpd.GeoDataFrame], buffer: float = 0) -> gpd.GeoSeries:
+def bbox(geom: Union[gpd.GeoSeries, gpd.GeoDataFrame], crs: str = None, buffer: float = None) -> gpd.GeoSeries:
     bounds = geom.total_bounds
-    buffered_box = box(*bounds).buffer(buffer)
-    return gpd.GeoSeries([buffered_box], crs=geom.crs)
+    gs = gpd.GeoSeries([box(*bounds)], crs=geom.crs)
+
+    if crs:
+        gs = gs.to_crs(crs)
+
+    if buffer:
+        gs = gs.buffer(buffer)
+
+    return gs

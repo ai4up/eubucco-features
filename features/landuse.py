@@ -1,10 +1,13 @@
 import geopandas as gpd
 import pandas as pd
 
+from util import bbox
+
 # CORINE landuse classes https://land.copernicus.eu/en/products/corine-land-cover
 CORINE_LU_CLASS_COL = "Code_18"
 CORINE_LU_CLASSES = {"agricultural": [211, 212, 213, 221, 222, 223, 231, 241, 242, 243, 244], "industrial": [121]}
-CORINE_CRS = 3035
+CORINE_CRS = "EPSG:3035"
+OCEANS_CRS = "EPSG:3857"
 
 
 def distance_to_landuse(buildings: gpd.GeoDataFrame, category: str, landuse_path: str) -> pd.Series:
@@ -19,11 +22,11 @@ def distance_to_landuse(buildings: gpd.GeoDataFrame, category: str, landuse_path
     Returns:
         A Series containing the distances from each building to the nearest land use area of the specified category.
     """
-    bbox = buildings.to_crs(CORINE_CRS).total_bounds
-    lu = gpd.read_file(landuse_path, bbox=tuple(bbox))
+    box = bbox(buildings, crs=CORINE_CRS, buffer=1000)
+    lu = gpd.read_file(landuse_path, bbox=box)
 
     lu = lu[lu[CORINE_LU_CLASS_COL].astype(int).isin(CORINE_LU_CLASSES[category])]
-    lu = lu.union_all()
+    lu = lu.to_crs(buildings.crs).union_all()
     dis = buildings.centroid.distance(lu)
 
     return dis
@@ -40,7 +43,10 @@ def distance_to_coast(buildings: gpd.GeoDataFrame, oceans_path: str) -> pd.Serie
     Returns:
         A Series containing the distances from each building to the nearest ocean or sea.
     """
-    ocean = gpd.read_file(oceans_path).union_all()
-    dis = buildings.centroid.distance(ocean)
+    box = bbox(buildings, crs=OCEANS_CRS, buffer=1e6)
+    oceans = gpd.read_file(oceans_path, bbox=box)
+
+    ocean_geom = oceans.to_crs(buildings.crs).union_all()
+    dis = buildings.centroid.distance(ocean_geom)
 
     return dis
