@@ -74,21 +74,21 @@ def execute_feature_pipeline(
 
 
 def _calculate_building_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
-    buildings["footprint_area"] = buildings.area
-    buildings["perimeter"] = buildings.length
-    buildings["normalized_perimeter_index"] = building.calculate_norm_perimeter(buildings)
-    buildings["area_perimeter_ratio"] = buildings["footprint_area"] / buildings["perimeter"]
-    buildings["phi"] = building.calculate_phi(buildings)
-    buildings["longest_axis_length"] = longest_axis_length(buildings)
-    buildings["elongation"] = elongation(buildings)
-    buildings["convexity"] = convexity(buildings)
-    buildings["rectangularity"] = equivalent_rectangular_index(buildings)
-    buildings["orientation"] = orientation(buildings)
-    buildings["corners"] = corners(buildings)
-    buildings["shared_wall_length"] = shared_walls(buildings)
-    buildings["rel_courtyard_size"] = courtyard_area(buildings) / buildings.area
-    buildings["touches"] = building.calculate_touches(buildings)
-    buildings["distance_to_closest_building"] = building.calculate_distance_to_closest_building(buildings)
+    buildings["bldg_footprint_area"] = buildings.area
+    buildings["bldg_perimeter"] = buildings.length
+    buildings["bldg_normalized_perimeter_index"] = building.calculate_norm_perimeter(buildings)
+    buildings["bldg_area_perimeter_ratio"] = buildings["bldg_footprint_area"] / buildings["bldg_perimeter"]
+    buildings["bldg_phi"] = building.calculate_phi(buildings)
+    buildings["bldg_longest_axis_length"] = longest_axis_length(buildings)
+    buildings["bldg_elongation"] = elongation(buildings)
+    buildings["bldg_convexity"] = convexity(buildings)
+    buildings["bldg_rectangularity"] = equivalent_rectangular_index(buildings)
+    buildings["bldg_orientation"] = orientation(buildings)
+    buildings["bldg_corners"] = corners(buildings)
+    buildings["bldg_shared_wall_length"] = shared_walls(buildings)
+    buildings["bldg_rel_courtyard_size"] = courtyard_area(buildings) / buildings.area
+    buildings["bldg_touches"] = building.calculate_touches(buildings)
+    buildings["bldg_distance_closest"] = building.calculate_distance_to_closest_building(buildings)
 
     return buildings
 
@@ -97,8 +97,8 @@ def _calculate_block_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     blocks = block.generate_blocks(buildings)
     blocks["block_length"] = blocks.building_ids.apply(len)
     blocks["block_total_footprint_area"] = blocks.geometry.apply(lambda g: g.area)
-    blocks["av_block_footprint_area"] = blocks.block_buildings.apply(lambda b: b.area.mean())
-    blocks["st_block_footprint_area"] = blocks.block_buildings.apply(lambda b: b.area.std())
+    blocks["block_avg_footprint_area"] = blocks.block_buildings.apply(lambda b: b.area.mean())
+    blocks["block_std_footprint_area"] = blocks.block_buildings.apply(lambda b: b.area.std())
     blocks["block_perimeter"] = blocks.length
     blocks["block_longest_axis_length"] = longest_axis_length(blocks)
     blocks["block_elongation"] = elongation(blocks)
@@ -112,29 +112,29 @@ def _calculate_block_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 
 def _calculate_buffer_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     buffer_fts = {
-        "avg_footprint_area": ("footprint_area", "mean"),
-        "std_footprint_area": ("footprint_area", "std"),
-        "max_footprint_area": ("footprint_area", "max"),
-        "avg_elongation": ("elongation", "mean"),
-        "std_elongation": ("elongation", "std"),
-        "max_elongation": ("elongation", "max"),
-        "avg_convexity": ("convexity", "mean"),
-        "std_convexity": ("convexity", "std"),
-        "max_convexity": ("convexity", "max"),
-        "avg_orientation": ("orientation", "mean"),
-        "std_orientation": ("orientation", "std"),
-        "max_orientation": ("orientation", "max"),
-        "avg_distance_to_closest_building": ("distance_to_closest_building", "mean"),
-        "std_distance_to_closest_building": ("distance_to_closest_building", "std"),
-        "max_distance_to_closest_building": ("distance_to_closest_building", "max"),
-        "avg_distance_to_closest_street": ("distance_to_closest_street", "mean"),
-        "std_distance_to_closest_street": ("distance_to_closest_street", "std"),
-        "max_distance_to_closest_street": ("distance_to_closest_street", "max"),
-        "avg_size_of_closest_street": ("size_of_closest_street", "mean"),
-        "std_size_of_closest_street": ("size_of_closest_street", "std"),
-        "max_size_of_closest_street": ("size_of_closest_street", "max"),
-        "total_footprint_area": ("footprint_area", "sum"),
-        "n_buildings": ("footprint_area", "count"),
+        "bldg_n": ("bldg_footprint_area", "count"),
+        "bldg_total_footprint_area": ("bldg_footprint_area", "sum"),
+        "bldg_avg_footprint_area": ("bldg_footprint_area", "mean"),
+        "bldg_std_footprint_area": ("bldg_footprint_area", "std"),
+        "bldg_max_footprint_area": ("bldg_footprint_area", "max"),
+        "bldg_avg_elongation": ("bldg_elongation", "mean"),
+        "bldg_std_elongation": ("bldg_elongation", "std"),
+        "bldg_max_elongation": ("bldg_elongation", "max"),
+        "bldg_avg_convexity": ("bldg_convexity", "mean"),
+        "bldg_std_convexity": ("bldg_convexity", "std"),
+        "bldg_max_convexity": ("bldg_convexity", "max"),
+        "bldg_avg_orientation": ("bldg_orientation", "mean"),
+        "bldg_std_orientation": ("bldg_orientation", "std"),
+        "bldg_max_orientation": ("bldg_orientation", "max"),
+        "bldg_avg_distance_closest": ("bldg_distance_closest", "mean"),
+        "bldg_std_distance_closest": ("bldg_distance_closest", "std"),
+        "bldg_max_distance_closest": ("bldg_distance_closest", "max"),
+        "street_avg_distance": ("street_distance", "mean"),
+        "street_std_distance": ("street_distance", "std"),
+        "street_max_distance": ("street_distance", "max"),
+        "street_avg_size": ("street_size", "mean"),
+        "street_std_size": ("street_size", "std"),
+        "street_max_size": ("street_size", "max"),
     }
     hex_grid = buffer.calculate_h3_buffer_features(buildings, buffer_fts, H3_RES, H3_BUFFER_SIZES)
     buildings = buildings.merge(hex_grid, left_on="h3_index", right_index=True, how="left")
@@ -145,9 +145,9 @@ def _calculate_buffer_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 def _calculate_street_features(buildings: gpd.GeoDataFrame, city_path: str) -> gpd.GeoDataFrame:
     streets = load_streets(city_path)
 
-    buildings[
-        ["size_of_closest_street", "distance_to_closest_street", "street_alignment"]
-    ] = street.closest_street_features(buildings, streets)
+    buildings[["street_size", "street_distance", "street_alignment"]] = street.closest_street_features(
+        buildings, streets
+    )
 
     return buildings
 
@@ -155,9 +155,9 @@ def _calculate_street_features(buildings: gpd.GeoDataFrame, city_path: str) -> g
 def _calculate_poi_features(buildings: gpd.GeoDataFrame, city_path: str) -> gpd.GeoDataFrame:
     pois = load_pois(city_path)
 
-    buildings["distance_to_closest_poi"] = poi.distance_to_closest_poi(buildings, pois)
+    buildings["poi_distance"] = poi.distance_to_closest_poi(buildings, pois)
 
-    buffer_fts = {"n_pois": ("amenity", "count")}
+    buffer_fts = {"poi_n": ("amenity", "count")}
     hex_grid = buffer.calculate_h3_buffer_features(pois, buffer_fts, H3_RES, H3_BUFFER_SIZES)
     buildings = buildings.merge(hex_grid, left_on="h3_index", right_index=True, how="left")
 
@@ -184,7 +184,8 @@ def _calculate_topography_features(buildings: gpd.GeoDataFrame, topo_file: str) 
 
 def _calculate_population_features(buildings: gpd.GeoDataFrame, pop_file: str) -> gpd.GeoDataFrame:
     buildings["population"] = population.count_local_population(buildings, pop_file)
-    buildings["population_within_buffer"] = population.count_population_in_buffer(buildings, pop_file, H3_RES - 2)
+    suffix = buffer.ft_suffix(H3_RES - 2)
+    buildings[f"population_{suffix}"] = population.count_population_in_buffer(buildings, pop_file, H3_RES - 2)
 
     return buildings
 
@@ -195,7 +196,6 @@ def _calculate_osm_buildings_features(buildings: gpd.GeoDataFrame, city_path: st
     buildings = osm.closest_building_attributes(
         buildings, osm_buildings, {"type": "osm_closest_building_type", "height": "osm_closest_building_height"}
     )
-
     buildings["osm_distance_to_industry"] = osm.distance_to_some_building_type(buildings, osm_buildings, "industrial")
     buildings["osm_distance_to_commercial"] = osm.distance_to_some_building_type(
         buildings, osm_buildings, "commercial"
@@ -204,7 +204,6 @@ def _calculate_osm_buildings_features(buildings: gpd.GeoDataFrame, city_path: st
         buildings, osm_buildings, "agricultural"
     )
     buildings["osm_distance_to_education"] = osm.distance_to_some_building_type(buildings, osm_buildings, "education")
-
     buildings["osm_distance_to_medium_rise"] = osm.distance_to_some_building_height(buildings, osm_buildings, [15, 30])
     buildings["osm_distance_to_high_rise"] = osm.distance_to_some_building_height(
         buildings, osm_buildings, [30, np.inf]
@@ -232,20 +231,20 @@ def _calculate_GHS_built_up_features(buildings: gpd.GeoDataFrame, built_up_file:
     built_up = built_up.to_crs(buildings.crs)
 
     nearest = snearest_attr(buildings, built_up, attr=["use_type", "height"], max_distance=100)
-    buildings["GHS_nearest_use_type"] = nearest["use_type"]
-    buildings["GHS_nearest_height"] = nearest["height"]
+    buildings["ghs_nearest_use_type"] = nearest["use_type"]
+    buildings["ghs_nearest_height"] = nearest["height"]
 
     high_rise_areas = built_up[built_up["high_rise"]]
-    buildings["GHS_distance_high_rise"] = distance_nearest(buildings, high_rise_areas, max_distance=1000)
+    buildings["ghs_distance_high_rise"] = distance_nearest(buildings, high_rise_areas, max_distance=1000)
 
     hex_grid_type_shares = buffer.calculate_h3_buffer_shares(built_up, "use_type", H3_RES, H3_BUFFER_SIZES)
-    hex_grid_type_shares = hex_grid_type_shares.add_prefix("GHS_use_type_share_")
+    hex_grid_type_shares = hex_grid_type_shares.add_prefix("ghs_use_type_share_")
     buildings = buildings.merge(hex_grid_type_shares, left_on="h3_index", right_index=True, how="left")
 
     # Note: could be calculated separately since classes are mutually exclusive, so likely no performance gain here
     buffer_fts = {
-        "GHS_greenness": ("NDVI", "mean"),
-        "GHS_height": ("height", "mean"),
+        "ghs_greenness": ("NDVI", "mean"),
+        "ghs_height": ("height", "mean"),
     }
     hex_grid = buffer.calculate_h3_buffer_features(built_up, buffer_fts, H3_RES, H3_BUFFER_SIZES)
     buildings = buildings.merge(hex_grid, left_on="h3_index", right_index=True, how="left")
@@ -254,27 +253,31 @@ def _calculate_GHS_built_up_features(buildings: gpd.GeoDataFrame, built_up_file:
 
 
 def _calculate_interaction_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
-    buildings["distance_to_closest_built_environment"] = buildings[
-        ["distance_to_closest_building", "distance_to_closest_street"]
+    buildings["interact_distance_to_closest_built_environment"] = buildings[
+        ["bldg_distance_closest", "street_distance"]
     ].min(axis=1)
-    buildings["distance_to_closest_built_environment_interact_total_footprint_area"] = (
-        buildings["distance_to_closest_building"] * buildings["total_footprint_area_within_0.92_buffer"]
+    suffix = buffer.ft_suffix(H3_RES, H3_BUFFER_SIZES[-1])
+    buildings["interact_distance_to_closest_built_environment_total_footprint_area"] = (
+        buildings["bldg_distance_closest"] * buildings[f"bldg_total_footprint_area_{suffix}"]
     )
-    buildings["population_per_footprint_area"] = (
-        buildings["population_within_buffer"] / buildings["total_footprint_area_within_0.92_buffer"]
+    buildings["interact_population_per_footprint_area"] = (
+        buildings[f"population_{buffer.ft_suffix(H3_RES - 2)}"] / buildings[f"bldg_total_footprint_area_{suffix}"]
     )
 
-    for ft in [
-        "footprint_area",
-        "elongation",
-        "convexity",
-        "orientation",
-        "distance_to_closest_building",
-        "distance_to_closest_street",
-        "size_of_closest_street",
+    for cat, ft in [
+        ("bldg", "footprint_area"),
+        ("bldg", "elongation"),
+        ("bldg", "convexity"),
+        ("bldg", "orientation"),
+        ("bldg", "distance_closest"),
+        ("street", "distance"),
+        ("street", "size"),
     ]:
-        for buf in ["within_0.11_buffer", "within_0.92_buffer"]:
-            buildings[f"deviation_{ft}_{buf}"] = buildings[f"avg_{ft}_{buf}"] - buildings[ft]
+        for s in H3_BUFFER_SIZES:
+            suffix = buffer.ft_suffix(H3_RES, s)
+            buildings[f"{cat}_deviation_{ft}_{suffix}"] = (
+                buildings[f"{cat}_avg_{ft}_{suffix}"] - buildings[f"{cat}_{ft}"]
+            )
 
     return buildings
 

@@ -127,6 +127,11 @@ def distance_to_h3_grid_max(gdf: gpd.GeoDataFrame, s: pd.Series):
     return dis
 
 
+def ft_suffix(res: int, k: int = 0) -> str:
+    area = _calculate_buffer_area(res, k)
+    return f"within_buffer_{area:.2f}km2"
+
+
 def _calcuate_hex_rings_aggregate(
     hex_grid: gpd.GeoDataFrame, operation: Union[str, List, Dict, Callable], res: int, k: Union[int, List[int]]
 ) -> gpd.GeoDataFrame:
@@ -135,9 +140,8 @@ def _calcuate_hex_rings_aggregate(
 
     # Calculate aggregate for each hex ring size / buffer size
     for j in hex_rings:
-        buffer_area = _calculate_buffer_area(res, j)
         ring_aggregate = _calcuate_hex_ring_aggregate(hex_grid, operation, j)
-        ring_aggregate = ring_aggregate.add_suffix(f"_within_{buffer_area:.2f}_buffer")
+        ring_aggregate = ring_aggregate.add_suffix("_" + ft_suffix(res, j))
         aggregates.append(ring_aggregate)
 
     return pd.concat(aggregates, axis=1)
