@@ -210,7 +210,7 @@ def _calculate_osm_buildings_features(buildings: gpd.GeoDataFrame, city_path: st
         buildings, osm_buildings, [30, np.inf]
     )
 
-    hex_grid_type_shares = osm.building_type_share_buffer(osm_buildings, H3_RES, H3_BUFFER_SIZES)
+    hex_grid_type_shares = buffer.calculate_h3_buffer_shares(osm_buildings, "type", H3_RES, H3_BUFFER_SIZES)
     hex_grid_type_shares = hex_grid_type_shares.add_prefix("osm_type_share_")
     buildings = buildings.merge(hex_grid_type_shares, left_on="h3_index", right_index=True, how="left")
 
@@ -237,6 +237,10 @@ def _calculate_GHS_built_up_features(buildings: gpd.GeoDataFrame, built_up_file:
 
     high_rise_areas = built_up[built_up["high_rise"]]
     buildings["GHS_distance_high_rise"] = distance_nearest(buildings, high_rise_areas, max_distance=1000)
+
+    hex_grid_type_shares = buffer.calculate_h3_buffer_shares(built_up, "use_type", H3_RES, H3_BUFFER_SIZES)
+    hex_grid_type_shares = hex_grid_type_shares.add_prefix("GHS_use_type_share_")
+    buildings = buildings.merge(hex_grid_type_shares, left_on="h3_index", right_index=True, how="left")
 
     # Note: could be calculated separately since classes are mutually exclusive, so likely no performance gain here
     buffer_fts = {

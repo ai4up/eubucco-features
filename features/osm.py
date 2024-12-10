@@ -4,7 +4,6 @@ import geopandas as gpd
 import pandas as pd
 
 import util
-from features import buffer
 
 
 def closest_building_type(buildings: gpd.GeoDataFrame, osm_buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
@@ -39,12 +38,3 @@ def distance_to_some_building_height(
     osm_buildings = osm_buildings[osm_buildings["height"].between(*height_range)]
     dis = buildings.centroid.distance(osm_buildings.geometry.union_all())
     return dis
-
-
-def building_type_share_buffer(
-    osm_buildings: gpd.GeoDataFrame, h3_res: int, k: Union[int, List[int]]
-) -> gpd.GeoDataFrame:
-    hex_grid_shares = buffer.calculate_h3_grid_shares(osm_buildings, "type", h3_res)
-    hex_grid_shares = hex_grid_shares.unstack(level="type", fill_value=0)
-    hex_grid_shares = buffer._calcuate_hex_rings_aggregate(hex_grid_shares, "mean", h3_res, k)
-    return hex_grid_shares

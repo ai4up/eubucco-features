@@ -78,6 +78,16 @@ def calculate_h3_buffer_features(
     return hex_grid
 
 
+def calculate_h3_buffer_shares(
+    gdf: gpd.GeoDataFrame, col: str, h3_res: int, k: Union[int, List[int]]
+) -> gpd.GeoDataFrame:
+    hex_grid_shares = calculate_h3_grid_shares(gdf, col, h3_res)
+    hex_grid_shares = hex_grid_shares.unstack(level=col, fill_value=0)
+    hex_grid_shares = _calcuate_hex_rings_aggregate(hex_grid_shares, "mean", h3_res, k)
+
+    return hex_grid_shares
+
+
 def h3_index(gdf: Union[gpd.GeoSeries, gpd.GeoDataFrame], res: int) -> List[str]:
     """
     Generate H3 indexes for the geometries in a GeoDataFrame or GeoSeries.
