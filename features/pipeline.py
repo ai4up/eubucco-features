@@ -108,7 +108,7 @@ def _calculate_building_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFram
 def _calculate_block_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     blocks = block.generate_blocks(buildings)
     blocks["block_length"] = blocks.building_ids.apply(len)
-    blocks["block_total_footprint_area"] = blocks.geometry.apply(lambda g: g.area)
+    blocks["block_footprint_area"] = blocks.geometry.apply(lambda g: g.area)
     blocks["block_avg_footprint_area"] = blocks.block_buildings.apply(lambda b: b.area.mean())
     blocks["block_std_footprint_area"] = blocks.block_buildings.apply(lambda b: b.area.std())
     blocks["block_perimeter"] = blocks.length
@@ -217,6 +217,25 @@ def _calculate_building_buffer_features(buildings: gpd.GeoDataFrame) -> gpd.GeoD
         "bldg_avg_distance_closest": ("bldg_distance_closest", "mean"),
         "bldg_std_distance_closest": ("bldg_distance_closest", "std"),
         "bldg_max_distance_closest": ("bldg_distance_closest", "max"),
+        "blocks_n": ("block_footprint_area", "count"),
+        "block_avg_footprint_area": ("block_footprint_area", "mean"),
+        "block_std_footprint_area": ("block_footprint_area", "std"),
+        "block_max_footprint_area": ("block_footprint_area", "max"),
+        "block_avg_elongation": ("block_elongation", "mean"),
+        "block_std_elongation": ("block_elongation", "std"),
+        "block_max_elongation": ("block_elongation", "max"),
+        "block_avg_convexity": ("block_convexity", "mean"),
+        "block_std_convexity": ("block_convexity", "std"),
+        "block_max_convexity": ("block_convexity", "max"),
+        "block_avg_orientation": ("block_orientation", "mean"),
+        "block_std_orientation": ("block_orientation", "std"),
+        "block_max_orientation": ("block_orientation", "max"),
+        "block_avg_corners": ("block_corners", "mean"),
+        "block_std_corners": ("block_corners", "std"),
+        "block_max_corners": ("block_corners", "max"),
+        "block_avg_length": ("block_length", "mean"),
+        "block_std_length": ("block_length", "std"),
+        "block_max_length": ("block_length", "max"),
         "street_avg_distance": ("street_distance", "mean"),
         "street_std_distance": ("street_distance", "std"),
         "street_max_distance": ("street_distance", "max"),
@@ -233,6 +252,12 @@ def _calculate_building_buffer_features(buildings: gpd.GeoDataFrame) -> gpd.GeoD
         ("bldg", "convexity"),
         ("bldg", "orientation"),
         ("bldg", "distance_closest"),
+        ("block", "footprint_area"),
+        ("block", "elongation"),
+        ("block", "convexity"),
+        ("block", "orientation"),
+        ("block", "corners"),
+        ("block", "length"),
         ("street", "distance"),
         ("street", "size"),
     ]:
