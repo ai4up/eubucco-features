@@ -30,7 +30,7 @@ H3_BUFFER_SIZES = [1, 4]  # corresponds to a buffer of 0.1 and 0.9 km^2
 
 
 def execute_feature_pipeline(
-    city_path: str, log_file: str, built_up_path: str, lu_path: str, topo_path: str, pop_path: str
+    city_path: str, log_file: str, built_up_path: str, lu_path: str, oceans_path: str, topo_path: str, pop_path: str
 ) -> None:
     logger = setup_logger(log_file=log_file)
 
@@ -56,7 +56,7 @@ def execute_feature_pipeline(
         buildings = _calculate_GHS_built_up_features(buildings, built_up_path)
 
     with LoggingContext(logger, feature_name="landuse"):
-        buildings = _calculate_landuse_features(buildings, lu_path)
+        buildings = _calculate_landuse_features(buildings, lu_path, oceans_path)
 
     with LoggingContext(logger, feature_name="topography"):
         buildings = _calculate_topography_features(buildings, topo_path)
@@ -167,9 +167,10 @@ def _calculate_poi_features(buildings: gpd.GeoDataFrame, city_path: str) -> gpd.
     return buildings
 
 
-def _calculate_landuse_features(buildings: gpd.GeoDataFrame, lu_path: str) -> gpd.GeoDataFrame:
+def _calculate_landuse_features(buildings: gpd.GeoDataFrame, lu_path: str, oceans_path: str) -> gpd.GeoDataFrame:
     buildings["lu_distance_to_industry"] = landuse.distance_to_landuse(buildings, "industrial", lu_path)
     buildings["lu_distance_to_agriculture"] = landuse.distance_to_landuse(buildings, "agricultural", lu_path)
+    buildings["lu_distance_to_coast"] = landuse.distance_to_coast(buildings, oceans_path)
 
     return buildings
 
@@ -279,7 +280,10 @@ if __name__ == "__main__":
     log_file = "test_data/logs/features.log"
     GHS_built_up_path = "test_data/GHS_BUILT_C_MSZ_E2018_GLOBE_R2023A_54009_10_V1_0_R4_C19.tif"
     corine_lu_path = "test_data/U2018_CLC2018_V2020_20u1.gpkg"
+    oceans_path = "test_data/OSM-water-polygons.gpkg"
     topo_path = "test_data/gmted2010-mea075.tif"
     GHS_pop_path = "test_data/GHS_POP_E2020_GLOBE_R2023A_54009_100_V1_0.tif"
 
-    execute_feature_pipeline(city_path, log_file, GHS_built_up_path, corine_lu_path, topo_path, GHS_pop_path)
+    execute_feature_pipeline(
+        city_path, log_file, GHS_built_up_path, corine_lu_path, oceans_path, topo_path, GHS_pop_path
+    )

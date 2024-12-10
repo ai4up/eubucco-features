@@ -27,3 +27,20 @@ def distance_to_landuse(buildings: gpd.GeoDataFrame, category: str, landuse_path
     dis = buildings.centroid.distance(lu)
 
     return dis
+
+
+def distance_to_coast(buildings: gpd.GeoDataFrame, oceans_path: str) -> pd.Series:
+    """
+    Calculate the distance from each building to the nearest ocean or sea.
+
+    Args:
+        buildings: A GeoDataFrame containing building geometries.
+        oceans_path: The file path to the oceans and seas data.
+
+    Returns:
+        A Series containing the distances from each building to the nearest ocean or sea.
+    """
+    ocean = gpd.read_file(oceans_path).union_all()
+    dis = buildings.centroid.distance(ocean)
+
+    return dis
