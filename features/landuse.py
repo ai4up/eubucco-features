@@ -45,8 +45,10 @@ def distance_to_coast(buildings: gpd.GeoDataFrame, oceans_path: str) -> pd.Serie
     """
     box = bbox(buildings, crs=OCEANS_CRS, buffer=1e6)
     oceans = gpd.read_file(oceans_path, bbox=box)
-
     ocean_geom = oceans.to_crs(buildings.crs).union_all()
-    dis = buildings.centroid.distance(ocean_geom)
 
-    return dis
+    approx_dis = buildings.geometry.iloc[0].distance(ocean_geom)
+    if approx_dis > 50000:
+        return approx_dis
+
+    return buildings.centroid.distance(ocean_geom)
