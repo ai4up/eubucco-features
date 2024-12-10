@@ -336,14 +336,12 @@ def _calculate_GHS_built_up_buffer_features(buildings: gpd.GeoDataFrame, built_u
 
 
 def _calculate_interaction_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
-    buildings["interact_distance_to_closest_built_environment"] = buildings[
-        ["bldg_distance_closest", "street_distance"]
-    ].min(axis=1)
+    buildings["i_distance_to_built"] = buildings[["bldg_distance_closest", "street_distance"]].min(axis=1)
     suffix = buffer.ft_suffix(H3_RES, H3_BUFFER_SIZES[-1])
-    buildings["interact_distance_to_closest_built_environment_total_footprint_area"] = (
+    buildings["i_distance_to_built_times_total_footprint_area"] = (
         buildings["bldg_distance_closest"] * buildings[f"bldg_total_footprint_area_{suffix}"]
     )
-    buildings["interact_population_per_footprint_area"] = (
+    buildings["i_population_per_footprint_area"] = (
         buildings[f"population_{buffer.ft_suffix(H3_RES - 2)}"] / buildings[f"bldg_total_footprint_area_{suffix}"]
     )
 
