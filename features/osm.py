@@ -16,7 +16,7 @@ def closest_building_height(buildings: gpd.GeoDataFrame, osm_buildings: gpd.GeoD
     return buildings
 
 
-def closest_building_attributes(
+def closest_building_attr(
     buildings: gpd.GeoDataFrame, osm_buildings: gpd.GeoDataFrame, attributes: Union[List[str], Dict[str, str]]
 ) -> gpd.GeoDataFrame:
     buildings = util.sjoin_nearest_cols(buildings, osm_buildings, cols=attributes, max_distance=250)
@@ -24,7 +24,7 @@ def closest_building_attributes(
 
 
 # TODO: possibly correct distance metrics by overall building coverage in region
-def distance_to_some_building_type(
+def distance_to_building_type(
     buildings: gpd.GeoDataFrame, osm_buildings: gpd.GeoDataFrame, use_type: str
 ) -> pd.Series:
     osm_buildings = osm_buildings[osm_buildings["type"] == use_type]
@@ -32,7 +32,7 @@ def distance_to_some_building_type(
     return dis
 
 
-def distance_to_some_building_height(
+def distance_to_building_height(
     buildings: gpd.GeoDataFrame, osm_buildings: gpd.GeoDataFrame, height_range: Tuple[float, float]
 ) -> pd.Series:
     osm_buildings = osm_buildings[osm_buildings["height"].between(*height_range)]

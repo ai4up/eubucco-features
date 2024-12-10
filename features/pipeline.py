@@ -1,15 +1,6 @@
 import geopandas as gpd
+import momepy
 import numpy as np
-from momepy import (
-    convexity,
-    corners,
-    courtyard_area,
-    elongation,
-    equivalent_rectangular_index,
-    longest_axis_length,
-    orientation,
-    shared_walls,
-)
 
 from features import block, buffer, building, landuse, osm, poi, population, street, topography
 from log import LoggingContext, setup_logger
@@ -91,14 +82,14 @@ def _calculate_building_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFram
     buildings["bldg_normalized_perimeter_index"] = building.calculate_norm_perimeter(buildings)
     buildings["bldg_area_perimeter_ratio"] = buildings["bldg_footprint_area"] / buildings["bldg_perimeter"]
     buildings["bldg_phi"] = building.calculate_phi(buildings)
-    buildings["bldg_longest_axis_length"] = longest_axis_length(buildings)
-    buildings["bldg_elongation"] = elongation(buildings)
-    buildings["bldg_convexity"] = convexity(buildings)
-    buildings["bldg_rectangularity"] = equivalent_rectangular_index(buildings)
-    buildings["bldg_orientation"] = orientation(buildings)
-    buildings["bldg_corners"] = corners(buildings)
-    buildings["bldg_shared_wall_length"] = shared_walls(buildings)
-    buildings["bldg_rel_courtyard_size"] = courtyard_area(buildings) / buildings.area
+    buildings["bldg_longest_axis_length"] = momepy.longest_axis_length(buildings)
+    buildings["bldg_elongation"] = momepy.elongation(buildings)
+    buildings["bldg_convexity"] = momepy.convexity(buildings)
+    buildings["bldg_rectangularity"] = momepy.equivalent_rectangular_index(buildings)
+    buildings["bldg_orientation"] = momepy.orientation(buildings)
+    buildings["bldg_corners"] = momepy.corners(buildings)
+    buildings["bldg_shared_wall_length"] = momepy.shared_walls(buildings)
+    buildings["bldg_rel_courtyard_size"] = momepy.courtyard_area(buildings) / buildings.area
     buildings["bldg_touches"] = building.calculate_touches(buildings)
     buildings["bldg_distance_closest"] = building.calculate_distance_to_closest_building(buildings)
 
@@ -112,11 +103,11 @@ def _calculate_block_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     blocks["block_avg_footprint_area"] = blocks.block_buildings.apply(lambda b: b.area.mean())
     blocks["block_std_footprint_area"] = blocks.block_buildings.apply(lambda b: b.area.std())
     blocks["block_perimeter"] = blocks.length
-    blocks["block_longest_axis_length"] = longest_axis_length(blocks)
-    blocks["block_elongation"] = elongation(blocks)
-    blocks["block_convexity"] = convexity(blocks)
-    blocks["block_orientation"] = orientation(blocks)
-    blocks["block_corners"] = corners(blocks.convex_hull)
+    blocks["block_longest_axis_length"] = momepy.longest_axis_length(blocks)
+    blocks["block_elongation"] = momepy.elongation(blocks)
+    blocks["block_convexity"] = momepy.convexity(blocks)
+    blocks["block_orientation"] = momepy.orientation(blocks)
+    blocks["block_corners"] = momepy.corners(blocks.convex_hull)
 
     buildings = block.merge_blocks_and_buildings(blocks, buildings)
     return buildings
@@ -141,9 +132,9 @@ def _calculate_poi_features(buildings: gpd.GeoDataFrame, city_path: str) -> gpd.
 
 
 def _calculate_landuse_features(buildings: gpd.GeoDataFrame, lu_path: str, oceans_path: str) -> gpd.GeoDataFrame:
-    buildings["lu_distance_to_industry"] = landuse.distance_to_landuse(buildings, "industrial", lu_path)
-    buildings["lu_distance_to_agriculture"] = landuse.distance_to_landuse(buildings, "agricultural", lu_path)
-    buildings["lu_distance_to_coast"] = landuse.distance_to_coast(buildings, oceans_path)
+    buildings["lu_distance_industry"] = landuse.distance_to_landuse(buildings, "industrial", lu_path)
+    buildings["lu_distance_agriculture"] = landuse.distance_to_landuse(buildings, "agricultural", lu_path)
+    buildings["lu_distance_coast"] = landuse.distance_to_coast(buildings, oceans_path)
 
     return buildings
 
@@ -164,21 +155,15 @@ def _calculate_population_features(buildings: gpd.GeoDataFrame, pop_file: str) -
 def _calculate_osm_buildings_features(buildings: gpd.GeoDataFrame, city_path: str) -> gpd.GeoDataFrame:
     osm_buildings = load_osm_buildings(city_path)
 
-    buildings = osm.closest_building_attributes(
+    buildings = osm.closest_building_attr(
         buildings, osm_buildings, {"type": "osm_closest_building_type", "height": "osm_closest_building_height"}
     )
-    buildings["osm_distance_to_industry"] = osm.distance_to_some_building_type(buildings, osm_buildings, "industrial")
-    buildings["osm_distance_to_commercial"] = osm.distance_to_some_building_type(
-        buildings, osm_buildings, "commercial"
-    )
-    buildings["osm_distance_to_agriculture"] = osm.distance_to_some_building_type(
-        buildings, osm_buildings, "agricultural"
-    )
-    buildings["osm_distance_to_education"] = osm.distance_to_some_building_type(buildings, osm_buildings, "education")
-    buildings["osm_distance_to_medium_rise"] = osm.distance_to_some_building_height(buildings, osm_buildings, [15, 30])
-    buildings["osm_distance_to_high_rise"] = osm.distance_to_some_building_height(
-        buildings, osm_buildings, [30, np.inf]
-    )
+    buildings["osm_distance_industry"] = osm.distance_to_building_type(buildings, osm_buildings, "industrial")
+    buildings["osm_distance_commercial"] = osm.distance_to_building_type(buildings, osm_buildings, "commercial")
+    buildings["osm_distance_agriculture"] = osm.distance_to_building_type(buildings, osm_buildings, "agricultural")
+    buildings["osm_distance_education"] = osm.distance_to_building_type(buildings, osm_buildings, "education")
+    buildings["osm_distance_medium_rise"] = osm.distance_to_building_height(buildings, osm_buildings, [15, 30])
+    buildings["osm_distance_high_rise"] = osm.distance_to_building_height(buildings, osm_buildings, [30, np.inf])
 
     return buildings
 
