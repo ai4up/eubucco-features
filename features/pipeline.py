@@ -225,7 +225,7 @@ def _calculate_building_buffer_features(buildings: gpd.GeoDataFrame) -> gpd.GeoD
         "street_max_size": ("street_size", "max"),
     }
     hex_grid = buffer.calculate_h3_buffer_features(buildings, buffer_fts, H3_RES, H3_BUFFER_SIZES)
-    buildings = buildings.merge(hex_grid, left_on="h3_index", right_index=True, how="left")
+    buildings = _add_grid_fts_to_buildings(buildings, hex_grid)
 
     for cat, ft in [
         ("bldg", "footprint_area"),
@@ -255,7 +255,7 @@ def _calculate_poi_buffer_features(buildings: gpd.GeoDataFrame, city_path: str) 
 
     buffer_fts = {"poi_n": ("amenity", "count")}
     hex_grid = buffer.calculate_h3_buffer_features(pois, buffer_fts, H3_RES, H3_BUFFER_SIZES)
-    buildings = buildings.merge(hex_grid, left_on="h3_index", right_index=True, how="left")
+    buildings = _add_grid_fts_to_buildings(buildings, hex_grid)
 
     hex_grid_large_buffer = hex_grid[hex_grid.columns[-1]]
     buildings["distance_to_center"] = buffer.distance_to_h3_grid_max(buildings, hex_grid_large_buffer)
@@ -268,7 +268,7 @@ def _calculate_osm_buildings_buffer_features(buildings: gpd.GeoDataFrame, city_p
 
     hex_grid_type_shares = buffer.calculate_h3_buffer_shares(osm_buildings, "type", H3_RES, H3_BUFFER_SIZES)
     hex_grid_type_shares = hex_grid_type_shares.add_prefix("osm_type_share_")
-    buildings = buildings.merge(hex_grid_type_shares, left_on="h3_index", right_index=True, how="left")
+    buildings = _add_grid_fts_to_buildings(buildings, hex_grid_type_shares)
 
     buffer_fts = {
         "osm_avg_height": ("height", "mean"),
@@ -277,7 +277,7 @@ def _calculate_osm_buildings_buffer_features(buildings: gpd.GeoDataFrame, city_p
         "osm_type_variety": ("type", "nunique"),
     }
     hex_grid = buffer.calculate_h3_buffer_features(osm_buildings, buffer_fts, H3_RES, H3_BUFFER_SIZES)
-    buildings = buildings.merge(hex_grid, left_on="h3_index", right_index=True, how="left")
+    buildings = _add_grid_fts_to_buildings(buildings, hex_grid)
 
     return buildings
 
@@ -289,7 +289,7 @@ def _calculate_GHS_built_up_buffer_features(buildings: gpd.GeoDataFrame, built_u
 
     hex_grid_type_shares = buffer.calculate_h3_buffer_shares(built_up, "use_type", H3_RES, H3_BUFFER_SIZES)
     hex_grid_type_shares = hex_grid_type_shares.add_prefix("ghs_use_type_share_")
-    buildings = buildings.merge(hex_grid_type_shares, left_on="h3_index", right_index=True, how="left")
+    buildings = _add_grid_fts_to_buildings(buildings, hex_grid_type_shares)
 
     # Note: could be calculated separately since classes are mutually exclusive, so likely no performance gain here
     buffer_fts = {
@@ -297,7 +297,7 @@ def _calculate_GHS_built_up_buffer_features(buildings: gpd.GeoDataFrame, built_u
         "ghs_height": ("height", "mean"),
     }
     hex_grid = buffer.calculate_h3_buffer_features(built_up, buffer_fts, H3_RES, H3_BUFFER_SIZES)
-    buildings = buildings.merge(hex_grid, left_on="h3_index", right_index=True, how="left")
+    buildings = _add_grid_fts_to_buildings(buildings, hex_grid)
 
     return buildings
 
@@ -315,6 +315,10 @@ def _calculate_interaction_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataF
     )
 
     return buildings
+
+
+def _add_grid_fts_to_buildings(buildings, grid):
+    return buildings.merge(grid, left_on="h3_index", right_index=True, how="left")
 
 
 if __name__ == "__main__":
