@@ -2,7 +2,10 @@ from typing import Dict, List, Union
 
 import geopandas as gpd
 import pandas as pd
+from pyproj import Transformer
 from shapely.geometry import box
+from shapely.geometry.base import BaseGeometry
+from shapely.ops import transform
 
 
 def sjoin_nearest_cols(
@@ -77,3 +80,10 @@ def bbox(geom: Union[gpd.GeoSeries, gpd.GeoDataFrame], crs: str = None, buffer: 
         gs = gs.buffer(buffer)
 
     return gs
+
+
+def transform_crs(geom: BaseGeometry, source_crs: str, target_crs: str) -> BaseGeometry:
+    transformer = Transformer.from_crs(source_crs, target_crs, always_xy=True)
+    transformed_geom = transform(transformer.transform, geom)
+
+    return transformed_geom

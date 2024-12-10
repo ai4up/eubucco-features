@@ -10,7 +10,7 @@ from .data import (
     store_features,
 )
 from .raster import raster_to_gdf, read_area
-from .spatial import bbox, distance_nearest, sjoin_nearest_cols, snearest, snearest_attr
+from .spatial import bbox, distance_nearest, sjoin_nearest_cols, snearest, snearest_attr, transform_crs
 
 __all__ = [
     "load_csv",
@@ -24,6 +24,7 @@ __all__ = [
     "snearest",
     "snearest_attr",
     "bbox",
+    "transform_crs",
     "read_area",
     "raster_to_gdf",
     "load_population",
