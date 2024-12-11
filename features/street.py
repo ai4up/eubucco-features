@@ -52,14 +52,14 @@ def closest_street_features(buildings: gpd.GeoDataFrame, streets: gpd.GeoDataFra
     """
     if "street_orientation" not in streets.columns:
         streets["street_orientation"] = momepy.orientation(streets)
-    if "orientation" not in buildings.columns:
-        buildings["orientation"] = momepy.orientation(buildings)
+    if "bldg_orientation" not in buildings.columns:
+        buildings["bldg_orientation"] = momepy.orientation(buildings)
 
     streets["size"] = streets["highway"].apply(_preprocess_highway_type)
     buildings = util.sjoin_nearest_cols(
         buildings, streets, cols=["size", "street_orientation"], distance_col="distance", max_distance=100
     )
-    buildings["street_alignment"] = (buildings["orientation"] - buildings["street_orientation"]).abs()
+    buildings["street_alignment"] = (buildings["bldg_orientation"] - buildings["street_orientation"]).abs()
 
     return buildings[["size", "distance", "street_alignment"]]
 
