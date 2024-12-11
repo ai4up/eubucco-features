@@ -3,7 +3,7 @@ from typing import Dict, List, Union
 import geopandas as gpd
 import pandas as pd
 from pyproj import Transformer
-from shapely.geometry import box
+from shapely.geometry import Point, box
 from shapely.geometry.base import BaseGeometry
 from shapely.ops import transform
 
@@ -80,6 +80,15 @@ def bbox(geom: Union[gpd.GeoSeries, gpd.GeoDataFrame], crs: str = None, buffer: 
         gs = gs.buffer(buffer)
 
     return gs
+
+
+def center(geom: Union[gpd.GeoSeries, gpd.GeoDataFrame]) -> Point:
+    xmin, ymin, xmax, ymax = geom.total_bounds
+    center_x = (xmin + xmax) / 2
+    center_y = (ymin + ymax) / 2
+    center = Point(center_x, center_y)
+
+    return center
 
 
 def transform_crs(geom: BaseGeometry, source_crs: str, target_crs: str) -> BaseGeometry:

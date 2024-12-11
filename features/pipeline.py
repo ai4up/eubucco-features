@@ -6,14 +6,17 @@ from features import block, buffer, building, landuse, osm, poi, population, str
 from log import LoggingContext, setup_logger
 from util import (
     bbox,
+    center,
     distance_nearest,
     load_buildings,
     load_GHS_built_up,
     load_osm_buildings,
     load_pois,
     load_streets,
+    read_value,
     snearest_attr,
     store_features,
+    transform_crs,
 )
 
 H3_RES = 10
@@ -21,7 +24,15 @@ H3_BUFFER_SIZES = [1, 4]  # corresponds to a buffer of 0.1 and 0.9 km^2
 
 
 def execute_feature_pipeline(
-    city_path: str, log_file: str, built_up_path: str, lu_path: str, oceans_path: str, topo_path: str, pop_path: str
+    city_path: str,
+    log_file: str,
+    built_up_path: str,
+    lu_path: str,
+    oceans_path: str,
+    topo_path: str,
+    cdd_path: str,
+    hdd_path: str,
+    pop_path: str,
 ) -> None:
     logger = setup_logger(log_file=log_file)
 
@@ -51,6 +62,9 @@ def execute_feature_pipeline(
 
     with LoggingContext(logger, feature_name="topography"):
         buildings = _calculate_topography_features(buildings, topo_path)
+
+    with LoggingContext(logger, feature_name="climate"):
+        buildings = _calculate_climate_features(buildings, cdd_path, hdd_path)
 
     with LoggingContext(logger, feature_name="population"):
         buildings = _calculate_population_features(buildings, pop_path)
@@ -142,6 +156,16 @@ def _calculate_landuse_features(buildings: gpd.GeoDataFrame, lu_path: str, ocean
 def _calculate_topography_features(buildings: gpd.GeoDataFrame, topo_file: str) -> gpd.GeoDataFrame:
     buildings["elevation"] = topography.calculate_elevation(buildings, topo_file)
     buildings["ruggedness"] = topography.calculate_ruggedness(buildings, topo_file, H3_RES - 2)
+
+    return buildings
+
+
+def _calculate_climate_features(buildings: gpd.GeoDataFrame, cdd_file: str, hdd_file: str) -> gpd.GeoDataFrame:
+    c = center(buildings)
+    c = transform_crs(c, buildings.crs, "EPSG:4326")
+    lng, lat = c.x, c.y
+    buildings["cdd"] = read_value(cdd_file, lng, lat)
+    buildings["hdd"] = read_value(hdd_file, lng, lat)
 
     return buildings
 
@@ -344,8 +368,18 @@ if __name__ == "__main__":
     corine_lu_path = "test_data/U2018_CLC2018_V2020_20u1.gpkg"
     oceans_path = "test_data/OSM-water-polygons-split.gpkg"
     topo_path = "test_data/gmted2010-mea075.tif"
+    cdd_path = "test_data/CDD_historical_mean_v1.nc"
+    hdd_path = "test_data/HDD_historical_mean_v1.nc"
     GHS_pop_path = "test_data/GHS_POP_E2020_GLOBE_R2023A_54009_100_V1_0.tif"
 
     execute_feature_pipeline(
-        city_path, log_file, GHS_built_up_path, corine_lu_path, oceans_path, topo_path, GHS_pop_path
+        city_path,
+        log_file,
+        GHS_built_up_path,
+        corine_lu_path,
+        oceans_path,
+        topo_path,
+        cdd_path,
+        hdd_path,
+        GHS_pop_path,
     )

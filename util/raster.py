@@ -52,3 +52,20 @@ def read_area(filepath: str, geometries: gpd.GeoSeries):
         city_meta.update({"height": data.shape[1], "width": data.shape[2], "transform": out_transform})
 
     return data, city_meta
+
+
+def read_value(filepath: str, lon: float, lat: float, approx: bool = False):
+    with rasterio.open(filepath, crs="EPSG:4326") as src:
+        coord = src.index(lon, lat)
+        value = src.read(1)[coord]  # first band
+
+        if approx and np.isnan(value):
+            print(f"Value at lat {lat:.3f}, lon {lon:.3f} is NaN. Calculating average over 3x3 grid around location.")
+            x_min = coord[0] - 1
+            x_max = coord[0] + 2
+            y_min = coord[1] - 1
+            y_max = coord[1] + 2
+            values = src.read(1)[x_min:x_max, y_min:y_max]
+            value = np.nanmean(values)
+
+    return value
