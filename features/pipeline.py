@@ -185,7 +185,6 @@ def _calculate_osm_buildings_features(buildings: gpd.GeoDataFrame, city_path: st
     buildings["osm_distance_industry"] = osm.distance_to_building_type(buildings, osm_buildings, "industrial")
     buildings["osm_distance_commercial"] = osm.distance_to_building_type(buildings, osm_buildings, "commercial")
     buildings["osm_distance_agriculture"] = osm.distance_to_building_type(buildings, osm_buildings, "agricultural")
-    buildings["osm_distance_education"] = osm.distance_to_building_type(buildings, osm_buildings, "education")
     buildings["osm_distance_medium_rise"] = osm.distance_to_building_height(buildings, osm_buildings, [15, 30])
     buildings["osm_distance_high_rise"] = osm.distance_to_building_height(buildings, osm_buildings, [30, np.inf])
 
