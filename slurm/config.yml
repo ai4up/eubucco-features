@@ -1,0 +1,61 @@
+jobs:
+  - name: download-streets
+    script: /p/projects/eubucco/eubucco-features/slurm/download_streets.py
+    param_files:
+      - /p/projects/eubucco/eubucco-features/slurm/params-download-streets.yml
+    log_dir: /p/projects/eubucco/logs/v1_0-db/download-streets
+    resources:
+      cpus: 1
+      partition: io
+      mem: 8000
+    properties:
+      exp_backoff_factor: 2
+      max_retries: 1
+
+  - name: download-pois
+    script: /p/projects/eubucco/eubucco-features/slurm/download_pois.py
+    param_files:
+      - /p/projects/eubucco/eubucco-features/slurm/params-download-pois.yml
+    log_dir: /p/projects/eubucco/logs/v1_0-db/download-pois
+    resources:
+      cpus: 1
+      partition: io
+      mem: 8000
+    properties:
+      exp_backoff_factor: 2
+      max_retries: 1
+
+   - name: feature-engineering
+     script: /p/projects/eubucco/eubucco-features/slurm/ft-eng.py
+     param_generator_file: /p/projects/eubucco/eubucco-features/slurm/params-ft-eng.yml
+     log_dir: /p/projects/eubucco/logs/v1_0-db/feature-engineering
+     resources:
+       cpus: 4
+       time: "12:00:00"
+     special_cases:
+       - name: small-cities
+         files:
+           path: "{{city_path}}_geom.csv"
+           size_max: 20000000
+         resources:
+           cpus: 1
+           time: "03:00:00"
+       - name: large-cities
+         files:
+           path: "{{city_path}}_geom.csv"
+           size_min: 100000000
+         resources:
+           cpus: 8
+           mem: 60000
+           time: "24:00:00"
+
+properties:
+  conda_env: eubucco-features
+  account: eubucco
+  log_level: INFO
+  exp_backoff_factor: 4
+  max_retries: 3
+  poll_interval: 30
+  slack:
+    channel: "#test-slurm-bot"
+    token: <to-be-added>

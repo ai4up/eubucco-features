@@ -1,0 +1,13 @@
+log_file: [/p/projects/eubucco/logs/v1_0-db/feature-engineering/pipeline.log]
+built_up_path: [/p/projects/eubucco/eubucco-features/data/GHS_BUILT_C_MSZ_E2018_GLOBE_R2023A_54009_10_V1_0_R4_C19.tif]
+lu_path: [/p/projects/eubucco/eubucco-features/data/U2018_CLC2018_V2020_20u1.gpkg]
+oceans_path: [/p/projects/eubucco/eubucco-features/data/OSM-water-polygons-split.gpkg]
+topo_path: [/p/projects/eubucco/eubucco-features/data/gmted2010-mea075.tif]
+cdd_path: [/p/projects/eubucco/eubucco-features/data/CDD_historical_mean_v1.nc]
+hdd_path: [/p/projects/eubucco/eubucco-features/data/HDD_historical_mean_v1.nc]
+pop_path: [/p/projects/eubucco/eubucco-features/data/GHS_POP_E2020_GLOBE_R2023A_54009_100_V1_0.tif]
+city_path:
+  - /p/projects/eubucco/data/2-database-nuts-level-v1/portugal/PT11E.gpkg
+  - /p/projects/eubucco/data/2-database-nuts-level-v1/finland/FI1D1.gpkg
+  - /p/projects/eubucco/data/2-database-nuts-level-v1/ireland/IE052.gpkg
+  - /p/projects/eubucco/data/2-database-nuts-level-v1/croatia/HR04E.gpkg
