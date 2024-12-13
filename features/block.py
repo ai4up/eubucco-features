@@ -1,3 +1,5 @@
+import uuid
+
 import geopandas as gpd
 import networkx as nx
 
@@ -21,6 +23,7 @@ def generate_blocks(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
                 "geometry": block_geometry,
                 "building_ids": building_ids.values,
                 "block_buildings": block_buildings.values,
+                "block_id": uuid.uuid4().hex[:16],
             }
         )
 
@@ -37,5 +40,6 @@ def merge_blocks_and_buildings(blocks: gpd.GeoDataFrame, buildings: gpd.GeoDataF
     blocks = blocks.drop(columns=["geometry", "block_buildings"])
     blocks = blocks.explode("building_ids")
     buildings = buildings.merge(blocks, left_on="id", right_on="building_ids", how="left")
+    buildings = buildings.drop(columns="building_ids")
 
     return buildings
