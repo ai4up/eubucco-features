@@ -1,3 +1,4 @@
+import uuid
 from pathlib import Path
 
 import geopandas as gpd
@@ -20,6 +21,7 @@ def load_buildings(city_path: str) -> gpd.GeoDataFrame:
     city_name = city_path.split("/")[-1]
     buildings = load_csv(Path(f"{city_path}/{city_name}_geom.csv"))
     buffer_ = load_csv(Path(f"{city_path}/{city_name}_buffer.csv"))
+    buffer_["id"] = [uuid.uuid4() for _ in range(len(buffer_))]  # temporary fix for missing ids
     buildings = gpd.pd.concat([buildings, buffer_], ignore_index=True)
     return buildings
 
