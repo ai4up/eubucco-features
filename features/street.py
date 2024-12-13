@@ -3,6 +3,9 @@ from typing import Dict, List, Union
 import geopandas as gpd
 import momepy
 import numpy as np
+import osmnx as ox
+from networkx.exception import NetworkXPointlessConcept
+from shapely.geometry import Polygon
 
 import util
 
@@ -17,6 +20,28 @@ ROAD_SIZE: Dict[str, int] = {
     "living_street": 0,
     "pedestrian": 0,
 }
+
+
+def download(area: Polygon) -> gpd.GeoDataFrame:
+    """
+    Downloads streets from OpenStreetMap within a specified geographic area (assumes EPSG:4326).
+
+    Args:
+        area: A GeoDataFrame representing the geographic area of interest.
+    Returns:
+        A GeoDataFrame containing the POIs within the specified area.
+    """
+    try:
+        ox.config(timeout=1000)
+        street_network = ox.graph_from_polygon(area, simplify=True, network_type="drive")
+        streets = ox.utils_graph.graph_to_gdfs(
+            street_network, nodes=False, edges=True, node_geometry=False, fill_edge_geometry=True
+        )[["osmid", "highway", "length", "geometry"]]
+
+        return streets
+
+    except NetworkXPointlessConcept:
+        return None
 
 
 def distance_to_closest_street(buildings: gpd.GeoDataFrame, streets: gpd.GeoDataFrame) -> gpd.GeoSeries:

@@ -3,6 +3,8 @@ from collections import defaultdict
 import geopandas as gpd
 import osmnx as ox
 import pandas as pd
+from networkx.exception import NetworkXPointlessConcept
+from shapely.geometry import Polygon
 
 _education = [
     "university",
@@ -50,25 +52,25 @@ OSM_TAGS = {
 }
 
 
-def download(area: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+def download(area: Polygon) -> gpd.GeoDataFrame:
     """
-    Downloads points of interest (POIs) within a specified geographic area.
+    Downloads points of interest (POIs) from OpenStreetMap within a specified geographic area (assumes EPSG:4326).
 
     Args:
         area: A GeoDataFrame representing the geographic area of interest.
     Returns:
-        A GeoDataFrame containing the POIs within the specified area, with the same CRS as the input area.
+        A GeoDataFrame containing the POIs within the specified area.
     """
-    ox.config(timeout=1000)
-    tags = _merge_tags(*OSM_TAGS.values())
+    try:
+        ox.config(timeout=1000)
+        tags = _merge_tags(*OSM_TAGS.values())
+        pois = ox.geometries.geometries_from_polygon(area, tags)
+        pois = pois[["geometry"] + list(tags.keys())]
 
-    east, south, west, north = area.to_crs("EPSG:4326").total_bounds
-    pois = ox.geometries.geometries_from_bbox(north, south, east, west, tags)
+        return pois
 
-    pois = pois[["geometry"] + list(tags.keys())]
-    pois = pois.to_crs(area.crs)
-
-    return pois
+    except NetworkXPointlessConcept:
+        return None
 
 
 def distance_to_closest_poi(buildings: gpd.GeoDataFrame, pois: gpd.GeoDataFrame, category=None) -> gpd.GeoSeries:
