@@ -1,9 +1,12 @@
+import os
 import uuid
 from pathlib import Path
+from typing import Callable, Union
 
 import geopandas as gpd
 import pandas as pd
 from shapely import wkt
+from shapely.geometry import MultiPolygon, Polygon
 
 import util
 
@@ -94,3 +97,33 @@ def load_GHS_built_up(built_up_file: str, area: gpd.GeoSeries) -> gpd.GeoDataFra
 def store_features(buildings: gpd.GeoDataFrame, city_path: str):
     city_name = city_path.split("/")[-1]
     buildings.to_file(Path(f"{city_path}/{city_name}_features.gpkg"), driver="GPKG")
+
+
+def nuts_geometries(nuts_path: str, crs: str, buffer: int = 0) -> (str, Union[Polygon, MultiPolygon]):
+    nuts = gpd.read_file(nuts_path)
+    nuts = nuts.dissolve("NUTS_ID")
+
+    if buffer:
+        local_crs = nuts.estimate_utm_crs()
+        nuts = nuts.to_crs(local_crs).buffer(buffer)
+
+    nuts_geoms = nuts.to_crs(crs).geometry
+    for nuts_id, nuts_geom in nuts_geoms.items():
+        yield nuts_id, nuts_geom
+
+
+def download_all_nuts(download_func: Callable, nuts_path: str, out_path: str, buffer: int = 0) -> None:
+    for nuts_id, nuts_geom in nuts_geometries(nuts_path, crs="EPSG:4326", buffer=buffer):
+        file_path = os.path.join(out_path, f"{nuts_id}.gpkg")
+
+        if os.path.exists(file_path):
+            print(f"File {file_path} already exists. Skipping download.")
+            continue
+
+        gdf = download_func(nuts_geom)
+
+        if gdf is None:
+            print(f"Download failed for NUTS region {nuts_id}.")
+            continue
+
+        gdf.to_file(file_path, driver="GPKG")

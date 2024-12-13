@@ -1,4 +1,5 @@
 from .data import (
+    download_all_nuts,
     load_buildings,
     load_csv,
     load_elevation,
@@ -7,17 +8,20 @@ from .data import (
     load_pois,
     load_population,
     load_streets,
+    nuts_geometries,
     store_features,
 )
 from .raster import raster_to_gdf, read_area, read_value
 from .spatial import bbox, center, distance_nearest, sjoin_nearest_cols, snearest, snearest_attr, transform_crs
 
 __all__ = [
+    "download_all_nuts",
     "load_csv",
     "load_buildings",
     "load_osm_buildings",
     "load_streets",
     "load_pois",
+    "nuts_geometries",
     "store_features",
     "sjoin_nearest_cols",
     "distance_nearest",
