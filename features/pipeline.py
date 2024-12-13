@@ -358,27 +358,3 @@ def _calculate_interaction_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataF
 
 def _add_grid_fts_to_buildings(buildings, grid):
     return buildings.merge(grid, left_on="h3_index", right_index=True, how="left")
-
-
-if __name__ == "__main__":
-    city_path = "test_data/Toulouse"
-    log_file = "test_data/logs/features.log"
-    GHS_built_up_path = "test_data/GHS_BUILT_C_MSZ_E2018_GLOBE_R2023A_54009_10_V1_0_R4_C19.tif"
-    corine_lu_path = "test_data/U2018_CLC2018_V2020_20u1.gpkg"
-    oceans_path = "test_data/OSM-water-polygons-split.gpkg"
-    topo_path = "test_data/gmted2010-mea075.tif"
-    cdd_path = "test_data/CDD_historical_mean_v1.nc"
-    hdd_path = "test_data/HDD_historical_mean_v1.nc"
-    GHS_pop_path = "test_data/GHS_POP_E2020_GLOBE_R2023A_54009_100_V1_0.tif"
-
-    execute_feature_pipeline(
-        city_path,
-        log_file,
-        GHS_built_up_path,
-        corine_lu_path,
-        oceans_path,
-        topo_path,
-        cdd_path,
-        hdd_path,
-        GHS_pop_path,
-    )

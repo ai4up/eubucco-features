@@ -116,19 +116,22 @@ fabric.properties
 
 # End of https://www.toptal.com/developers/gitignore/api/pycharm
 
-test_data/logs/features.log
-test_data/logs/stats.csv
-test_data/logs/stats.lock
+tests/logs/features.log
+tests/logs/stats.csv
+tests/logs/stats.lock
 .idea/*
 
 # Ignore test data features but keep source files
-test_data/Vaugneray/*
-!test_data/Vaugneray/Vaugneray_attrib.csv
-!test_data/Vaugneray/Vaugneray_buffer.csv
-!test_data/Vaugneray/Vaugneray_geom.csv
+tests/data/Vaugneray/*
+!tests/data/Vaugneray/Vaugneray_attrib.csv
+!tests/data/Vaugneray/Vaugneray_buffer.csv
+!tests/data/Vaugneray/Vaugneray_geom.csv
 
 # OSM download cache
 cache/
 
 # VSCode
 .vscode/
+
+.data/
+logs/
