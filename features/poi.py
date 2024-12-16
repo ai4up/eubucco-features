@@ -65,7 +65,7 @@ def download(area: Polygon) -> gpd.GeoDataFrame:
         ox.config(timeout=1000)
         tags = _merge_tags(*OSM_TAGS.values())
         pois = ox.geometries.geometries_from_polygon(area, tags)
-        pois = pois[["geometry"] + list(tags.keys())]
+        pois = pois.filter(items=["geometry"] + list(tags.keys()))
 
         return pois
 
