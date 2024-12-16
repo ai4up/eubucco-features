@@ -8,19 +8,29 @@ from features.pipeline import execute_feature_pipeline  # noqa: E402
 
 
 def test_pipeline():
-    city_path = os.path.join(PROJECT_SRC_PATH, "tests", "data", "Vaugneray")
-    log_file = os.path.join(PROJECT_SRC_PATH, "tests", "logs", "features.log")
-    GHS_built_up_path = os.path.join(city_path, "GHS_BUILT_test_region.tif")
-    corine_lu_path = os.path.join(city_path, "CORINE_landuse_test_region.gpkg")
-    oceans_path = os.path.join(city_path, "OSM_oceans_test_region.gpkg")
-    topo_path = os.path.join(city_path, "GMTED_topography_test_region.tif")
-    cdd_path = os.path.join(city_path, "CDD_historical_mean_v1.nc")
-    hdd_path = os.path.join(city_path, "HDD_historical_mean_v1.nc")
-    GHS_pop_path = os.path.join(city_path, "GHS_POP_test_region.tif")
+    region_id = "Vaugneray"
+    test_dir = os.path.join(PROJECT_SRC_PATH, "tests")
+    test_data_dir = os.path.join(test_dir, "data")
+    bldgs_dir = os.path.join(test_data_dir, "bldgs")
+    streets_dir = os.path.join(test_data_dir, "streets")
+    pois_dir = os.path.join(test_data_dir, "pois")
+    osm_bldgs_dir = os.path.join(test_data_dir, "osm-bldgs")
+    GHS_built_up_path = os.path.join(test_data_dir, "GHS_BUILT_test_region.tif")
+    corine_lu_path = os.path.join(test_data_dir, "CORINE_landuse_test_region.gpkg")
+    oceans_path = os.path.join(test_data_dir, "OSM_oceans_test_region.gpkg")
+    topo_path = os.path.join(test_data_dir, "GMTED_topography_test_region.tif")
+    cdd_path = os.path.join(test_data_dir, "CDD_historical_mean_v1.nc")
+    hdd_path = os.path.join(test_data_dir, "HDD_historical_mean_v1.nc")
+    GHS_pop_path = os.path.join(test_data_dir, "GHS_POP_test_region.tif")
+    out_dir = test_dir
+    log_file = os.path.join(test_dir, "logs", "features.log")
 
     execute_feature_pipeline(
-        city_path,
-        log_file,
+        region_id,
+        bldgs_dir,
+        streets_dir,
+        pois_dir,
+        osm_bldgs_dir,
         GHS_built_up_path,
         corine_lu_path,
         oceans_path,
@@ -28,4 +38,6 @@ def test_pipeline():
         cdd_path,
         hdd_path,
         GHS_pop_path,
+        out_dir,
+        log_file,
     )

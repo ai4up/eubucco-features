@@ -1,10 +1,8 @@
 from .data import (
     download_all_nuts,
     load_buildings,
-    load_csv,
     load_elevation,
     load_GHS_built_up,
-    load_osm_buildings,
     load_pois,
     load_population,
     load_streets,
@@ -16,9 +14,7 @@ from .spatial import bbox, center, distance_nearest, sjoin_nearest_cols, sneares
 
 __all__ = [
     "download_all_nuts",
-    "load_csv",
     "load_buildings",
-    "load_osm_buildings",
     "load_streets",
     "load_pois",
     "nuts_geometries",

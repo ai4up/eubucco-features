@@ -10,7 +10,6 @@ from util import (
     distance_nearest,
     load_buildings,
     load_GHS_built_up,
-    load_osm_buildings,
     load_pois,
     load_streets,
     read_value,
@@ -24,8 +23,11 @@ H3_BUFFER_SIZES = [1, 4]  # corresponds to a buffer of 0.1 and 0.9 km^2
 
 
 def execute_feature_pipeline(
-    city_path: str,
-    log_file: str,
+    region_id: str,
+    bldgs_dir: str,
+    streets_dir: str,
+    pois_dir: str,
+    osm_bldgs_dir: str,
     built_up_path: str,
     lu_path: str,
     oceans_path: str,
@@ -33,10 +35,12 @@ def execute_feature_pipeline(
     cdd_path: str,
     hdd_path: str,
     pop_path: str,
+    out_dir: str,
+    log_file: str,
 ) -> None:
     logger = setup_logger(log_file=log_file)
 
-    buildings = load_buildings(city_path)
+    buildings = load_buildings(bldgs_dir, region_id)
     buildings["h3_index"] = buffer.h3_index(buildings, H3_RES)
 
     with LoggingContext(logger, feature_name="building"):
@@ -46,13 +50,13 @@ def execute_feature_pipeline(
         buildings = _calculate_block_features(buildings)
 
     with LoggingContext(logger, feature_name="street"):
-        buildings = _calculate_street_features(buildings, city_path)
+        buildings = _calculate_street_features(buildings, streets_dir, region_id)
 
     with LoggingContext(logger, feature_name="poi"):
-        buildings = _calculate_poi_features(buildings, city_path)
+        buildings = _calculate_poi_features(buildings, pois_dir, region_id)
 
     with LoggingContext(logger, feature_name="osm_buildings"):
-        buildings = _calculate_osm_buildings_features(buildings, city_path)
+        buildings = _calculate_osm_buildings_features(buildings, osm_bldgs_dir, region_id)
 
     with LoggingContext(logger, feature_name="GHS_built_up"):
         buildings = _calculate_GHS_built_up_features(buildings, built_up_path)
@@ -73,10 +77,10 @@ def execute_feature_pipeline(
         buildings = _calculate_building_buffer_features(buildings)
 
     with LoggingContext(logger, feature_name="buffer_poi"):
-        buildings = _calculate_poi_buffer_features(buildings, city_path)
+        buildings = _calculate_poi_buffer_features(buildings, pois_dir, region_id)
 
     with LoggingContext(logger, feature_name="buffer_osm_buildings"):
-        buildings = _calculate_osm_buildings_buffer_features(buildings, city_path)
+        buildings = _calculate_osm_buildings_buffer_features(buildings, osm_bldgs_dir, region_id)
 
     with LoggingContext(logger, feature_name="buffer_GHS_built_up"):
         buildings = _calculate_GHS_built_up_buffer_features(buildings, built_up_path)
@@ -87,7 +91,7 @@ def execute_feature_pipeline(
     with LoggingContext(logger, feature_name="interaction"):
         buildings = _calculate_interaction_features(buildings)
 
-    store_features(buildings, city_path)
+    store_features(buildings, out_dir, region_id)
 
 
 def _calculate_building_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
@@ -127,8 +131,8 @@ def _calculate_block_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     return buildings
 
 
-def _calculate_street_features(buildings: gpd.GeoDataFrame, city_path: str) -> gpd.GeoDataFrame:
-    streets = load_streets(city_path)
+def _calculate_street_features(buildings: gpd.GeoDataFrame, streets_dir: str, region_id: str) -> gpd.GeoDataFrame:
+    streets = load_streets(streets_dir, region_id)
 
     buildings[["street_size", "street_distance", "street_alignment"]] = street.closest_street_features(
         buildings, streets
@@ -137,8 +141,8 @@ def _calculate_street_features(buildings: gpd.GeoDataFrame, city_path: str) -> g
     return buildings
 
 
-def _calculate_poi_features(buildings: gpd.GeoDataFrame, city_path: str) -> gpd.GeoDataFrame:
-    pois = load_pois(city_path)
+def _calculate_poi_features(buildings: gpd.GeoDataFrame, pois_dir: str, region_id: str) -> gpd.GeoDataFrame:
+    pois = load_pois(pois_dir, region_id)
 
     buildings["poi_distance"] = poi.distance_to_closest_poi(buildings, pois)
 
@@ -176,8 +180,10 @@ def _calculate_population_features(buildings: gpd.GeoDataFrame, pop_file: str) -
     return buildings
 
 
-def _calculate_osm_buildings_features(buildings: gpd.GeoDataFrame, city_path: str) -> gpd.GeoDataFrame:
-    osm_buildings = load_osm_buildings(city_path)
+def _calculate_osm_buildings_features(
+    buildings: gpd.GeoDataFrame, osm_bldgs_dir: str, region_id: str
+) -> gpd.GeoDataFrame:
+    osm_buildings = osm.load_osm_buildings(osm_bldgs_dir, region_id)
 
     buildings = osm.closest_building_attr(
         buildings, osm_buildings, {"type": "osm_closest_building_type", "height": "osm_closest_building_height"}
@@ -291,8 +297,8 @@ def _calculate_population_buffer_features(buildings: gpd.GeoDataFrame, pop_file:
     return buildings
 
 
-def _calculate_poi_buffer_features(buildings: gpd.GeoDataFrame, city_path: str) -> gpd.GeoDataFrame:
-    pois = load_pois(city_path)
+def _calculate_poi_buffer_features(buildings: gpd.GeoDataFrame, pois_dir: str, region_id: str) -> gpd.GeoDataFrame:
+    pois = load_pois(pois_dir, region_id)
 
     buffer_fts = {"poi_n": ("amenity", "count")}
     hex_grid = buffer.calculate_h3_buffer_features(pois, buffer_fts, H3_RES, H3_BUFFER_SIZES)
@@ -304,8 +310,10 @@ def _calculate_poi_buffer_features(buildings: gpd.GeoDataFrame, city_path: str) 
     return buildings
 
 
-def _calculate_osm_buildings_buffer_features(buildings: gpd.GeoDataFrame, city_path: str) -> gpd.GeoDataFrame:
-    osm_buildings = load_osm_buildings(city_path)
+def _calculate_osm_buildings_buffer_features(
+    buildings: gpd.GeoDataFrame, osm_bldgs_dir: str, region_id: str
+) -> gpd.GeoDataFrame:
+    osm_buildings = osm.load_osm_buildings(osm_bldgs_dir, region_id)
 
     hex_grid_type_shares = buffer.calculate_h3_buffer_shares(osm_buildings, "type", H3_RES, H3_BUFFER_SIZES)
     hex_grid_type_shares = hex_grid_type_shares.add_prefix("osm_type_share_")

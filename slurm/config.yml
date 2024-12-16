@@ -35,14 +35,14 @@ jobs:
      special_cases:
        - name: small-cities
          files:
-           path: "{{city_path}}_geom.csv"
+           path: "{{bldgs_dir}}/{{region_id}}.gpkg"
            size_max: 20000000
          resources:
            cpus: 1
            time: "03:00:00"
        - name: large-cities
          files:
-           path: "{{city_path}}_geom.csv"
+           path: "{{bldgs_dir}}/{{region_id}}.gpkg"
            size_min: 100000000
          resources:
            cpus: 8

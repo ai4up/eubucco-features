@@ -1,7 +1,7 @@
 import os
 import uuid
 from pathlib import Path
-from typing import Callable, Union
+from typing import Callable, Iterator, Tuple, Union
 
 import geopandas as gpd
 import pandas as pd
@@ -14,37 +14,26 @@ CRS_UNI = "EPSG:3035"
 geometry_col = "geometry"
 
 
-def load_csv(path: Path) -> gpd.GeoDataFrame:
-    df = pd.read_csv(path)
-    gdf = gpd.GeoDataFrame(df, geometry=df[geometry_col].apply(wkt.loads), crs=CRS_UNI)
-    return gdf
+def load_buildings(buildings_dir: str, region_id: str) -> gpd.GeoDataFrame:
+    bldgs_file = os.path.join(buildings_dir, f"{region_id}.gpkg")
+    buffer_file = os.path.join(buildings_dir, f"{region_id}_buffer.gpkg")
+    buildings = gpd.read_file(bldgs_file)
+    buffer = gpd.read_file(buffer_file)
 
+    buffer["id"] = [uuid.uuid4() for _ in range(len(buffer))]  # temporary fix for missing ids
+    buffer["buffer"] = True
+    buildings["buffer"] = False
+    buildings = gpd.pd.concat([buildings, buffer], ignore_index=True)
 
-def load_buildings(city_path: str) -> gpd.GeoDataFrame:
-    city_name = city_path.split("/")[-1]
-    buildings = load_csv(Path(f"{city_path}/{city_name}_geom.csv"))
-    buffer_ = load_csv(Path(f"{city_path}/{city_name}_buffer.csv"))
-    buffer_["id"] = [uuid.uuid4() for _ in range(len(buffer_))]  # temporary fix for missing ids
-    buildings = gpd.pd.concat([buildings, buffer_], ignore_index=True)
     return buildings
 
 
-def load_streets(city_path: str) -> gpd.GeoDataFrame:
-    city_name = city_path.split("/")[-1]
-    streets = load_csv(Path(f"{city_path}/{city_name}_streets_raw.csv"))
-    return streets
+def load_streets(streets_dir: str, region_id: str) -> gpd.GeoDataFrame:
+    return _load_gpkg(streets_dir, region_id)
 
 
-def load_pois(city_path: str) -> gpd.GeoDataFrame:
-    city_name = city_path.split("/")[-1]
-    pois = gpd.read_file(Path(f"{city_path}/{city_name}_pois.gpkg"))
-    return pois
-
-
-def load_osm_buildings(city_path: str) -> gpd.GeoDataFrame:
-    city_name = city_path.split("/")[-1]
-    buildings = gpd.read_file(Path(f"{city_path}/{city_name}_osm_bldgs.gpkg"))
-    return buildings
+def load_pois(pois_dir: str, region_id: str) -> gpd.GeoDataFrame:
+    return _load_gpkg(pois_dir, region_id)
 
 
 def load_population(population_file: str, area: gpd.GeoSeries, point_geom: bool) -> gpd.GeoDataFrame:
@@ -94,12 +83,12 @@ def load_GHS_built_up(built_up_file: str, area: gpd.GeoSeries) -> gpd.GeoDataFra
     return built_up
 
 
-def store_features(buildings: gpd.GeoDataFrame, city_path: str):
-    city_name = city_path.split("/")[-1]
-    buildings.to_file(Path(f"{city_path}/{city_name}_features.gpkg"), driver="GPKG")
+def store_features(buildings: gpd.GeoDataFrame, out_dir: str, region_id: str):
+    out_file = os.path.join(out_dir, f"{region_id}.gpkg")
+    buildings.to_file(out_file, driver="GPKG")
 
 
-def nuts_geometries(nuts_path: str, crs: str, buffer: int = 0) -> (str, Union[Polygon, MultiPolygon]):
+def nuts_geometries(nuts_path: str, crs: str, buffer: int = 0) -> Iterator[Tuple[str, Union[Polygon, MultiPolygon]]]:
     nuts = gpd.read_file(nuts_path)
     nuts = nuts.dissolve("NUTS_ID")
 
@@ -127,3 +116,17 @@ def download_all_nuts(download_func: Callable, nuts_path: str, out_path: str, bu
             continue
 
         gdf.to_file(file_path, driver="GPKG")
+
+
+def _load_gpkg(data_dir: str, region_id: str) -> gpd.GeoDataFrame:
+    gdf_file = os.path.join(data_dir, f"{region_id}.gpkg")
+    gdf = gpd.read_file(gdf_file)
+
+    return gdf
+
+
+def _load_csv_geom(path: Path) -> gpd.GeoDataFrame:
+    df = pd.read_csv(path)
+    gdf = gpd.GeoDataFrame(df, geometry=df[geometry_col].apply(wkt.loads), crs=CRS_UNI)
+
+    return gdf
