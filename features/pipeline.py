@@ -20,6 +20,7 @@ from util import (
 
 H3_RES = 10
 H3_BUFFER_SIZES = [1, 4]  # corresponds to a buffer of 0.1 and 0.9 km^2
+CRS = 3035
 
 
 def execute_feature_pipeline(
@@ -41,6 +42,7 @@ def execute_feature_pipeline(
     logger = setup_logger(log_file=log_file)
 
     buildings = load_buildings(bldgs_dir, region_id)
+    buildings = buildings.to_crs(CRS)
     buildings["h3_index"] = buffer.h3_index(buildings, H3_RES)
 
     with LoggingContext(logger, feature_name="building"):
@@ -133,6 +135,7 @@ def _calculate_block_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 
 def _calculate_street_features(buildings: gpd.GeoDataFrame, streets_dir: str, region_id: str) -> gpd.GeoDataFrame:
     streets = load_streets(streets_dir, region_id)
+    streets = streets.to_crs(buildings.crs)
 
     buildings[["street_size", "street_distance", "street_alignment"]] = street.closest_street_features(
         buildings, streets
@@ -143,6 +146,7 @@ def _calculate_street_features(buildings: gpd.GeoDataFrame, streets_dir: str, re
 
 def _calculate_poi_features(buildings: gpd.GeoDataFrame, pois_dir: str, region_id: str) -> gpd.GeoDataFrame:
     pois = load_pois(pois_dir, region_id)
+    pois = pois.to_crs(buildings.crs)
 
     buildings["poi_distance"] = poi.distance_to_closest_poi(buildings, pois)
 
@@ -184,6 +188,7 @@ def _calculate_osm_buildings_features(
     buildings: gpd.GeoDataFrame, osm_bldgs_dir: str, region_id: str
 ) -> gpd.GeoDataFrame:
     osm_buildings = osm.load_osm_buildings(osm_bldgs_dir, region_id)
+    osm_buildings = osm_buildings.to_crs(buildings.crs)
 
     buildings = osm.closest_building_attr(
         buildings, osm_buildings, {"type": "osm_closest_building_type", "height": "osm_closest_building_height"}
@@ -299,6 +304,7 @@ def _calculate_population_buffer_features(buildings: gpd.GeoDataFrame, pop_file:
 
 def _calculate_poi_buffer_features(buildings: gpd.GeoDataFrame, pois_dir: str, region_id: str) -> gpd.GeoDataFrame:
     pois = load_pois(pois_dir, region_id)
+    pois = pois.to_crs(buildings.crs)
 
     buffer_fts = {"poi_n": ("amenity", "count")}
     hex_grid = buffer.calculate_h3_buffer_features(pois, buffer_fts, H3_RES, H3_BUFFER_SIZES)
@@ -314,6 +320,7 @@ def _calculate_osm_buildings_buffer_features(
     buildings: gpd.GeoDataFrame, osm_bldgs_dir: str, region_id: str
 ) -> gpd.GeoDataFrame:
     osm_buildings = osm.load_osm_buildings(osm_bldgs_dir, region_id)
+    osm_buildings = osm_buildings.to_crs(buildings.crs)
 
     hex_grid_type_shares = buffer.calculate_h3_buffer_shares(osm_buildings, "type", H3_RES, H3_BUFFER_SIZES)
     hex_grid_type_shares = hex_grid_type_shares.add_prefix("osm_type_share_")
