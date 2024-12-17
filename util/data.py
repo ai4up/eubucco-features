@@ -84,6 +84,7 @@ def load_GHS_built_up(built_up_file: str, area: gpd.GeoSeries) -> gpd.GeoDataFra
 
 
 def store_features(buildings: gpd.GeoDataFrame, out_dir: str, region_id: str):
+    buildings = buildings[~buildings["buffer"]]
     out_file = os.path.join(out_dir, f"{region_id}.gpkg")
     buildings.to_file(out_file, driver="GPKG")
 
