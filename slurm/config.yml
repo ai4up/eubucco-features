@@ -32,22 +32,6 @@ jobs:
      resources:
        cpus: 4
        time: "12:00:00"
-     special_cases:
-       - name: small-cities
-         files:
-           path: "{{bldgs_dir}}/{{region_id}}.gpkg"
-           size_max: 20000000
-         resources:
-           cpus: 1
-           time: "03:00:00"
-       - name: large-cities
-         files:
-           path: "{{bldgs_dir}}/{{region_id}}.gpkg"
-           size_min: 100000000
-         resources:
-           cpus: 8
-           mem: 60000
-           time: "24:00:00"
 
 properties:
   conda_env: eubucco-features
