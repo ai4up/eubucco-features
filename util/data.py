@@ -15,8 +15,8 @@ geometry_col = "geometry"
 
 
 def load_buildings(buildings_dir: str, region_id: str) -> gpd.GeoDataFrame:
-    bldgs_file = os.path.join(buildings_dir, f"{region_id}.gpkg")
-    buffer_file = os.path.join(buildings_dir, f"{region_id}_buffer.gpkg")
+    bldgs_file = _find_file(buildings_dir, f"{region_id}.gpkg")
+    buffer_file = _find_file(buildings_dir, f"{region_id}_buffer.gpkg")
     buildings = gpd.read_file(bldgs_file)
     buffer = gpd.read_file(buffer_file)
 
@@ -117,6 +117,10 @@ def download_all_nuts(download_func: Callable, nuts_path: str, out_path: str, bu
             continue
 
         gdf.to_file(file_path, driver="GPKG")
+
+
+def _find_file(data_dir: str, pattern: str) -> Path:
+    return next(Path(data_dir).rglob(pattern))
 
 
 def _load_gpkg(data_dir: str, region_id: str) -> gpd.GeoDataFrame:
