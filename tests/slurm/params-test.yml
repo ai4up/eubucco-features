@@ -1,0 +1,15 @@
+bldgs_dir: [/p/projects/eubucco/eubucco-features/tests/data/bldgs]
+streets_dir: [/p/projects/eubucco/eubucco-features/tests/data/streets]
+pois_dir: [/p/projects/eubucco/eubucco-features/tests/data/pois]
+osm_blgds_dir: [/p/projects/eubucco/eubucco-features/tests/data/osm-bldgs]
+built_up_path: [/p/projects/eubucco/eubucco-features/data/GHS_BUILT_test_region.tif]
+lu_path: [/p/projects/eubucco/eubucco-features/data/CORINE_landuse_test_region.gpkg]
+oceans_path: [/p/projects/eubucco/eubucco-features/data/OSM_oceans_test_region.gpkg]
+topo_path: [/p/projects/eubucco/eubucco-features/data/GMTED_topography_test_region.tif]
+cdd_path: [/p/projects/eubucco/eubucco-features/data/CDD_historical_mean_v1.nc]
+hdd_path: [/p/projects/eubucco/eubucco-features/data/HDD_historical_mean_v1.nc]
+pop_path: [/p/projects/eubucco/eubucco-features/data/GHS_POP_test_region.tif]
+out_dir: [/p/projects/eubucco/eubucco-features/tests/]
+log_file: [/p/projects/eubucco/eubucco-features/tests/logs/pipeline.log]
+region_id:
+  - Vaugneray
