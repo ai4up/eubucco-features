@@ -120,7 +120,10 @@ def download_all_nuts(download_func: Callable, nuts_path: str, out_path: str, bu
 
 
 def _find_file(data_dir: str, pattern: str) -> Path:
-    return next(Path(data_dir).rglob(pattern))
+    try:
+        return next(Path(data_dir).rglob(pattern))
+    except StopIteration:
+        raise Exception(f"File {pattern} could not be found in {data_dir}.")
 
 
 def _load_gpkg(data_dir: str, region_id: str) -> gpd.GeoDataFrame:
