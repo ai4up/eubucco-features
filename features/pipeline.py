@@ -1,3 +1,5 @@
+import os
+
 import geopandas as gpd
 import momepy
 import numpy as np
@@ -40,6 +42,11 @@ def execute_feature_pipeline(
     log_file: str,
 ) -> None:
     logger = setup_logger(log_file=log_file)
+
+    out_file = os.path.join(out_dir, f"{region_id}.gpkg")
+    if os.path.exists(out_file):
+        logger.info(f"Skipping feature engineering for region {region_id} because already done.")
+        return
 
     buildings = load_buildings(bldgs_dir, region_id)
     buildings = buildings.to_crs(CRS)
