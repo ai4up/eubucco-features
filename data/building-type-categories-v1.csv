@@ -56,7 +56,7 @@ liguria,Luogo di culto,Place of worship,non-residential,public,
 liguria,Amministrativo-sede provincia,Administrative office - province headquarters,non-residential,public,
 liguria,Ricreativo-altre attività-campeggio,Recreational-other activities - camping,non-residential,others,
 liguria,Servizi di trasporto stradale-stazione di rifornimento carburante stradale,Road transport services - road refueling station,non-residential,commercial,
-liguria,Residenziale,Residential,residential,residential,residential
+liguria,Residenziale,Residential,residential,residential,
 liguria,Ricreativo-sede di attività sportive,Recreational-business location sports,non-residential,public,
 liguria,Servizio pubblico-sede di vigili del fuoco,Public service - headquarters of the fire brigade,non-residential,public,
 liguria,Industriale-impianto di produzione energia-centrale idroelettrica,Industrial-power plant-hydroelectric power plant,non-residential,industrial,
@@ -69,7 +69,7 @@ liguria,Servizi di trasporto aereo,Air transport services,non-residential,public
 liguria,Servizi di trasporto stradale,Road transport services,non-residential,public,
 liguria,Servizi di trasporto stradale - Stazione autolinee,Road transport services - Bus station,non-residential,public,
 liguria,Industriale-depuratore,Industrial-purifier,non-residential,industrial,
-liguria,Residenziale-Abitativa,Residential-Housing,residential,residential,residential
+liguria,Residenziale-Abitativa,Residential-Housing,residential,residential,
 liguria,Servizi di trasporto ferroviario-scalo merci,Railway transport services - freight yard,non-residential,industrial,
 lombardia,servizi di trasporto - stradale - edificio accessorio alle strade,transport services - road - building accessory to the roads,non-residential,others,
 lombardia,industriale,industrial,non-residential,industrial,
@@ -90,7 +90,7 @@ lombardia,servizio pubblico - casello forestale,public service - forest toll boo
 lombardia,luogo di culto - convento,place of worship - convent,non-residential,public,
 lombardia,servizio pubblico - istruzione - sede di scuola,public service - education - school site,non-residential,public,
 lombardia,servizio pubblico - sede di tribunale,public service - court seat,non-residential,public,
-lombardia,strutture ricettive,accommodation facilities,non-residential,commercial,residential
+lombardia,strutture ricettive,accommodation facilities,non-residential,commercial,
 lombardia,servizio pubblico - sede di forze dell'ordine, public service - headquarters of law enforcement ,non-residential,public,
 lombardia,servizi di trasporto - ferroviario - fermata ferroviaria,transport services - rail - railway stop,non-residential,public,
 lombardia,"servizi di trasporto - ferroviario - deposito ferroviario per vagoni, rimessa locomotive",transport services - railway - railway depot for wagons,non-residential,industrial,
@@ -139,7 +139,7 @@ lombardia,agricolturale - fattoria,agricultural - farm,non-residential,agricultu
 lombardia,ricreativo,recreational,non-residential,public,
 lombardia,servizi di trasporto - altro impianto di trasporto - stazione skilift,transport services - other transport facility - ski lift station,non-residential,public,
 lombardia,ricreativo - sede di attivita' culturali - museo, recreational - seat of cultural activities - museum ,non-residential,public,
-lombardia,residenziale - abitativa,residential - housing,residential,residential,residential
+lombardia,residenziale - abitativa,residential - housing,residential,residential,
 lombardia,industriale - impianto di produzione energia - centrale nucleare,industrial - energy production plant - nuclear power plant,non-residential,industrial,
 lombardia,industriale - impianto di produzione energia - centrale termoelettrica,industrial - energy production plant - thermoelectric plant,non-residential,industrial,
 lombardia,ricreativo - sede di attivita' culturali - cinema, recreational - venue for cultural activities - cinema ,non-residential,commercial,
@@ -152,7 +152,7 @@ lombardia,ricreativo - sede di attivita' culturali - pinacoteca, recreational - 
 lombardia,industriale - depuratore,industrial - purifier,non-residential,industrial,
 lombardia,industriale - edificio di teleriscaldamento,industrial - district heating building,non-residential,industrial,
 lombardia,servizi di trasporto - aereo - stazione passeggeri aeroportuale,transport services - air - airport passenger station,non-residential,public,
-lombardia,residenziale,residential,residential,residential,residential
+lombardia,residenziale,residential,residential,residential,
 lombardia,ricreativo - sede di attivita' sportive - piscina coperta,recreational - sports venue - indoor swimming pool ,non-residential,commercial,
 lombardia,ricreativo - sede di attivita' culturali,recreational - seat of cultural activities ,non-residential,public,
 lombardia,servizi di trasporto - stradale - stazione autolinee,transport services - road - bus station,non-residential,public,
@@ -175,7 +175,7 @@ italy,11,"prison, prison",non-residential,public,
 italy,204,embassy or consulate,non-residential,public,
 italy,201,municipality,non-residential,public,
 italy,60101,airport passenger station,non-residential,public,
-italy,12,accommodation facilities,residential,commercial,residential
+italy,12,accommodation facilities,residential,commercial,
 italy,95,other,unknown,others,
 italy,203,regional headquarters,non-residential,commercial,
 italy,603,railway,non-residential,public,
@@ -199,7 +199,7 @@ italy,1201,hotel structure,non-residential,commercial,
 italy,802,energy production plant,non-residential,industrial,
 italy,7,commercial,non-residential,commercial,
 italy,60102,heliport,non-residential,others,
-italy,1,residential,residential,residential,residential
+italy,1,residential,residential,residential,
 italy,301,health care,non-residential,public,
 italy,30302,university,non-residential,public,
 italy,303,instruction,non-residential,public,
@@ -213,7 +213,7 @@ italy,601,airplane,non-residential,industrial,
 italy,803,technological plant,non-residential,industrial,
 italy,100103,"theater, audience",non-residential,public,
 italy,30101,seat of social assistance service,non-residential,public,
-italy,101,housing,residential,residential,residential
+italy,101,housing,residential,residential,
 italy,701,bank headquarters,non-residential,commercial,
 italy,205,seat of metropolitan city,non-residential,public,
 italy,60202,multi-storey or covered parking,non-residential,commercial,
@@ -240,7 +240,7 @@ italy,702,headquarters of a shopping center,non-residential,commercial,
 italy,904,farm,non-residential,agricultural,
 italy,100104,museo,non-residential,public,
 italy,102,unknown,unknown,,
-slovenia,1,Living space,residential,residential,residential
+slovenia,1,Living space,residential,residential,
 slovenia,2,"Shop, shop",non-residential,commercial,
 slovenia,3,Office,non-residential,commercial,
 slovenia,4,Space for mass use,non-residential,public,
@@ -248,7 +248,7 @@ slovenia,5,Production space,non-residential,industrial,
 slovenia,6,Garage,non-residential,others,
 slovenia,7,Parking space,non-residential,others,
 slovenia,8,"Pantry, dryer, laundry",non-residential,,
-slovenia,9,Basement,non-residential,residential,residential
+slovenia,9,Basement,non-residential,residential,
 slovenia,10,"Open terrace, balcony, loggia",non-residential,others,
 slovenia,11,"Enclosed terrace, balcony, loggia",non-residential,others,
 slovenia,12,Agricultural space,non-residential,agricultural,
@@ -265,7 +265,7 @@ slovakia,office,office,non-residential,commercial,
 slovakia,unknown,unknown,,,
 slovakia,agriculture,agriculture,non-residential,agricultural,
 slovakia,commerce and services,commerce and services,non-residential,commercial,
-slovakia,residental,residental,residential,residential,residential
+slovakia,residental,residental,residential,residential,
 slovakia,residence for communities,residence for communities,residential,residential,apartment block
 slovakia,individual residence,individual residence,residential,residential,detached single-family house
 slovakia,trade,trade,non-residential,commercial,
@@ -275,15 +275,15 @@ vantaa,teollisuusrakennus,industrial building,non-residential,industrial,
 vantaa,toimistorakennus,office building,non-residential,commercial,
 vantaa,liikerakennus,commercial building,non-residential,commercial,
 vantaa,varastorakennus,warehouse building,non-residential,industrial,
-vantaa,asuinrakennus,dwelling house,residential,residential,residential
+vantaa,asuinrakennus,dwelling house,residential,residential,
 vantaa,julkinen rakennus,public building,non-residential,public,
 mecklenburg,,,unknown,,
 mecklenburg,http://inspire.ec.europa.eu/codelist/CurrentUseValue/trade,trade,non-residential,commercial,
 mecklenburg,https://registry.gdi-de.org/id/de.____/verkehr,transport,non-residential,public,
 mecklenburg,http://inspire.ec.europa.eu/codelist/CurrentUseValue/commerceAndServices,commerceAndServices,non-residential,commercial,
 mecklenburg,https://registry.gdi-de.org/id/de.____/versorgungEntsorgung,disposalsupply,non-residential,industrial,
-mecklenburg,http://inspire.ec.europa.eu/codelist/CurrentUseValue/residential,residential,residential,residential,residential
-mecklenburg,http://inspire.ec.europa.eu/codelist/CurrentUseValue/residenceForCommunities,residenceForCommunities,residential,residential,residential
+mecklenburg,http://inspire.ec.europa.eu/codelist/CurrentUseValue/residential,residential,residential,residential,
+mecklenburg,http://inspire.ec.europa.eu/codelist/CurrentUseValue/residenceForCommunities,residenceForCommunities,residential,residential,
 mecklenburg,http://inspire.ec.europa.eu/codelist/CurrentUseValue/publicServices,publicServices,non-residential,public,
 mecklenburg,http://inspire.ec.europa.eu/codelist/CurrentUseValue/agriculture,agriculture,non-residential,agricultural,
 mecklenburg,https://registry.gdi-de.org/id/de.____/industrie,industry,non-residential,industrial,
@@ -319,7 +319,7 @@ berlin,1122,professional school,non-residential,public,
 berlin,2591,pump station (not for water supply),non-residential,industrial,
 berlin,2821,indoor pool,non-residential,commercial,
 berlin,1462,youth hostel,non-residential,commercial,
-berlin,1162,recreation home,non-residential,residential,residential
+berlin,1162,recreation home,non-residential,residential,
 berlin,2699,Building for disposal,non-residential,industrial,
 berlin,1169,welfare facility,non-residential,public,
 berlin,2513,pumping station,non-residential,industrial,
@@ -359,7 +359,7 @@ berlin,1361,skyscraper,non-residential,commercial,
 berlin,1751,transport building,non-residential,public,
 berlin,2799,Buildings for agriculture and forestry,non-residential,agricultural,
 berlin,2621,waste disposal,non-residential,industrial,
-berlin,1469,accommodation,non-residential,residential,residential
+berlin,1469,accommodation,non-residential,residential,
 berlin,1474,canteen,non-residential,commercial,
 berlin,1341,group house,residential,residential,apartment block
 berlin,1231,Block of flats in closed construction,residential,residential,apartment block
@@ -374,10 +374,10 @@ berlin,2344,boathouse,non-residential,others,
 berlin,1373,"Workers' dormitory, nurses' dormitory",residential,residential,apartment block
 berlin,1742,Storage,non-residential,industrial,
 berlin,1114,customs office,non-residential,public,
-berlin,1372,retirement home,residential,residential,residential
+berlin,1372,retirement home,residential,residential,
 berlin,1194,subway station,non-residential,public,
 berlin,2329,rail transport,non-residential,public,
-berlin,1461,accommodation,non-residential,residential,residential
+berlin,1461,accommodation,non-residential,residential,
 berlin,1181,mourning hall,non-residential,public,
 berlin,2619,sewage disposal,non-residential,industrial,
 berlin,1499,other buildings for trade and services,non-residential,commercial,
@@ -389,8 +389,8 @@ berlin,1799,Commercial and industrial buildings,non-residential,commercial,
 berlin,1701,Commercial and industrial buildings (general),non-residential,commercial,
 berlin,1115,court,non-residential,public,
 berlin,2521,power station,non-residential,industrial,
-berlin,1301,Residential house (general),non-residential,residential,residential
-berlin,1371,children's home,non-residential,residential,residential
+berlin,1301,Residential house (general),non-residential,residential,
+berlin,1371,children's home,non-residential,residential,
 berlin,1141,church cross,non-residential,public,
 berlin,1731,Gas station,non-residential,commercial,
 berlin,1173,barracks,residential,residential,apartment block
@@ -419,7 +419,7 @@ berlin,2861,holiday home,non-residential,residential,detached single-family hous
 berlin,2529,electricity supply,non-residential,industrial,
 berlin,2721,barn,non-residential,agricultural,
 berlin,2611,sewage treatment plant,non-residential,industrial,
-berlin,2711,agricultural residential building,residential,residential,residential
+berlin,2711,agricultural residential building,residential,residential,
 berlin,2724,shed,non-residential,others,
 berlin,1381,makeshift dwelling,residential,others,
 berlin,1479,restoration,non-residential,others,
@@ -428,7 +428,7 @@ berlin,2899,buildings for recreation,non-residential,public,
 berlin,1163,Senior Recreation Center,non-residential,public,
 berlin,1123,"college, university",non-residential,public,
 berlin,1721,workshop,non-residential,industrial,
-berlin,1399,residential building,residential,residential,residential
+berlin,1399,residential building,residential,residential,
 berlin,2323,Block PostsBuilding,non-residential,,
 berlin,2141,public building with apartments,residential,residential,apartment block
 berlin,1442,shopping mall,non-residential,commercial,
@@ -451,9 +451,9 @@ berlin,2365,double garage,non-residential,others,
 berlin,2727,Animal husbandry building,non-residential,agricultural,
 berlin,2831,Stadion,non-residential,public,
 berlin,2363,underground car park,non-residential,commercial,
-berlin,1164,boarding house,non-residential,residential,residential
+berlin,1164,boarding house,non-residential,residential,
 berlin,2364,collective garage,non-residential,commercial,
-berlin,2869,leisure house,non-residential,residential,residential
+berlin,2869,leisure house,non-residential,residential,
 berlin,2541,transmission tower,non-residential,industrial,
 berlin,2313,vehicle hall,non-residential,industrial,
 berlin,2549,radio and telecommunications,non-residential,commercial,
@@ -488,7 +488,7 @@ berlin,2322,engine shed,non-residential,industrial,
 berlin,2366,single garage,non-residential,others,
 berlin,1484,casino,non-residential,commercial,
 berlin,2399,Building to traffic facility,non-residential,public,
-berlin,2111,Residential building with public,residential,residential,residential
+berlin,2111,Residential building with public,residential,residential,
 berlin,2622,waste incinerator,non-residential,industrial,
 berlin,1165,kindergarten,non-residential,public,
 berlin,1482,movie theater,non-residential,commercial,
@@ -496,18 +496,18 @@ berlin,2311,road maintenance,non-residential,public,
 berlin,2729,operation,non-residential,others,
 berlin,1161,youth recreation home,non-residential,public,
 berlin,1444,store building,non-residential,commercial,
-berlin,2101,mixed use building with housing,residential,residential,residential
+berlin,2101,mixed use building with housing,residential,residential,
 france,Agricole,Agricole,non-residential,agricultural,
 france,Annexe,Annexe,non-residential,others,
 france,Commercial et services,Commercial and services Indifference,non-residential,commercial,
 france,Industriel,Industrial,non-residential,industrial,
 france,Religious,Religious,non-residential,public,
-france,Résidentiel,Residence,residential,residential,residential
+france,Résidentiel,Residence,residential,residential,
 france,Religieux,Regligious,non-residential,public,
 france,Sportif,Sport facilities,non-residential,public,
 france,Indifférencié,unknown,,,
 czechia,Trade,Trade,non-residential,commercial,
-czechia,Residential,Residential,residential,residential,residential
+czechia,Residential,Residential,residential,residential,
 czechia,Office,Office,non-residential,commercial,
 czechia,Industrial,Industrial,non-residential,industrial,
 czechia,IndividualResidence,IndividualResidence,residential,residential,detached single-family house
@@ -516,14 +516,14 @@ czechia,Agriculture,Agriculture,non-residential,agricultural,
 czechia,CommerceAndServices,CommerceAndServices,non-residential,commercial,
 czechia,PublicServices,PublicServices,non-residential,public,
 czechia,CollectiveResidence,CollectiveResidence,residential,residential,apartment block
-germany,31001_1000,residential building,residential,residential,residential
-germany,31001_1010,residential house,residential,residential,residential
+germany,31001_1000,residential building,residential,residential,
+germany,31001_1010,residential house,residential,residential,
 germany,31001_1020,dorm,non-residential,residential,apartment block
-germany,31001_1021,children's home,non-residential,public,residential
-germany,31001_1022,retirement home,residential,residential,residential
-germany,31001_1023,sisters dorm,residential,residential,residential
+germany,31001_1021,children's home,non-residential,public,
+germany,31001_1022,retirement home,residential,residential,
+germany,31001_1023,sisters dorm,residential,residential,
 germany,31001_1024,student dormitories,residential,residential,apartment block
-germany,31001_1025,school hostel,non-residential,residential,residential
+germany,31001_1025,school hostel,non-residential,residential,
 germany,31001_1100,Mixed use building with housing,residential,commercial,
 germany,31001_1110,Residential building with common needs,residential,commercial,
 germany,31001_1120,Residential building with trade and services,residential,commercial,
@@ -532,10 +532,10 @@ germany,31001_1122,residential and office buildings,residential,commercial,
 germany,31001_1123,residential and commercial buildings,residential,commercial,
 germany,31001_1130,Residential building with trade and industry,residential,residential,
 germany,31001_1131,residential and commercial buildings,residential,commercial,
-germany,31001_1210,Agricultural and forestry residential building,residential,residential,residential
+germany,31001_1210,Agricultural and forestry residential building,residential,residential,
 germany,31001_1220,Agricultural and forestry residential and company building,residential,agricultural,
 germany,31001_1221,farmhouse,residential,residential,detached single-family house
-germany,31001_1222,Residential and farm buildings,residential,residential,residential
+germany,31001_1222,Residential and farm buildings,residential,residential,
 germany,31001_1223,Forsthaus,residential,residential,detached single-family house
 germany,31001_1310,Recreational buildings,non-residential,public,
 germany,31001_1311,Ferienhaus,residential,residential,detached single-family house
@@ -554,10 +554,10 @@ germany,31001_2054,Laden,non-residential,commercial,
 germany,31001_2055,Kiosk,non-residential,commercial,
 germany,31001_2056,pharmacy,non-residential,commercial,
 germany,31001_2060,Messehalle,non-residential,commercial,
-germany,31001_2070,buildings for accommodation,non-residential,residential,residential
+germany,31001_2070,buildings for accommodation,non-residential,residential,
 germany,31001_2071,"Hotel, Motel, Pension",non-residential,commercial,
-germany,31001_2072,Jugendherberge,non-residential,commercial,residential
-germany,31001_2073,Hut (with accommodation),non-residential,residential,residential
+germany,31001_2072,Jugendherberge,non-residential,commercial,
+germany,31001_2073,Hut (with accommodation),non-residential,residential,
 germany,31001_2074,campsite building,non-residential,others,
 germany,31001_2080,Building for hospitality,non-residential,commercial,
 germany,31001_2081,"pub, restaurant",non-residential,commercial,
@@ -706,7 +706,7 @@ germany,31001_3062,"Leisure, club house, village community, community center",no
 germany,31001_3063,Seniorenfreizeitst??tte,non-residential,public,
 germany,31001_3064,homeless shelter,residential,public,
 germany,31001_3065,"Cr??che, kindergarten, day care center",non-residential,public,
-germany,31001_3066,asylum seekers home,residential,residential,residential
+germany,31001_3066,asylum seekers home,residential,residential,
 germany,31001_3070,Security and order building,non-residential,public,
 germany,31001_3071,police,non-residential,public,
 germany,31001_3072,fire Department,non-residential,public,
@@ -753,7 +753,7 @@ abruzzo,Luogo di culto,Place of worship,non-residential,public,
 abruzzo,Industriale,Industrial,non-residential,industrial,
 abruzzo,Agricolturale,Agricultural,non-residential,agricultural,
 abruzzo,Municipio,Municipality,non-residential,public,
-abruzzo,Abitativa,Housing,residential,residential,residential
+abruzzo,Abitativa,Housing,residential,residential,
 sardegna,sede di servizio socio assistenziale,seat of social assistance service,non-residential,public,
 sardegna,museo,museum,non-residential,public,
 sardegna,cinema,cinema,non-residential,commercial,
@@ -777,7 +777,7 @@ sardegna,teatro,theater,non-residential,public,
 sardegna,auditorium,auditorium,non-residential,public,
 sardegna,commerciale,commercial,non-residential,commercial,
 sardegna,oratorio,oratory,non-residential,public,
-sardegna,residenziale,residential,residential,residential,residential
+sardegna,residenziale,residential,residential,residential,
 sardegna,impiantotecnologico,plant technology,non-residential,industrial,
 sardegna,sedeclinica,sedeclinica,non-residential,public,
 sardegna,sedediscuola,school seat,non-residential,public,
@@ -812,7 +812,7 @@ sardegna,agricolturale,agricultural,non-residential,agricultural,
 trentino,Centrale-Cabina,Central-Cabin,non-residential,residential,detached single-family house
 trentino,Stalla/Fienile,Stable / Barn,non-residential,agricultural,
 trentino,Tendone,tend,non-residential,others,
-trentino,Baracca,Shack,non-residential,residential,residential
+trentino,Baracca,Shack,non-residential,residential,
 trentino,Civile1,Civil 1,unknown,public,
 trentino,Porticologgia,Porticology,unknown,others,
 trentino,Serra,Greenhouse,non-residential,agricultural,
@@ -835,7 +835,7 @@ spain,4_3_publicServices,publicServices,non-residential,public,
 spain,2_agriculture,agriculture,non-residential,agricultural,
 spain,3_industrial,industrial,non-residential,industrial,
 spain,4_2_retail,retail,non-residential,commercial,
-spain,1_residential,residential,residential,residential,residential
+spain,1_residential,residential,residential,residential,
 spain,4_1_office,office,non-residential,commercial,
 sicilia,"Stalla, fienile","Stable, barn",non-residential,agricultural,
 sicilia,"Centrale elettrica, cabina elettrica","Power plant, electrical substation",non-residential,industrial,
@@ -843,19 +843,19 @@ sicilia,Unità Volumetrica industriale Unità volumetrica commerciale Capannone,
 sicilia,Serra stabile,Stable greenhouse,non-residential,agricultural,
 sicilia,Baracca – edicola,Baracca - newsstand,non-residential,commercial,
 sicilia,"Torre, ciminiera, silos","Tower, chimney, silos",non-residential,industrial,
-sicilia,Unità Volumetrica civile,Civil Volumetric Unit,residential,residential,residential
+sicilia,Unità Volumetrica civile,Civil Volumetric Unit,residential,residential,
 sicilia,Tendone pressurizzato,Pressurized awning,non-residential,others,
 sicilia,Corpo aggettante- Portico-Loggiato,Projecting body - Portico-Loggiato,non-residential,public,
 sicilia,Unità volumetrica di culto Campanile Tabernacolo rappresentabile,Volumetric unit of worship. Bell Tower. Tabernacle. Representable,non-residential,public,
 sicilia,Tettoia pensilina,Canopy canopy,non-residential,others,
 osm_type_matches.csv,yes,yes,,,
 osm_type_matches.csv,house,house,,residential,detached single-family house
-osm_type_matches.csv,residential,residential,,residential,residential
+osm_type_matches.csv,residential,residential,,residential,
 osm_type_matches.csv,detached,detached,,residential,detached single-family house
 osm_type_matches.csv,garage,garage,,others,
 osm_type_matches.csv,apartments,apartments,,residential,apartment block
 osm_type_matches.csv,shed,shed,,others,
-osm_type_matches.csv,hut,hut,,residential,residential
+osm_type_matches.csv,hut,hut,,residential,
 osm_type_matches.csv,industrial,industrial,,industrial,
 osm_type_matches.csv,farm_auxiliary,farm_auxiliary,,agricultural,
 osm_type_matches.csv,roof,roof,,others,
@@ -871,7 +871,7 @@ osm_type_matches.csv,barn,barn,,agricultural,
 osm_type_matches.csv,greenhouse,greenhouse,,agricultural,
 osm_type_matches.csv,cabin,cabin,,residential,detached single-family house
 osm_type_matches.csv,service,service,,industrial,
-osm_type_matches.csv,static_caravan,static_caravan,,residential,residential
+osm_type_matches.csv,static_caravan,static_caravan,,residential,
 osm_type_matches.csv,warehouse,warehouse,,industrial,
 osm_type_matches.csv,church,church,,public,
 osm_type_matches.csv,farm,farm,,agricultural,
@@ -915,12 +915,12 @@ osm_type_matches.csv,commercial;residential,commercial;residential,,commercial,
 osm_type_matches.csv,grandstand,grandstand,,public,
 osm_type_matches.csv,kiosk,kiosk,,commercial,
 osm_type_matches.csv,agricultural,agricultural,,agricultural,
-osm_type_matches.csv,houseboat,houseboat,,residential,residential
+osm_type_matches.csv,houseboat,houseboat,,residential,
 osm_type_matches.csv,sports_centre,sports_centre,,public,
 osm_type_matches.csv,stilt_house,stilt_house,,residential,detached single-family house
 osm_type_matches.csv,pavilion,pavilion,,public,
 osm_type_matches.csv,supermarket,supermarket,,commercial,
-osm_type_matches.csv,trullo,trullo,,residential,residential
+osm_type_matches.csv,trullo,trullo,,residential,
 osm_type_matches.csv,no,no,,others,
 osm_type_matches.csv,tent,tent,,others,
 osm_type_matches.csv,container,container,,others,
@@ -929,7 +929,7 @@ osm_type_matches.csv,stadium,stadium,,public,
 osm_type_matches.csv,tomb,tomb,,public,
 osm_type_matches.csv,digester,digester,,industrial,
 osm_type_matches.csv,kitchen,kitchen,,commercial,
-osm_type_matches.csv,conservatory,conservatory,,residential,residential
+osm_type_matches.csv,conservatory,conservatory,,residential,
 osm_type_matches.csv,religious,religious,,public,
 osm_type_matches.csv,duplex,duplex,,residential,semi-detached duplex house
 osm_type_matches.csv,pajaru,pajaru,,others,
@@ -945,11 +945,11 @@ osm_type_matches.csv,beach_hut,beach_hut,,others,
 osm_type_matches.csv,military,military,,public,
 osm_type_matches.csv,shrine,shrine,,public,
 osm_type_matches.csv,chalet,chalet,,residential,detached single-family house
-osm_type_matches.csv,dwelling_house,dwelling_house,,residential,residential
+osm_type_matches.csv,dwelling_house,dwelling_house,,residential,
 osm_type_matches.csv,clinic,clinic,,public,
 osm_type_matches.csv,mobile_home,mobile_home,,residential,detached single-family house
 osm_type_matches.csv,factory,factory,,industrial,
-osm_type_matches.csv,presbytery,presbytery,,residential,residential
+osm_type_matches.csv,presbytery,presbytery,,residential,
 osm_type_matches.csv,shop,shop,,commercial,
 osm_type_matches.csv,ail,ail,,others,
 osm_type_matches.csv,cathedral,cathedral,,public,
@@ -984,8 +984,8 @@ osm_type_matches.csv,prison,prison,,public,
 osm_type_matches.csv,administrative,administrative,,public,
 osm_type_matches.csv,foundation,foundation,,others,
 osm_type_matches.csv,utility,utility,,industrial,
-osm_type_matches.csv,barracks,barracks,,residential,residential
-osm_type_matches.csv,annexe,annexe,,residential,residential
+osm_type_matches.csv,barracks,barracks,,residential,
+osm_type_matches.csv,annexe,annexe,,residential,
 osm_type_matches.csv,flats,flats,,residential,apartment block
 osm_type_matches.csv,terraced,terraced,,residential,terraced house
 osm_type_matches.csv,synagogue,synagogue,,public,
@@ -996,7 +996,7 @@ osm_type_matches.csv,mixed_use,mixed_use,,commercial,
 osm_type_matches.csv,water_tower,water_tower,,industrial,
 osm_type_matches.csv,education,education,,public,
 osm_type_matches.csv,deck,deck,,others,
-osm_type_matches.csv,tulou,tulou,,residential,residential
+osm_type_matches.csv,tulou,tulou,,residential,
 osm_type_matches.csv,wall,wall,,others,
 osm_type_matches.csv,townhouse,townhouse,,residential,terraced house
 osm_type_matches.csv,gasometer,gasometer,,industrial,
@@ -1010,12 +1010,12 @@ osm_type_matches.csv,summer_house,summer_house,,residential,detached single-fami
 osm_type_matches.csv,sport,sport,,public,
 osm_type_matches.csv,police,police,,public,
 osm_type_matches.csv,plot,plot,,others,
-osm_type_matches.csv,maisonette,maisonette,,residential,residential
+osm_type_matches.csv,maisonette,maisonette,,residential,
 osm_type_matches.csv,toilets;shower,toilets;shower,,public,
 osm_type_matches.csv,elevator,elevator,,,
 osm_type_matches.csv,village_office,village_office,,public,
 osm_type_matches.csv,tech_cab,tech_cab,,industrial,
-osm_type_matches.csv,yurt,yurt,,residential,residential
+osm_type_matches.csv,yurt,yurt,,residential,
 osm_type_matches.csv,community_centre,community_centre,,public,
 osm_type_matches.csv,bunglows,bunglows,,residential,detached single-family house
 osm_type_matches.csv,barrier,barrier,,others,
