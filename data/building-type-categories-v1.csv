@@ -848,11 +848,11 @@ sicilia,Tendone pressurizzato,Pressurized awning,non-residential,others,
 sicilia,Corpo aggettante- Portico-Loggiato,Projecting body - Portico-Loggiato,non-residential,public,
 sicilia,Unità volumetrica di culto Campanile Tabernacolo rappresentabile,Volumetric unit of worship. Bell Tower. Tabernacle. Representable,non-residential,public,
 sicilia,Tettoia pensilina,Canopy canopy,non-residential,others,
-osm_type_matches.csv,yes,yes,,others,
+osm_type_matches.csv,yes,yes,,,
 osm_type_matches.csv,house,house,,residential,detached single-family house
 osm_type_matches.csv,residential,residential,,residential,residential
 osm_type_matches.csv,detached,detached,,residential,detached single-family house
-osm_type_matches.csv,garage,garage,,residential,detached single-family house
+osm_type_matches.csv,garage,garage,,others,
 osm_type_matches.csv,apartments,apartments,,residential,apartment block
 osm_type_matches.csv,shed,shed,,others,
 osm_type_matches.csv,hut,hut,,residential,residential
@@ -865,8 +865,8 @@ osm_type_matches.csv,commercial,commercial,,commercial,
 osm_type_matches.csv,school,school,,public,
 osm_type_matches.csv,retail,retail,,commercial,
 osm_type_matches.csv,construction,construction,,others,
-osm_type_matches.csv,garages,garages,,residential,residential
-osm_type_matches.csv,outbuilding,outbuilding,,residential,residential
+osm_type_matches.csv,garages,garages,,others,
+osm_type_matches.csv,outbuilding,outbuilding,,,
 osm_type_matches.csv,barn,barn,,agricultural,
 osm_type_matches.csv,greenhouse,greenhouse,,agricultural,
 osm_type_matches.csv,cabin,cabin,,residential,detached single-family house
@@ -878,7 +878,7 @@ osm_type_matches.csv,farm,farm,,agricultural,
 osm_type_matches.csv,bungalow,bungalow,,residential,detached single-family house
 osm_type_matches.csv,office,office,,commercial,
 osm_type_matches.csv,allotment_house,allotment_house,,residential,detached single-family house
-osm_type_matches.csv,carport,carport,,residential,residential
+osm_type_matches.csv,carport,carport,,others,
 osm_type_matches.csv,ruins,ruins,,others,
 osm_type_matches.csv,civic,civic,,public,
 osm_type_matches.csv,public,public,,public,
@@ -890,10 +890,10 @@ osm_type_matches.csv,kindergarten,kindergarten,,public,
 osm_type_matches.csv,chapel,chapel,,public,
 osm_type_matches.csv,manufacture,manufacture,,industrial,
 osm_type_matches.csv,mosque,mosque,,public,
-osm_type_matches.csv,ger,ger,,residential,residential
+osm_type_matches.csv,ger,ger,,others,
 osm_type_matches.csv,storage_tank,storage_tank,,industrial,
 osm_type_matches.csv,hangar,hangar,,industrial,
-osm_type_matches.csv,dormitory,dormitory,,residential,residential
+osm_type_matches.csv,dormitory,dormitory,,residential,apartment block
 osm_type_matches.csv,bunker,bunker,,others,
 osm_type_matches.csv,train_station,train_station,,public,
 osm_type_matches.csv,silo,silo,,industrial,
@@ -918,7 +918,7 @@ osm_type_matches.csv,agricultural,agricultural,,agricultural,
 osm_type_matches.csv,houseboat,houseboat,,residential,residential
 osm_type_matches.csv,sports_centre,sports_centre,,public,
 osm_type_matches.csv,stilt_house,stilt_house,,residential,detached single-family house
-osm_type_matches.csv,pavilion,pavilion,,sports and recreation,
+osm_type_matches.csv,pavilion,pavilion,,public,
 osm_type_matches.csv,supermarket,supermarket,,commercial,
 osm_type_matches.csv,trullo,trullo,,residential,residential
 osm_type_matches.csv,no,no,,others,
@@ -928,11 +928,11 @@ osm_type_matches.csv,sports_hall,sports_hall,,public,
 osm_type_matches.csv,stadium,stadium,,public,
 osm_type_matches.csv,tomb,tomb,,public,
 osm_type_matches.csv,digester,digester,,industrial,
-osm_type_matches.csv,kitchen,kitchen,,residential,residential
+osm_type_matches.csv,kitchen,kitchen,,commercial,
 osm_type_matches.csv,conservatory,conservatory,,residential,residential
 osm_type_matches.csv,religious,religious,,public,
 osm_type_matches.csv,duplex,duplex,,residential,semi-detached duplex house
-osm_type_matches.csv,pajaru,pajaru,,residential,detached single-family house
+osm_type_matches.csv,pajaru,pajaru,,others,
 osm_type_matches.csv,abandoned,abandoned,,others,
 osm_type_matches.csv,bridge,bridge,,others,
 osm_type_matches.csv,shelter,shelter,,others,
@@ -941,7 +941,7 @@ osm_type_matches.csv,guardhouse,guardhouse,,public,
 osm_type_matches.csv,damaged,damaged,,others,
 osm_type_matches.csv,wayside_shrine,wayside_shrine,,public,
 osm_type_matches.csv,tower,tower,,commercial,
-osm_type_matches.csv,beach_hut,beach_hut,,residential,residential
+osm_type_matches.csv,beach_hut,beach_hut,,others,
 osm_type_matches.csv,military,military,,public,
 osm_type_matches.csv,shrine,shrine,,public,
 osm_type_matches.csv,chalet,chalet,,residential,detached single-family house
@@ -954,15 +954,15 @@ osm_type_matches.csv,shop,shop,,commercial,
 osm_type_matches.csv,ail,ail,,others,
 osm_type_matches.csv,cathedral,cathedral,,public,
 osm_type_matches.csv,tank,tank,,industrial,
-osm_type_matches.csv,government_office,government_office,,commercial,
-osm_type_matches.csv,castle,castle,,residential,residential
+osm_type_matches.csv,government_office,government_office,,public,
+osm_type_matches.csv,castle,castle,,public,
 osm_type_matches.csv,proposed,proposed,,others,
 osm_type_matches.csv,hayrack,hayrack,,agricultural,
 osm_type_matches.csv,pub,pub,,commercial,
 osm_type_matches.csv,gatehouse,gatehouse,,public,
 osm_type_matches.csv,poultry_house,poultry_house,,agricultural,
 osm_type_matches.csv,monastery,monastery,,public,
-osm_type_matches.csv,riding_hall,riding_hall,,others,
+osm_type_matches.csv,riding_hall,riding_hall,,agricultural,
 osm_type_matches.csv,gazebo,gazebo,,others,
 osm_type_matches.csv,restaurant,restaurant,,commercial,
 osm_type_matches.csv,storage,storage,,industrial,
@@ -972,7 +972,7 @@ osm_type_matches.csv,store,store,,commercial,
 osm_type_matches.csv,livestock,livestock,,agricultural,
 osm_type_matches.csv,bank,bank,,commercial,
 osm_type_matches.csv,other,other,,others,
-osm_type_matches.csv,community_group_office,community_group_office,,commercial,
+osm_type_matches.csv,community_group_office,community_group_office,,public,
 osm_type_matches.csv,chicken_coop,chicken_coop,,agricultural,
 osm_type_matches.csv,terrace_house,terrace_house,,residential,terraced house
 osm_type_matches.csv,canopy,canopy,,others,
@@ -981,7 +981,7 @@ osm_type_matches.csv,veranda,veranda,,residential,detached single-family house
 osm_type_matches.csv,power_substation,power_substation,,industrial,
 osm_type_matches.csv,ruin,ruin,,others,
 osm_type_matches.csv,prison,prison,,public,
-osm_type_matches.csv,administrative,administrative,,commercial,
+osm_type_matches.csv,administrative,administrative,,public,
 osm_type_matches.csv,foundation,foundation,,others,
 osm_type_matches.csv,utility,utility,,industrial,
 osm_type_matches.csv,barracks,barracks,,residential,residential
@@ -989,7 +989,7 @@ osm_type_matches.csv,annexe,annexe,,residential,residential
 osm_type_matches.csv,flats,flats,,residential,apartment block
 osm_type_matches.csv,terraced,terraced,,residential,terraced house
 osm_type_matches.csv,synagogue,synagogue,,public,
-osm_type_matches.csv,entrance,entrance,,others,
+osm_type_matches.csv,entrance,entrance,,,
 osm_type_matches.csv,glasshouse,glasshouse,,agricultural,
 osm_type_matches.csv,museum,museum,,public,
 osm_type_matches.csv,mixed_use,mixed_use,,commercial,
@@ -1010,11 +1010,11 @@ osm_type_matches.csv,summer_house,summer_house,,residential,detached single-fami
 osm_type_matches.csv,sport,sport,,public,
 osm_type_matches.csv,police,police,,public,
 osm_type_matches.csv,plot,plot,,others,
-osm_type_matches.csv,maisonette,maisonette,,residential,apartment block
+osm_type_matches.csv,maisonette,maisonette,,residential,residential
 osm_type_matches.csv,toilets;shower,toilets;shower,,public,
-osm_type_matches.csv,elevator,elevator,,others,
-osm_type_matches.csv,village_office,village_office,,commercial,
-osm_type_matches.csv,tech_cab,tech_cab,,commercial,
+osm_type_matches.csv,elevator,elevator,,,
+osm_type_matches.csv,village_office,village_office,,public,
+osm_type_matches.csv,tech_cab,tech_cab,,industrial,
 osm_type_matches.csv,yurt,yurt,,residential,residential
 osm_type_matches.csv,community_centre,community_centre,,public,
 osm_type_matches.csv,bunglows,bunglows,,residential,detached single-family house
@@ -1030,7 +1030,7 @@ osm_type_matches.csv,ucap,ucap,,others,
 osm_type_matches.csv,balcony,balcony,,residential,residential
 osm_type_matches.csv,data_center,data_center,,commercial,
 osm_type_matches.csv,car_repair,car_repair,,commercial,
-osm_type_matches.csv,parking_entrance,parking_entrance,,commercial,
+osm_type_matches.csv,parking_entrance,parking_entrance,,,
 osm_type_matches.csv,kiln,kiln,,industrial,
 osm_type_matches.csv,windmill,windmill,,industrial,
 osm_type_matches.csv,ship,ship,,others,

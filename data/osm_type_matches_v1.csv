@@ -1,9 +1,9 @@
 type_source,type,residential_type,count,fraction,description
-yes,others,,503064388,0.7975,A building of an unspecified type.
+yes,,,503064388,0.7975,A building of an unspecified type.
 house,residential,detached single-family house,58709546,0.0931,A single dwelling unit usually inhabited by one family.
 residential,residential,residential,15451006,0.0245,A general tag for a building constructed primarily for residential purposes.
 detached,residential,detached single-family house,8310319,0.0132,A detached house: a free-standing residential building usually housing a single family.
-garage,residential,detached single-family house,7230561,0.0115,Denotes a single-owner private garage
+garage,others,,7230561,0.0115,Denotes a single-owner private garage
 apartments,residential,apartment block,6868592,0.0109,"A building arranged into individual dwellings, often on separate floors. May also have retail outlets on the ground floor."
 shed,others,,3836859,0.0061,"A small, simple structure used as storage or workshop"
 hut,residential,residential,2423959,0.0038,A small and crude shelter.
@@ -16,8 +16,8 @@ commercial,commercial,,1288208,0.002,A building constructed for non-specific com
 school,public,,1237775,0.002,A generic school building.
 retail,commercial,,1094758,0.0017,A building primarily used for selling goods to the public.
 construction,others,,1050161,0.0017,A building under construction
-garages,residential,residential,946131,0.0015,A block of private garages each with a separate owner.
-outbuilding,residential,residential,923139,0.0015,A less important building near to and on the same piece of land as a larger building
+garages,others,,946131,0.0015,A block of private garages each with a separate owner.
+outbuilding,,,923139,0.0015,A less important building near to and on the same piece of land as a larger building
 barn,agricultural,,751119,0.0012,An agricultural building that can be used for storage and as a covered workplace.
 greenhouse,agricultural,,725353,0.0011,A building in which plants are grown
 cabin,residential,detached single-family house,645265,0.001,"A small, roughly built house typically found in rural areas."
@@ -29,7 +29,7 @@ farm,agricultural,,395488,0.0006,A farmhouse is the main building of a farm
 bungalow,residential,detached single-family house,392693,0.0006,Simple single-storey flat house.
 office,commercial,,269127,0.0004,A building which contains spaces mainly designed to be used for offices.
 allotment_house,residential,detached single-family house,258825,0.0004,A small outbuilding for short visits in a allotment garden.
-carport,residential,residential,250006,0.0004,"A carport is a covered structure used to offer limited protection to vehicles, primarily cars, from the elements."
+carport,others,,250006,0.0004,"A carport is a covered structure used to offer limited protection to vehicles, primarily cars, from the elements."
 ruins,others,,236505,0.0004,"Frequently used to mark ruined buildings. However, this usage conflicts with general use of building tag. In theory it should only be used for buildings constructed to look like ruins."
 civic,public,,187520,0.0003,"A building hosting any civic amenity (town hall, library, swimming pool)."
 public,public,,167397,0.0003,"A building constructed as accessible to the public (town hall, police station, court house)."
@@ -41,10 +41,10 @@ kindergarten,public,,112115,0.0002,A generic kindergarten building.
 chapel,public,,108116,0.0002,Building built as chapel.
 manufacture,industrial,,99829,0.0002,"A building constructed to house some manufacturing process, see also tag:building=industrial."
 mosque,public,,98404,0.0002,A building that was built as a mosque.
-ger,residential,residential,91456,0.0001,"A portable, round tent (yurt or ger)"
+ger,others,,91456,0.0001,"A portable, round tent (yurt or ger)"
 storage_tank,industrial,,89032,0.0001,A storage tank
 hangar,industrial,,86503,0.0001,"A building used for the storage of aeroplanes, helicopters or space-craft."
-dormitory,residential,residential,64680,0.0001,College or university dormitory for shared living of its students.
+dormitory,residential,apartment block,64680,0.0001,College or university dormitory for shared living of its students.
 bunker,others,,63147,0.0001,A hardened military building.
 train_station,public,,54468,0.0001,A train station building
 silo,industrial,,53383,0.0001,A silo is a building for storing bulk materials.
@@ -69,7 +69,7 @@ agricultural,agricultural,,18151,0.0,
 houseboat,residential,residential,16979,0.0,"A boat (re)constructed as a floating home, staying at a single permanent location."
 sports_centre,public,,16579,0.0,A building that was built as a sports centre
 stilt_house,residential,detached single-family house,15470,0.0,A house raised on piles over the surface of the soil or a body of water.
-pavilion,sports and recreation,,14655,0.0,A building providing facilities for users of sports grounds
+pavilion,public,,14655,0.0,A building providing facilities for users of sports grounds
 supermarket,commercial,,14183,0.0,A building built as a supermarket
 trullo,residential,residential,13533,0.0,"A stone hut with a conical roof, built without mortar"
 no,others,,11929,0.0,
@@ -79,11 +79,11 @@ sports_hall,public,,11007,0.0,A building that was built as a sports hall
 stadium,public,,10924,0.0,A building which was built as stadium.
 tomb,public,,10193,0.0,
 digester,industrial,,10114,0.0,"A building constructed as a digester, a bioreactor for the production of biogas from biomass."
-kitchen,residential,residential,9324,0.0,
+kitchen,commercial,,9324,0.0,
 conservatory,residential,residential,8298,0.0,Conservatory - a building or room having glass or tarpaulin roofing and walls used as an indoor garden or a sunroom (winter garden).
 religious,public,,8218,0.0,A building that was built as a religious building.
 duplex,residential,semi-detached duplex house,7724,0.0,
-pajaru,residential,detached single-family house,7489,0.0,
+pajaru,others,,7489,0.0,
 abandoned,others,,7324,0.0,
 bridge,others,,7168,0.0,A building used as a bridge.
 shelter,others,,6673,0.0,
@@ -92,7 +92,7 @@ guardhouse,public,,6523,0.0,A small building constructed to house guard(s).
 damaged,others,,6369,0.0,
 wayside_shrine,public,,6266,0.0,A wayside shrine that meets the criteria of a building.
 tower,commercial,,6073,0.0,"A tower, that is a building."
-beach_hut,residential,residential,5991,0.0,"A small, usually wooden, and often brightly coloured cabin or shelter above the high tide mark on popular bathing beaches."
+beach_hut,others,,5991,0.0,"A small, usually wooden, and often brightly coloured cabin or shelter above the high tide mark on popular bathing beaches."
 military,public,,5674,0.0,An unspecific building constructed for military purposes.
 shrine,public,,5492,0.0,A building that was built as a shrine
 chalet,residential,detached single-family house,5292,0.0,
@@ -105,15 +105,15 @@ shop,commercial,,4107,0.0,
 ail,others,,3803,0.0,
 cathedral,public,,3337,0.0,A building that was built as a cathedral.
 tank,industrial,,3134,0.0,
-government_office,commercial,,3105,0.0,
-castle,residential,residential,3000,0.0,A building constructed as a castle.
+government_office,public,,3105,0.0,
+castle,public,,3000,0.0,A building constructed as a castle.
 proposed,others,,2998,0.0,
 hayrack,agricultural,,2931,0.0,
 pub,commercial,,2839,0.0,
 gatehouse,public,,2755,0.0,"An entry control point building, spanning over a highway that enters a city or compound."
 poultry_house,agricultural,,2679,0.0,
 monastery,public,,2644,0.0,A building constructed as monastery
-riding_hall,others,,2569,0.0,A building that was built as a riding hall or indoor arena.
+riding_hall,agricultural,,2569,0.0,A building that was built as a riding hall or indoor arena.
 gazebo,others,,2466,0.0,
 restaurant,commercial,,2401,0.0,
 storage,industrial,,2322,0.0,
@@ -123,7 +123,7 @@ store,commercial,,2169,0.0,
 livestock,agricultural,,2142,0.0,A building or part of a building that was built for housing livestock.
 bank,commercial,,2136,0.0,
 other,others,,2126,0.0,
-community_group_office,commercial,,2083,0.0,
+community_group_office,public,,2083,0.0,
 chicken_coop,agricultural,,2071,0.0,
 terrace_house,residential,terraced house,2044,0.0,
 canopy,others,,1970,0.0,
@@ -132,7 +132,7 @@ veranda,residential,detached single-family house,1942,0.0,
 power_substation,industrial,,1837,0.0,
 ruin,others,,1826,0.0,
 prison,public,,1784,0.0,
-administrative,commercial,,1769,0.0,
+administrative,public,,1769,0.0,
 foundation,others,,1759,0.0,
 utility,industrial,,1756,0.0,
 barracks,residential,residential,1736,0.0,A building built to house military personnel or laborers.
@@ -140,7 +140,7 @@ annexe,residential,residential,1707,0.0,A small self contained apartment on the 
 flats,residential,apartment block,1687,0.0,
 terraced,residential,terraced house,1648,0.0,
 synagogue,public,,1617,0.0,A building that was built as a synagogue.
-entrance,others,,1614,0.0,To mark the location of a building entrance.
+entrance,,,1614,0.0,To mark the location of a building entrance.
 glasshouse,agricultural,,1566,0.0,A glass building in which plants are grown. Note far more popular tag:building=greenhouse.
 museum,public,,1552,0.0,A building which was designed as a museum.
 mixed_use,commercial,,1550,0.0,
@@ -161,11 +161,11 @@ summer_house,residential,detached single-family house,1142,0.0,
 sport,public,,1132,0.0,
 police,public,,1114,0.0,A building constructed for use by the police.
 plot,others,,1083,0.0,
-maisonette,residential,apartment block,1076,0.0,
+maisonette,residential,residential,1076,0.0,
 toilets;shower,public,,967,0.0,
-elevator,others,,932,0.0,
-village_office,commercial,,927,0.0,
-tech_cab,commercial,,921,0.0,Small prefabricated cabin structures for the air-conditioned accommodation of different technology.
+elevator,,,932,0.0,
+village_office,public,,927,0.0,
+tech_cab,industrial,,921,0.0,Small prefabricated cabin structures for the air-conditioned accommodation of different technology.
 yurt,residential,residential,916,0.0,
 community_centre,public,,896,0.0,
 bunglows,residential,detached single-family house,890,0.0,
@@ -181,7 +181,7 @@ ucap,others,,788,0.0,
 balcony,residential,residential,783,0.0,
 data_center,commercial,,766,0.0,A building which was built as a data center
 car_repair,commercial,,761,0.0,
-parking_entrance,commercial,,761,0.0,
+parking_entrance,,,761,0.0,
 kiln,industrial,,752,0.0,
 windmill,industrial,,748,0.0,"A building constructed as a traditional windmill, historically used to mill grain with wind power."
 ship,others,,735,0.0,A decommissioned ship/submarine which stays in one place.
