@@ -1,4 +1,5 @@
 from .data import (
+    building_type_harmonization,
     download_all_nuts,
     load_buildings,
     load_elevation,
@@ -13,6 +14,7 @@ from .raster import raster_to_gdf, read_area, read_value
 from .spatial import bbox, center, distance_nearest, sjoin_nearest_cols, snearest, snearest_attr, transform_crs
 
 __all__ = [
+    "building_type_harmonization",
     "download_all_nuts",
     "load_buildings",
     "load_streets",

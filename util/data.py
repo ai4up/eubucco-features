@@ -1,7 +1,7 @@
 import os
 import uuid
 from pathlib import Path
-from typing import Callable, Iterator, Tuple, Union
+from typing import Callable, Dict, Iterator, Tuple, Union
 
 import geopandas as gpd
 import pandas as pd
@@ -10,8 +10,10 @@ from shapely.geometry import MultiPolygon, Polygon
 
 import util
 
+module_dir = os.path.dirname(__file__)
+BUILDING_TYPE_CATEGORIES_FILE = os.path.join(module_dir, "..", "data", "osm_type_matches_v1.csv")
 CRS_UNI = "EPSG:3035"
-geometry_col = "geometry"
+GEOMETRY_COL = "geometry"
 
 
 def load_buildings(buildings_dir: str, region_id: str) -> gpd.GeoDataFrame:
@@ -90,6 +92,13 @@ def store_features(buildings: gpd.GeoDataFrame, out_dir: str, region_id: str):
     buildings.to_file(out_file, driver="GPKG")
 
 
+def building_type_harmonization() -> Dict[str, str]:
+    bldg_types = pd.read_csv(BUILDING_TYPE_CATEGORIES_FILE)
+    type_mapping = bldg_types.set_index("type_source")["type"].to_dict()
+
+    return type_mapping
+
+
 def nuts_geometries(nuts_path: str, crs: str, buffer: int = 0) -> Iterator[Tuple[str, Union[Polygon, MultiPolygon]]]:
     nuts = gpd.read_file(nuts_path)
     nuts = nuts.dissolve("NUTS_ID")
@@ -136,6 +145,6 @@ def _load_gpkg(data_dir: str, region_id: str) -> gpd.GeoDataFrame:
 
 def _load_csv_geom(path: Path) -> gpd.GeoDataFrame:
     df = pd.read_csv(path)
-    gdf = gpd.GeoDataFrame(df, geometry=df[geometry_col].apply(wkt.loads), crs=CRS_UNI)
+    gdf = gpd.GeoDataFrame(df, geometry=df[GEOMETRY_COL].apply(wkt.loads), crs=CRS_UNI)
 
     return gdf

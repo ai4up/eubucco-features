@@ -4,11 +4,13 @@ import geopandas as gpd
 import momepy
 import numpy as np
 import pandas as pd
+from pandas.api.types import CategoricalDtype
 
 from features import block, buffer, building, landuse, osm, poi, population, street, topography
 from log import LoggingContext, setup_logger
 from util import (
     bbox,
+    building_type_harmonization,
     center,
     distance_nearest,
     load_buildings,
@@ -50,8 +52,7 @@ def execute_feature_pipeline(
         return
 
     buildings = load_buildings(bldgs_dir, region_id)
-    buildings = buildings.to_crs(CRS)
-    buildings["h3_index"] = buffer.h3_index(buildings, H3_RES)
+    buildings = _preprocess(buildings)
 
     with LoggingContext(logger, feature_name="building"):
         buildings = _calculate_building_features(buildings)
@@ -102,6 +103,23 @@ def execute_feature_pipeline(
         buildings = _calculate_interaction_features(buildings)
 
     store_features(buildings, out_dir, region_id)
+
+
+def _preprocess(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    buildings = buildings.to_crs(CRS)
+    buildings["h3_index"] = buffer.h3_index(buildings, H3_RES)
+
+    type_mapping = building_type_harmonization()
+    types = set(type_mapping.values())
+    types.remove(np.nan)
+    buildings["type"] = buildings["type_source"].map(type_mapping)
+    buildings["type"] = buildings["type"].astype(CategoricalDtype(categories=types))
+
+    buildings["height"] = buildings["height"].astype(float)
+    buildings["floors"] = buildings["floors"].astype(float)
+    buildings["age"] = buildings["age"].astype(float)
+
+    return buildings
 
 
 def _calculate_building_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
