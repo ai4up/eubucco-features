@@ -90,7 +90,7 @@ def execute_feature_pipeline(
         buildings = _calculate_nuts_region_features(buildings, lau_path, region_id)
 
     with LoggingContext(logger, feature_name="location_encoding"):
-        buildings = _calculate_location_encoding(buildings, region_id)
+        buildings = _calculate_location_encoding(buildings, lau_path, region_id)
 
     with LoggingContext(logger, feature_name="buffer"):
         buildings = _calculate_building_buffer_features(buildings)
@@ -265,16 +265,13 @@ def _calculate_nuts_region_features(buildings: gpd.GeoDataFrame, lau_path: str, 
     return buildings
 
 
-def _calculate_location_encoding(buildings: gpd.GeoDataFrame, region_id: str) -> gpd.GeoDataFrame:
+def _calculate_location_encoding(buildings: gpd.GeoDataFrame, lau_path: str, region_id: str) -> gpd.GeoDataFrame:
     buildings["bldg_lng"] = buildings.centroid.to_crs("EPSG:4326").x
     buildings["bldg_lat"] = buildings.centroid.to_crs("EPSG:4326").y
 
-    countries = [
-        'CZ', 'AT', 'DE', 'BE', 'EL', 'DK', 'EE', 'NL', 'BG', 'ES',
-        'CH', 'FR', 'FI', 'CY', 'HU', 'HR', 'IT', 'IE', 'PL', 'NO',
-        'LT', 'LU', 'LV', 'MT', 'PT', 'RO', 'SK', 'SE', 'UK', 'SI',
-       ]
-    buildings["country"] = region_id[:2]
+    nuts = load_nuts_attr(lau_path)
+    countries = nuts["CNTR_CODE"].unique()
+    buildings["country"] = nuts.loc[region_id]["CNTR_CODE"]
     buildings["country"] = buildings["country"].astype(CategoricalDtype(categories=countries))
     buildings = pd.get_dummies(buildings, columns=["country"])
 
