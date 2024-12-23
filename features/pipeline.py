@@ -104,6 +104,8 @@ def execute_feature_pipeline(
 
 
 def _calculate_building_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    buildings["bldg_lat"] = buildings.centroid.to_crs("EPSG:4326").y
+    buildings["bldg_lng"] = buildings.centroid.to_crs("EPSG:4326").x
     buildings["bldg_footprint_area"] = buildings.area
     buildings["bldg_perimeter"] = buildings.length
     buildings["bldg_normalized_perimeter_index"] = building.calculate_norm_perimeter(buildings)
