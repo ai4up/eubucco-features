@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Callable, Dict, Iterator, Tuple, Union
 
 import geopandas as gpd
+import numpy as np
 import pandas as pd
 from shapely import wkt
 from shapely.geometry import MultiPolygon, Polygon
@@ -84,6 +85,16 @@ def load_GHS_built_up(built_up_file: str, area: gpd.GeoSeries) -> gpd.GeoDataFra
     built_up["NDVI"] = built_up["class"].map(greeness_NDVI)
 
     return built_up
+
+
+def load_nuts_attr(lau_path: str) -> pd.DataFrame:
+    nuts = pd.read_csv(lau_path)
+    nuts = nuts.drop_duplicates(subset=["NUTS_ID_3"])
+    nuts = nuts.set_index("NUTS_ID_3")
+    nuts_attr = ["MOUNT_TYPE", "COAST_TYPE", "URBN_TYPE"]
+    nuts[nuts_attr] = nuts[nuts_attr].replace(0, np.nan)
+
+    return nuts
 
 
 def store_features(buildings: gpd.GeoDataFrame, out_dir: str, region_id: str):

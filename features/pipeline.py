@@ -15,6 +15,7 @@ from util import (
     distance_nearest,
     load_buildings,
     load_GHS_built_up,
+    load_nuts_attr,
     load_pois,
     load_streets,
     read_value,
@@ -41,6 +42,7 @@ def execute_feature_pipeline(
     cdd_path: str,
     hdd_path: str,
     pop_path: str,
+    lau_path: str,
     out_dir: str,
     log_file: str,
 ) -> None:
@@ -83,6 +85,9 @@ def execute_feature_pipeline(
 
     with LoggingContext(logger, feature_name="population"):
         buildings = _calculate_population_features(buildings, pop_path)
+
+    with LoggingContext(logger, feature_name="nuts_region"):
+        buildings = _calculate_nuts_region_features(buildings, lau_path, region_id)
 
     with LoggingContext(logger, feature_name="buffer"):
         buildings = _calculate_building_buffer_features(buildings)
@@ -244,6 +249,17 @@ def _calculate_GHS_built_up_features(buildings: gpd.GeoDataFrame, built_up_file:
 
     high_rise_areas = built_up[built_up["high_rise"]]
     buildings["ghs_distance_high_rise"] = distance_nearest(buildings, high_rise_areas, max_distance=1000)
+
+    return buildings
+
+
+def _calculate_nuts_region_features(buildings: gpd.GeoDataFrame, lau_path: str, region_id: str) -> gpd.GeoDataFrame:
+    nuts = load_nuts_attr(lau_path)
+    region_attr = nuts.loc[region_id]
+
+    buildings["nuts_mountain_type"] = region_attr["MOUNT_TYPE"]
+    buildings["nuts_coast_type"] = region_attr["COAST_TYPE"]
+    buildings["nuts_urban_type"] = region_attr["URBN_TYPE"]
 
     return buildings
 
