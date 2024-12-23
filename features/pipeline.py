@@ -123,6 +123,12 @@ def _preprocess(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     buildings["type"] = buildings["type_source"].map(type_mapping)
     buildings["type"] = buildings["type"].astype(CategoricalDtype(categories=types))
 
+    res_type_mapping = building_type_harmonization(residential=True)
+    res_types = set(res_type_mapping.values())
+    res_types.remove(np.nan)
+    buildings["residential_type"] = buildings["type_source"].map(res_type_mapping)
+    buildings["residential_type"] = buildings["residential_type"].astype(CategoricalDtype(categories=res_types))
+
     buildings["height"] = buildings["height"].astype(float)
     buildings["floors"] = buildings["floors"].astype(float)
     buildings["age"] = buildings["age"].astype(float)

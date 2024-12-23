@@ -103,9 +103,10 @@ def store_features(buildings: gpd.GeoDataFrame, out_dir: str, region_id: str):
     buildings.to_parquet(out_file)
 
 
-def building_type_harmonization() -> Dict[str, str]:
+def building_type_harmonization(residential: bool = False) -> Dict[str, str]:
     bldg_types = pd.read_csv(BUILDING_TYPE_CATEGORIES_FILE)
-    type_mapping = bldg_types.set_index("type_source")["type"].to_dict()
+    type_col = "residential_type" if residential else "type"
+    type_mapping = bldg_types.set_index("type_source")[type_col].to_dict()
 
     return type_mapping
 
