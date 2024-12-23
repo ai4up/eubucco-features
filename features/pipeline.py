@@ -272,8 +272,8 @@ def _calculate_nuts_region_features(buildings: gpd.GeoDataFrame, lau_path: str, 
 
 
 def _calculate_location_encoding(buildings: gpd.GeoDataFrame, lau_path: str, region_id: str) -> gpd.GeoDataFrame:
-    buildings["bldg_lng"] = buildings.centroid.to_crs("EPSG:4326").x
-    buildings["bldg_lat"] = buildings.centroid.to_crs("EPSG:4326").y
+    buildings["lng"] = buildings.centroid.to_crs("EPSG:4326").x
+    buildings["lat"] = buildings.centroid.to_crs("EPSG:4326").y
 
     nuts = load_nuts_attr(lau_path)
     countries = nuts["CNTR_CODE"].unique()
