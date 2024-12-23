@@ -6,4 +6,5 @@ matplotlib==3.9.2
 momepy==0.8.1
 networkx==3.4.2
 osmnx==1.9.3
+pyarrow==18.1.0
 rasterio==1.4.3

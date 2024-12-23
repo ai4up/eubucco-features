@@ -99,8 +99,8 @@ def load_nuts_attr(lau_path: str) -> pd.DataFrame:
 
 def store_features(buildings: gpd.GeoDataFrame, out_dir: str, region_id: str):
     buildings = buildings[~buildings["buffer"]]
-    out_file = os.path.join(out_dir, f"{region_id}.gpkg")
-    buildings.to_file(out_file, driver="GPKG")
+    out_file = os.path.join(out_dir, f"{region_id}.parquet")
+    buildings.to_parquet(out_file)
 
 
 def building_type_harmonization() -> Dict[str, str]:
