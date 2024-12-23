@@ -3,6 +3,7 @@ import os
 import geopandas as gpd
 import momepy
 import numpy as np
+import pandas as pd
 
 from features import block, buffer, building, landuse, osm, poi, population, street, topography
 from log import LoggingContext, setup_logger
@@ -218,8 +219,10 @@ def _calculate_GHS_built_up_features(buildings: gpd.GeoDataFrame, built_up_file:
     built_up = built_up.to_crs(buildings.crs)
 
     nearest = snearest_attr(buildings, built_up, attr=["use_type", "height"], max_distance=100)
-    buildings["ghs_nearest_use_type"] = nearest["use_type"]
-    buildings["ghs_nearest_height"] = nearest["height"]
+    nearest["use_type"] = pd.Categorical(nearest["use_type"], categories=["residential", "non-residential"])
+    buildings["ghs_closest_height"] = nearest["height"]
+    buildings["ghs_closest_use_type"] = nearest["use_type"]
+    buildings = pd.get_dummies(buildings, columns=["ghs_closest_use_type"])
 
     high_rise_areas = built_up[built_up["high_rise"]]
     buildings["ghs_distance_high_rise"] = distance_nearest(buildings, high_rise_areas, max_distance=1000)
