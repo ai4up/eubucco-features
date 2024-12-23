@@ -1,5 +1,6 @@
 import os
 import sys
+from pathlib import Path
 
 PROJECT_SRC_PATH = os.path.realpath(os.path.join(__file__, "..", ".."))
 sys.path.append(PROJECT_SRC_PATH)
@@ -24,7 +25,9 @@ def test_pipeline():
     GHS_pop_path = os.path.join(test_data_dir, "GHS_POP_test_region.tif")
     out_dir = test_dir
     log_file = os.path.join(test_dir, "logs", "features.log")
+    out_file = os.path.join(out_dir, f"{region_id}.gpkg")
 
+    Path(out_file).unlink(missing_ok=True)
     execute_feature_pipeline(
         region_id,
         bldgs_dir,
