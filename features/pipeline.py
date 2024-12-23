@@ -199,9 +199,8 @@ def _calculate_osm_buildings_features(
     osm_buildings = osm.load_osm_buildings(osm_bldgs_dir, region_id)
     osm_buildings = osm_buildings.to_crs(buildings.crs)
 
-    buildings = osm.closest_building_attr(
-        buildings, osm_buildings, {"type": "osm_closest_building_type", "height": "osm_closest_building_height"}
-    )
+    buildings = osm.closest_building_type(buildings, osm_buildings)
+    buildings["osm_closest_building_height"] = osm.closest_building_height(buildings, osm_buildings)
     buildings["osm_distance_residential"] = osm.distance_to_building_type(buildings, osm_buildings, "residential")
     buildings["osm_distance_public"] = osm.distance_to_building_type(buildings, osm_buildings, "public")
     buildings["osm_distance_industry"] = osm.distance_to_building_type(buildings, osm_buildings, "industrial")
