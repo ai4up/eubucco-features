@@ -89,6 +89,9 @@ def execute_feature_pipeline(
     with LoggingContext(logger, feature_name="nuts_region"):
         buildings = _calculate_nuts_region_features(buildings, lau_path, region_id)
 
+    with LoggingContext(logger, feature_name="location_encoding"):
+        buildings = _calculate_location_encoding(buildings, region_id)
+
     with LoggingContext(logger, feature_name="buffer"):
         buildings = _calculate_building_buffer_features(buildings)
 
@@ -128,8 +131,6 @@ def _preprocess(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 
 
 def _calculate_building_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
-    buildings["bldg_lat"] = buildings.centroid.to_crs("EPSG:4326").y
-    buildings["bldg_lng"] = buildings.centroid.to_crs("EPSG:4326").x
     buildings["bldg_footprint_area"] = buildings.area
     buildings["bldg_perimeter"] = buildings.length
     buildings["bldg_normalized_perimeter_index"] = building.calculate_norm_perimeter(buildings)
@@ -260,6 +261,22 @@ def _calculate_nuts_region_features(buildings: gpd.GeoDataFrame, lau_path: str, 
     buildings["nuts_mountain_type"] = region_attr["MOUNT_TYPE"]
     buildings["nuts_coast_type"] = region_attr["COAST_TYPE"]
     buildings["nuts_urban_type"] = region_attr["URBN_TYPE"]
+
+    return buildings
+
+
+def _calculate_location_encoding(buildings: gpd.GeoDataFrame, region_id: str) -> gpd.GeoDataFrame:
+    buildings["bldg_lng"] = buildings.centroid.to_crs("EPSG:4326").x
+    buildings["bldg_lat"] = buildings.centroid.to_crs("EPSG:4326").y
+
+    countries = [
+        'CZ', 'AT', 'DE', 'BE', 'EL', 'DK', 'EE', 'NL', 'BG', 'ES',
+        'CH', 'FR', 'FI', 'CY', 'HU', 'HR', 'IT', 'IE', 'PL', 'NO',
+        'LT', 'LU', 'LV', 'MT', 'PT', 'RO', 'SK', 'SE', 'UK', 'SI',
+       ]
+    buildings["country"] = region_id[:2]
+    buildings["country"] = buildings["country"].astype(CategoricalDtype(categories=countries))
+    buildings = pd.get_dummies(buildings, columns=["country"])
 
     return buildings
 
