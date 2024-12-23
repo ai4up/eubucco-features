@@ -65,6 +65,7 @@ def load_GHS_built_up(built_up_file: str, area: gpd.GeoSeries) -> gpd.GeoDataFra
         4.5: [12, 22],  # 3-6m
         10.5: [13, 23],  # 6-15m
         22.5: [14, 24],  # 15-30m
+        50: [15, 25],  # 30m+
     }
     greeness_NDVI = {
         1: 0.15,  # low vegetation surfaces NDVI <= 0.3
