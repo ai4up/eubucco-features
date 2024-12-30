@@ -25,18 +25,27 @@ jobs:
       exp_backoff_factor: 2
       max_retries: 1
 
-   - name: feature-engineering
-     script: /p/projects/eubucco/eubucco-features/slurm/ft-eng.py
-     param_generator_file: /p/projects/eubucco/eubucco-features/slurm/params-ft-eng.yml
-     log_dir: /p/projects/eubucco/logs/v1_0-db/feature-engineering
-     resources:
-       cpus: 4
-       time: "12:00:00"
+  - name: feature-engineering
+    script: /p/projects/eubucco/eubucco-features/slurm/ft-eng.py
+    param_generator_file: /p/projects/eubucco/eubucco-features/slurm/params-ft-eng.yml
+    log_dir: /p/projects/eubucco/logs/v1_0-db/feature-engineering
+    resources:
+      cpus: 8
+      time: "24:00:00"
+    special_cases:
+      - name: large-regions
+        files:
+          path: "{{bldgs_dir}}/**/{{region_id}}.gpkg"
+          size_min: 500000000
+        resources:
+          mem: 300000
 
 properties:
   conda_env: eubucco-features
   account: eubucco
   log_level: INFO
+  failure_threshold: 1
+  failure_threshold_activation: 9999999
   exp_backoff_factor: 4
   max_retries: 3
   poll_interval: 30
