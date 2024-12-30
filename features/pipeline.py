@@ -115,6 +115,7 @@ def execute_feature_pipeline(
 
 def _preprocess(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     buildings = buildings.to_crs(CRS)
+    buildings = building.remove_buildings_with_multiple_parts(buildings)
     buildings["h3_index"] = buffer.h3_index(buildings, H3_RES)
 
     type_mapping = building_type_harmonization()

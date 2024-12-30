@@ -3,6 +3,8 @@ import math
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+import shapely
+from shapely.geometry import MultiPolygon, Polygon
 
 import util
 
@@ -29,3 +31,19 @@ def _circle_perimeter(area: pd.Series) -> pd.Series:
 
 def calculate_distance_to_closest_building(buildings: gpd.GeoDataFrame) -> pd.Series:
     return util.distance_nearest(buildings, buildings, max_distance=100)
+
+
+def remove_buildings_with_multiple_parts(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    keep = []
+    for _, bldg in buildings.iterrows():
+        geom = bldg.geometry
+
+        if isinstance(geom, MultiPolygon):
+            geom = shapely.unary_union(geom)
+
+        if isinstance(geom, Polygon):
+            keep.append(bldg)
+
+    print(f"Removed {len(buildings) - len(keep)} buildings consisting of multiple, disconntected parts.")
+
+    return gpd.GeoDataFrame(keep, crs=buildings.crs)
