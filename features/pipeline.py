@@ -158,11 +158,11 @@ def _calculate_building_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFram
 
 def _calculate_block_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     blocks = block.generate_blocks(buildings)
-    blocks["block_length"] = blocks.building_ids.apply(len)
-    blocks["block_footprint_area"] = blocks.geometry.apply(lambda g: g.area)
-    blocks["block_avg_footprint_area"] = blocks.block_buildings.apply(lambda b: b.area.mean())
-    blocks["block_std_footprint_area"] = blocks.block_buildings.apply(lambda b: b.area.std())
+    blocks["block_length"] = blocks["building_ids"].apply(len)
     blocks["block_perimeter"] = blocks.length
+    blocks["block_footprint_area"] = blocks.area
+    blocks["block_avg_footprint_area"] = blocks["block_buildings"].apply(lambda b: b.area.mean())
+    blocks["block_std_footprint_area"] = blocks["block_buildings"].apply(lambda b: b.area.std())
     blocks["block_longest_axis_length"] = momepy.longest_axis_length(blocks)
     blocks["block_elongation"] = momepy.elongation(blocks)
     blocks["block_convexity"] = momepy.convexity(blocks)
