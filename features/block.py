@@ -27,7 +27,11 @@ def generate_blocks(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
             }
         )
 
-    blocks_gdf = gpd.GeoDataFrame(blocks, geometry="geometry", crs=buildings.crs)
+    if blocks:
+        blocks_gdf = gpd.GeoDataFrame(blocks, geometry="geometry", crs=buildings.crs)
+    else:
+        blocks_gdf = gpd.GeoDataFrame(columns=["geometry", "building_ids", "block_buildings", "block_id"])
+
     print(
         f"Generated {len(blocks_gdf)} blocks with on average "
         f"{blocks_gdf['building_ids'].apply(len).mean():.1f} buildings."
