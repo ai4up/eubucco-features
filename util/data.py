@@ -12,7 +12,7 @@ from shapely.geometry import MultiPolygon, Polygon
 import util
 
 module_dir = os.path.dirname(__file__)
-BUILDING_TYPE_CATEGORIES_FILE = os.path.join(module_dir, "..", "data", "osm_type_matches_v1.csv")
+BUILDING_TYPE_CATEGORIES_FILE = os.path.join(module_dir, "..", "data", "building-type-categories-v1.csv")
 CRS_UNI = "EPSG:3035"
 GEOMETRY_COL = "geometry"
 
