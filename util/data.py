@@ -17,16 +17,22 @@ CRS_UNI = "EPSG:3035"
 GEOMETRY_COL = "geometry"
 
 
-def load_buildings(buildings_dir: str, region_id: str) -> gpd.GeoDataFrame:
+def load_buildings(buildings_dir: str, buffer_dir: str, region_id: str) -> gpd.GeoDataFrame:
     bldgs_file = _find_file(buildings_dir, f"{region_id}.gpkg")
-    buffer_file = _find_file(buildings_dir, f"{region_id}_buffer.gpkg")
     buildings = gpd.read_file(bldgs_file)
-    buffer = gpd.read_file(buffer_file)
-
-    buffer["id"] = [uuid.uuid4() for _ in range(len(buffer))]  # temporary fix for missing ids
-    buffer["buffer"] = True
     buildings["buffer"] = False
-    buildings = gpd.pd.concat([buildings, buffer], ignore_index=True)
+
+    try:
+        buffer_file = _find_file(buffer_dir, f"{region_id}_buffer.gpkg")
+        buffer = gpd.read_file(buffer_file)[buildings.columns]
+
+        buffer["id"] = [uuid.uuid4() for _ in range(len(buffer))]  # temporary fix for missing ids
+        buffer["buffer"] = True
+        buildings = gpd.pd.concat([buildings, buffer], ignore_index=True)
+        buildings["buffer_considered"] = True
+
+    except Exception:
+        print(f"Buffer file not found for {region_id}. Continuing without buffer.")
 
     return buildings
 

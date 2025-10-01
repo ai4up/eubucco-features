@@ -13,9 +13,11 @@ def test_pipeline():
     test_dir = os.path.join(PROJECT_SRC_PATH, "tests")
     test_data_dir = os.path.join(test_dir, "data")
     bldgs_dir = os.path.join(test_data_dir, "bldgs")
+    buffer_dir = ""
     streets_dir = os.path.join(test_data_dir, "streets")
     pois_dir = os.path.join(test_data_dir, "pois")
     osm_bldgs_dir = os.path.join(test_data_dir, "osm-bldgs")
+    osm_buffer_dir = ""
     GHS_built_up_path = os.path.join(test_data_dir, "GHS_BUILT_test_region.tif")
     corine_lu_path = os.path.join(test_data_dir, "CORINE_landuse_test_region.gpkg")
     oceans_path = os.path.join(test_data_dir, "OSM_oceans_test_region.gpkg")
@@ -32,9 +34,11 @@ def test_pipeline():
     execute_feature_pipeline(
         region_id,
         bldgs_dir,
+        buffer_dir,
         streets_dir,
         pois_dir,
         osm_bldgs_dir,
+        osm_buffer_dir,
         GHS_built_up_path,
         corine_lu_path,
         oceans_path,

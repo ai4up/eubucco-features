@@ -32,9 +32,11 @@ CRS = 3035
 def execute_feature_pipeline(
     region_id: str,
     bldgs_dir: str,
+    buffer_dir: str,
     streets_dir: str,
     pois_dir: str,
     osm_bldgs_dir: str,
+    osm_buffer_dir: str,
     built_up_path: str,
     lu_path: str,
     oceans_path: str,
@@ -53,7 +55,7 @@ def execute_feature_pipeline(
         logger.info(f"Skipping feature engineering for region {region_id} because already done.")
         return
 
-    buildings = load_buildings(bldgs_dir, region_id)
+    buildings = load_buildings(bldgs_dir, buffer_dir, region_id)
     buildings = _preprocess(buildings)
 
     with LoggingContext(logger, feature_name="building"):
@@ -69,7 +71,7 @@ def execute_feature_pipeline(
         buildings = _calculate_poi_features(buildings, pois_dir, region_id)
 
     with LoggingContext(logger, feature_name="osm_buildings"):
-        buildings = _calculate_osm_buildings_features(buildings, osm_bldgs_dir, region_id)
+        buildings = _calculate_osm_buildings_features(buildings, osm_bldgs_dir, osm_buffer_dir, region_id)
 
     with LoggingContext(logger, feature_name="GHS_built_up"):
         buildings = _calculate_GHS_built_up_features(buildings, built_up_path)
@@ -99,7 +101,7 @@ def execute_feature_pipeline(
         buildings = _calculate_poi_buffer_features(buildings, pois_dir, region_id)
 
     with LoggingContext(logger, feature_name="buffer_osm_buildings"):
-        buildings = _calculate_osm_buildings_buffer_features(buildings, osm_bldgs_dir, region_id)
+        buildings = _calculate_osm_buildings_buffer_features(buildings, osm_bldgs_dir, osm_buffer_dir, region_id)
 
     with LoggingContext(logger, feature_name="buffer_GHS_built_up"):
         buildings = _calculate_GHS_built_up_buffer_features(buildings, built_up_path)
@@ -226,9 +228,9 @@ def _calculate_population_features(buildings: gpd.GeoDataFrame, pop_file: str) -
 
 
 def _calculate_osm_buildings_features(
-    buildings: gpd.GeoDataFrame, osm_bldgs_dir: str, region_id: str
+    buildings: gpd.GeoDataFrame, osm_bldgs_dir: str, osm_buffer_dir: str, region_id: str
 ) -> gpd.GeoDataFrame:
-    osm_buildings = osm.load_osm_buildings(osm_bldgs_dir, region_id)
+    osm_buildings = osm.load_osm_buildings(osm_bldgs_dir, osm_buffer_dir, region_id)
     osm_buildings = osm_buildings.to_crs(buildings.crs)
 
     buildings = osm.closest_building_type(buildings, osm_buildings)
