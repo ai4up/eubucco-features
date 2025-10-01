@@ -15,11 +15,11 @@ def get_building_types() -> List[str]:
     return categories["type"].dropna().unique().tolist()
 
 
-def load_osm_buildings(buildings_dir: str, osm_buffer_dir: str, region_id: str) -> gpd.GeoDataFrame:
+def load_osm_buildings(buildings_dir: str, region_id: str) -> gpd.GeoDataFrame:
     categories = pd.read_csv(BUILDING_TYPE_CATEGORIES_FILE)
     categories_map = categories.set_index("type_source")["type"].to_dict()
 
-    buildings = util.load_buildings(buildings_dir, osm_buffer_dir, region_id)
+    buildings = util.load_buildings(buildings_dir, region_id)
     buildings["height"] = pd.to_numeric(buildings["height"], errors="coerce")
     buildings["type"] = buildings["type_source"].map(categories_map)
 
