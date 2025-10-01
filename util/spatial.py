@@ -99,3 +99,7 @@ def transform_crs(geom: BaseGeometry, source_crs: str, target_crs: str) -> BaseG
     transformed_geom = transform(transformer.transform, geom)
 
     return transformed_geom
+
+
+def simplified_rectangular_buffer(geoms: gpd.GeoSeries, size: float) -> gpd.GeoSeries:
+    return geoms.simplify(0.1).buffer(size, join_style="mitre")
