@@ -1,6 +1,7 @@
 from collections.abc import Iterable
 from typing import Callable, Dict, List, Tuple, Union
 
+import pandas as pd
 import geopandas as gpd
 import h3
 import h3pandas  # noqa
@@ -11,7 +12,7 @@ from shapely import Point
 
 def aggregate_to_h3_grid(
     gdf: gpd.GeoDataFrame, operation: Dict[str, Tuple[str, Callable]], res: int
-) -> gpd.GeoDataFrame:
+) -> pd.DataFrame:
     """
     Aggregates a GeoDataFrame to a hexagonal H3-indexed grid.
 
@@ -23,7 +24,7 @@ def aggregate_to_h3_grid(
         res: Resolution of the hexagonal grid.
 
     Returns:
-        Aggregated GeoDataFrame.
+        Aggregated DataFrame.
     """
     if "h3_index" not in gdf.columns:
         gdf["h3_index"] = h3_index(gdf, res)
@@ -43,7 +44,7 @@ def calculate_h3_grid_shares(gdf: gpd.GeoDataFrame, col: str, res: int) -> gpd.G
         res: The resolution of the H3 hexagonal grid.
 
     Returns:
-        A GeoDataFrame with the unique value shares of the specified column within each H3 hexagonal grid cell.
+        A DataFrame with the unique value shares of the specified column within each H3 hexagonal grid cell.
     """
     if "h3_index" not in gdf.columns:
         gdf["h3_index"] = h3_index(gdf, res)
@@ -54,7 +55,7 @@ def calculate_h3_grid_shares(gdf: gpd.GeoDataFrame, col: str, res: int) -> gpd.G
 
 
 def calculate_h3_buffer_features(
-    gdf: gpd.GeoDataFrame, operation: Dict[str, Tuple[str, Callable]], res: int, k: Union[int, List[int]]
+    gdf: gpd.GeoDataFrame, operation: Dict[str, Tuple[str, Callable]], res: int, k: Union[int, List[int]], grid_cells: pd.DataFrame = None
 ) -> gpd.GeoDataFrame:
     """
     Calculate buffer features for a GeoDataFrame based on H3 indexes.
@@ -67,25 +68,30 @@ def calculate_h3_buffer_features(
         res: H3 resolution level.
         k:  The number of hexagonal rings to include in the buffer. Provide a list to calculate features
             for multiple buffer sizes.
+        grid_cells: Optional list of H3 indexes to calculate features for.
 
     Returns:
         A hexagonal grid with the calculated buffer features.
     """
-    hex_grid = aggregate_to_h3_grid(gdf, operation, res)
+    grid_values = aggregate_to_h3_grid(gdf, operation, res)
+    if grid_cells is None:
+        grid_cells = grid_values
     nbh_operation = _determine_neighborhood_agg_operation(operation)
-    hex_grid = _calcuate_hex_rings_aggregate(hex_grid, nbh_operation, res, k)
+    agg_grid = _calcuate_hex_rings_aggregate(grid_cells, grid_values, nbh_operation, res, k)
 
-    return hex_grid
+    return agg_grid
 
 
 def calculate_h3_buffer_shares(
-    gdf: gpd.GeoDataFrame, col: str, h3_res: int, k: Union[int, List[int]]
+    gdf: gpd.GeoDataFrame, col: str, h3_res: int, k: Union[int, List[int]], grid_cells: pd.DataFrame = None
 ) -> gpd.GeoDataFrame:
-    hex_grid_shares = calculate_h3_grid_shares(gdf, col, h3_res)
-    hex_grid_shares = hex_grid_shares.unstack(level=col, fill_value=0)
-    hex_grid_shares = _calcuate_hex_rings_aggregate(hex_grid_shares, "mean", h3_res, k)
+    grid_shares = calculate_h3_grid_shares(gdf, col, h3_res)
+    grid_shares = grid_shares.unstack(level=col, fill_value=0)
+    if grid_cells is None:
+        grid_cells = grid_shares
+    agg_grid_shares = _calcuate_hex_rings_aggregate(grid_cells, grid_shares, "mean", h3_res, k)
 
-    return hex_grid_shares
+    return agg_grid_shares
 
 
 def h3_index(gdf: Union[gpd.GeoSeries, gpd.GeoDataFrame], res: int) -> List[str]:
@@ -133,14 +139,14 @@ def ft_suffix(res: int, k: int = 0) -> str:
 
 
 def _calcuate_hex_rings_aggregate(
-    hex_grid: gpd.GeoDataFrame, operation: Union[str, List, Dict, Callable], res: int, k: Union[int, List[int]]
-) -> gpd.GeoDataFrame:
+    grid_cells: pd.DataFrame, grid_values: pd.DataFrame, operation: Union[str, List, Dict, Callable], res: int, k: Union[int, List[int]]
+) -> pd.DataFrame:
     aggregates = []
     hex_rings = _ensure_iterable(k)
 
     # Calculate aggregate for each hex ring size / buffer size
     for j in hex_rings:
-        ring_aggregate = _calcuate_hex_ring_aggregate(hex_grid, operation, j)
+        ring_aggregate = _calcuate_hex_ring_aggregate(grid_cells, grid_values, operation, j)
         ring_aggregate = ring_aggregate.add_suffix("_" + ft_suffix(res, j))
         aggregates.append(ring_aggregate)
 
@@ -148,16 +154,16 @@ def _calcuate_hex_rings_aggregate(
 
 
 def _calcuate_hex_ring_aggregate(
-    gdf: gpd.GeoDataFrame, operation: Union[str, List, Dict, Callable], k: int
-) -> gpd.GeoDataFrame:
+    grid_cells: pd.DataFrame, grid_values: pd.DataFrame, operation: Union[str, List, Dict, Callable], k: int
+) -> pd.DataFrame:
     # Add column with neighboring hexagons
-    neighbors = gdf.h3.k_ring(k=k)["h3_k_ring"]
+    neighbors = grid_cells.h3.k_ring(k=k)["h3_k_ring"]
 
     # Add self to the neighbor list
     neighbors[:] = [[i] + n for i, n in zip(neighbors.index, neighbors)]
 
     # Perform aggregate operation (e.g. mean) across the hexagons in the neighborhood
-    agg = neighbors.apply(lambda x: gdf.reindex(x).agg(operation))
+    agg = neighbors.apply(lambda x: grid_values.reindex(x).agg(operation))
 
     return agg
 
