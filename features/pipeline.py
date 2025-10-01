@@ -148,7 +148,7 @@ def _calculate_building_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFram
     buildings["bldg_convexity"] = momepy.convexity(buildings)
     buildings["bldg_rectangularity"] = momepy.equivalent_rectangular_index(buildings)
     buildings["bldg_orientation"] = momepy.orientation(buildings)
-    buildings["bldg_corners"] = momepy.corners(buildings)
+    buildings["bldg_corners"] = momepy.corners(buildings.simplify(0.5), eps=45)
     buildings["bldg_shared_wall_length"] = momepy.shared_walls(buildings)
     buildings["bldg_rel_courtyard_size"] = momepy.courtyard_area(buildings) / buildings.area
     buildings["bldg_touches"] = building.calculate_touches(buildings)
@@ -168,7 +168,7 @@ def _calculate_block_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     blocks["block_elongation"] = momepy.elongation(blocks)
     blocks["block_convexity"] = momepy.convexity(blocks)
     blocks["block_orientation"] = momepy.orientation(blocks)
-    blocks["block_corners"] = momepy.corners(blocks.convex_hull)
+    blocks["block_corners"] = momepy.corners(blocks.simplify(0.5), eps=45)
 
     buildings = block.merge_blocks_and_buildings(blocks, buildings)
     return buildings
