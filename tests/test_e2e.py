@@ -23,6 +23,7 @@ def test_pipeline():
     hdd_path = os.path.join(test_data_dir, "HDD_historical_mean_v1.nc")
     GHS_pop_path = os.path.join(test_data_dir, "GHS_POP_test_region.tif")
     lau_path = os.path.join(test_data_dir, "NUTS_LAU_attr_test_region.csv")
+    satclip_path = os.path.join(test_data_dir, "satclip_res8_pca64_test_region.parquet")
     out_dir = test_dir
     log_file = os.path.join(test_dir, "logs", "features.log")
     out_file = os.path.join(out_dir, f"{region_id}.gpkg")
@@ -41,6 +42,7 @@ def test_pipeline():
         hdd_path,
         GHS_pop_path,
         lau_path,
+        satclip_path,
         out_dir,
         log_file,
     )
