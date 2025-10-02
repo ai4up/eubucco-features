@@ -1,5 +1,4 @@
 import os
-import uuid
 from pathlib import Path
 from typing import Callable, Dict, Iterator, Tuple, Union
 
@@ -19,14 +18,7 @@ GEOMETRY_COL = "geometry"
 
 def load_buildings(buildings_dir: str, region_id: str) -> gpd.GeoDataFrame:
     bldgs_file = _find_file(buildings_dir, f"{region_id}.gpkg")
-    buffer_file = _find_file(buildings_dir, f"{region_id}_buffer.gpkg")
     buildings = gpd.read_file(bldgs_file)
-    buffer = gpd.read_file(buffer_file)
-
-    buffer["id"] = [uuid.uuid4() for _ in range(len(buffer))]  # temporary fix for missing ids
-    buffer["buffer"] = True
-    buildings["buffer"] = False
-    buildings = gpd.pd.concat([buildings, buffer], ignore_index=True)
 
     return buildings
 
@@ -98,7 +90,6 @@ def load_nuts_attr(lau_path: str) -> pd.DataFrame:
 
 
 def store_features(buildings: gpd.GeoDataFrame, out_dir: str, region_id: str):
-    buildings = buildings[~buildings["buffer"]]
     out_file = os.path.join(out_dir, f"{region_id}.parquet")
     buildings.to_parquet(out_file)
 
