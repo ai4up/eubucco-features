@@ -12,7 +12,7 @@ def test_pipeline():
     region_id = "Vaugneray"
     test_dir = os.path.join(PROJECT_SRC_PATH, "tests")
     test_data_dir = os.path.join(test_dir, "data")
-    bldgs_dir = os.path.join(test_data_dir, "bldgs")
+    bldgs_dir = os.path.join(test_data_dir, "bldgs-881f902143fffff")
     streets_dir = os.path.join(test_data_dir, "streets")
     pois_dir = os.path.join(test_data_dir, "pois")
     GHS_built_up_path = os.path.join(test_data_dir, "GHS_BUILT_test_region.tif")
