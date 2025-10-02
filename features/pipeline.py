@@ -376,7 +376,7 @@ def _calculate_building_buffer_features(buildings: gpd.GeoDataFrame) -> gpd.GeoD
             suffix = buffer.ft_suffix(H3_RES, s)
             buildings[f"{cat}_diff_{ft}_{suffix}"] = buildings[f"{cat}_avg_{ft}_{suffix}"] - buildings[f"{cat}_{ft}"]
 
-    h3_indices_of_interest = pd.DataFrame(index=buildings['h3_index'])
+    h3_indices_of_interest = pd.DataFrame(index=buildings['h3_index'].unique())
     hex_grid_type_shares = buffer.calculate_h3_buffer_shares(buildings, "bldg_type", H3_RES, H3_BUFFER_SIZES, h3_indices_of_interest, dropna=True, n_min=5)
     hex_grid_type_shares = hex_grid_type_shares.add_prefix("bldg_type_share_")
     buildings = _add_grid_fts_to_buildings(buildings, hex_grid_type_shares)
@@ -396,7 +396,7 @@ def _calculate_poi_buffer_features(buildings: gpd.GeoDataFrame, pois_dir: str, r
     pois = pois.to_crs(buildings.crs)
 
     buffer_fts = {"poi_n": ("amenity", "count")}
-    h3_indices_of_interest = pd.DataFrame(index=buildings['h3_index'])
+    h3_indices_of_interest = pd.DataFrame(index=buildings['h3_index'].unique())
     hex_grid = buffer.calculate_h3_buffer_features(pois, buffer_fts, H3_RES, H3_BUFFER_SIZES, h3_indices_of_interest)
     buildings = _add_grid_fts_to_buildings(buildings, hex_grid)
 
@@ -411,7 +411,7 @@ def _calculate_GHS_built_up_buffer_features(buildings: gpd.GeoDataFrame, built_u
     built_up = load_GHS_built_up(built_up_file, area)
     built_up = built_up.to_crs(buildings.crs)
 
-    h3_indices_of_interest = pd.DataFrame(index=buildings['h3_index'])
+    h3_indices_of_interest = pd.DataFrame(index=buildings['h3_index'].unique())
     hex_grid_type_shares = buffer.calculate_h3_buffer_shares(built_up, "use_type", H3_RES, H3_BUFFER_SIZES, h3_indices_of_interest)
     hex_grid_type_shares = hex_grid_type_shares.add_prefix("ghs_use_type_share_")
     buildings = _add_grid_fts_to_buildings(buildings, hex_grid_type_shares)
