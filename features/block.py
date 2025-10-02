@@ -3,7 +3,7 @@ import uuid
 import geopandas as gpd
 import networkx as nx
 
-from util import simplified_rectangular_buffer
+from util import extract_largest_polygon_from_multipolygon, simplified_rectangular_buffer
 
 def generate_blocks(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     geom = buildings[["geometry"]]
@@ -31,6 +31,7 @@ def generate_blocks(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     if blocks:
         blocks_gdf = gpd.GeoDataFrame(blocks, geometry="geometry", crs=buildings.crs)
         blocks_gdf.geometry = simplified_rectangular_buffer(blocks_gdf, 0.01)  # ensure all geometries are Polygons and valid
+        blocks_gdf.geometry = blocks_gdf.geometry.apply(extract_largest_polygon_from_multipolygon)
     else:
         blocks_gdf = gpd.GeoDataFrame(columns=["geometry", "building_ids", "block_buildings", "block_id"])
 
