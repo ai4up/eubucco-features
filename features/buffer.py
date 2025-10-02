@@ -194,6 +194,7 @@ def _determine_neighborhood_agg_operation(op):
         "sum": "sum",
         "mean": "mean",
         "max": "max",
+        "min": "min",
     }
     try:
         for k, v in op.items():

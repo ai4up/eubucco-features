@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 from pandas.api.types import CategoricalDtype
 
-from features import block, buffer, building, landuse, osm, poi, population, street, topography
+from features import block, buffer, building, landuse, neighbors, poi, population, satclip, street, topography
 from log import LoggingContext, setup_logger
 from util import (
     bbox,
@@ -34,7 +34,6 @@ def execute_feature_pipeline(
     bldgs_dir: str,
     streets_dir: str,
     pois_dir: str,
-    osm_bldgs_dir: str,
     built_up_path: str,
     lu_path: str,
     oceans_path: str,
@@ -62,14 +61,14 @@ def execute_feature_pipeline(
     with LoggingContext(logger, feature_name="blocks"):
         buildings = _calculate_block_features(buildings)
 
+    with LoggingContext(logger, feature_name="neighbors"):
+        buildings = _calculate_neighbor_features(buildings)
+
     with LoggingContext(logger, feature_name="street"):
         buildings = _calculate_street_features(buildings, streets_dir, region_id)
 
     with LoggingContext(logger, feature_name="poi"):
         buildings = _calculate_poi_features(buildings, pois_dir, region_id)
-
-    with LoggingContext(logger, feature_name="osm_buildings"):
-        buildings = _calculate_osm_buildings_features(buildings, osm_bldgs_dir, region_id)
 
     with LoggingContext(logger, feature_name="GHS_built_up"):
         buildings = _calculate_GHS_built_up_features(buildings, built_up_path)
@@ -97,9 +96,6 @@ def execute_feature_pipeline(
 
     with LoggingContext(logger, feature_name="buffer_poi"):
         buildings = _calculate_poi_buffer_features(buildings, pois_dir, region_id)
-
-    with LoggingContext(logger, feature_name="buffer_osm_buildings"):
-        buildings = _calculate_osm_buildings_buffer_features(buildings, osm_bldgs_dir, region_id)
 
     with LoggingContext(logger, feature_name="buffer_GHS_built_up"):
         buildings = _calculate_GHS_built_up_buffer_features(buildings, built_up_path)
@@ -133,6 +129,10 @@ def _preprocess(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     buildings["height"] = buildings["height"].astype(float)
     buildings["floors"] = buildings["floors"].astype(float)
     buildings["age"] = buildings["age"].astype(float)
+
+    buildings["bldg_height"] = buildings["height"]
+    buildings["bldg_age"] = buildings["age"]
+    buildings["bldg_type"] = buildings["type"]
 
     return buildings
 
@@ -171,6 +171,7 @@ def _calculate_block_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     blocks["block_corners"] = momepy.corners(blocks.simplify(0.5), eps=45)
 
     buildings = block.merge_blocks_and_buildings(blocks, buildings)
+
     return buildings
 
 
@@ -225,21 +226,25 @@ def _calculate_population_features(buildings: gpd.GeoDataFrame, pop_file: str) -
     return buildings
 
 
-def _calculate_osm_buildings_features(
-    buildings: gpd.GeoDataFrame, osm_bldgs_dir: str, region_id: str
-) -> gpd.GeoDataFrame:
-    osm_buildings = osm.load_osm_buildings(osm_bldgs_dir, region_id)
-    osm_buildings = osm_buildings.to_crs(buildings.crs)
+def _calculate_neighbor_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    buildings["neighbors_distance_public"] = neighbors.distance_to_building(buildings, "type", "public")
+    buildings["neighbors_distance_industry"] = neighbors.distance_to_building(buildings, "type", "industrial")
+    buildings["neighbors_distance_commercial"] = neighbors.distance_to_building(buildings, "type", "commercial")
+    buildings["neighbors_distance_agriculture"] = neighbors.distance_to_building(buildings, "type", "agricultural")
+    buildings["neighbors_distance_residential"] = neighbors.distance_to_building(buildings, "type", "residential")
+    buildings["neighbors_distance_non_residential"] = buildings[["neighbors_distance_public", "neighbors_distance_industry", "neighbors_distance_commercial", "neighbors_distance_agriculture"]].min(axis=1)
 
-    buildings = osm.closest_building_type(buildings, osm_buildings)
-    buildings["osm_closest_building_height"] = osm.closest_building_height(buildings, osm_buildings)
-    buildings["osm_distance_residential"] = osm.distance_to_building_type(buildings, osm_buildings, "residential")
-    buildings["osm_distance_public"] = osm.distance_to_building_type(buildings, osm_buildings, "public")
-    buildings["osm_distance_industry"] = osm.distance_to_building_type(buildings, osm_buildings, "industrial")
-    buildings["osm_distance_commercial"] = osm.distance_to_building_type(buildings, osm_buildings, "commercial")
-    buildings["osm_distance_agriculture"] = osm.distance_to_building_type(buildings, osm_buildings, "agricultural")
-    buildings["osm_distance_medium_rise"] = osm.distance_to_building_height(buildings, osm_buildings, [15, 30])
-    buildings["osm_distance_high_rise"] = osm.distance_to_building_height(buildings, osm_buildings, [30, np.inf])
+    buildings["neighbors_closest_building_height"] = neighbors.closest_building(buildings, "height")
+    buildings["neighbors_distance_low_rise"] = neighbors.distance_to_building(buildings, "height", [0, 10])
+    buildings["neighbors_distance_low_medium_rise"] = neighbors.distance_to_building(buildings, "height", [10, 20])
+    buildings["neighbors_distance_medium_rise"] = neighbors.distance_to_building(buildings, "height", [20, 30])
+    buildings["neighbors_distance_high_rise"] = neighbors.distance_to_building(buildings, "height", [30, np.inf])
+
+    buildings["neighbors_closest_building_age"] = neighbors.closest_building(buildings, "age")
+    buildings["neighbors_distance_prior_1900"] = neighbors.distance_to_building(buildings, "age", [0, 1900])
+    buildings["neighbors_distance_1900_1970"] = neighbors.distance_to_building(buildings, "age", [1900, 1970])
+    buildings["neighbors_distance_1970_2000"] = neighbors.distance_to_building(buildings, "age", [1970, 2000])
+    buildings["neighbors_distance_after_2000"] = neighbors.distance_to_building(buildings, "age", [2000, np.inf])
 
     return buildings
 
@@ -288,6 +293,15 @@ def _calculate_location_encoding(buildings: gpd.GeoDataFrame, lau_path: str, reg
 def _calculate_building_buffer_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     buffer_fts = {
         "bldg_n": ("bldg_footprint_area", "count"),
+        "bldg_avg_height": ("bldg_height", "mean"),
+        "bldg_max_height": ("bldg_height", "max"),
+        "bldg_min_height": ("bldg_height", "min"),
+        "bldg_std_height": ("bldg_height", "std"),
+        "bldg_avg_age": ("bldg_age", "mean"),
+        "bldg_max_age": ("bldg_age", "max"),
+        "bldg_min_age": ("bldg_age", "min"),
+        "bldg_std_age": ("bldg_age", "std"),
+        "bldg_type_variety": ("bldg_type", "nunique"),
         "bldg_total_footprint_area": ("bldg_footprint_area", "sum"),
         "bldg_avg_footprint_area": ("bldg_footprint_area", "mean"),
         "bldg_std_footprint_area": ("bldg_footprint_area", "std"),
@@ -340,6 +354,8 @@ def _calculate_building_buffer_features(buildings: gpd.GeoDataFrame) -> gpd.GeoD
     buildings = _add_grid_fts_to_buildings(buildings, hex_grid)
 
     for cat, ft in [
+        ("bldg", "height"),
+        ("bldg", "age"),
         ("bldg", "footprint_area"),
         ("bldg", "perimeter"),
         ("bldg", "elongation"),
@@ -359,6 +375,11 @@ def _calculate_building_buffer_features(buildings: gpd.GeoDataFrame) -> gpd.GeoD
         for s in H3_BUFFER_SIZES:
             suffix = buffer.ft_suffix(H3_RES, s)
             buildings[f"{cat}_diff_{ft}_{suffix}"] = buildings[f"{cat}_avg_{ft}_{suffix}"] - buildings[f"{cat}_{ft}"]
+
+    h3_indices_of_interest = pd.DataFrame(index=buildings['h3_index'])
+    hex_grid_type_shares = buffer.calculate_h3_buffer_shares(buildings, "bldg_type", H3_RES, H3_BUFFER_SIZES, h3_indices_of_interest, dropna=True, n_min=5)
+    hex_grid_type_shares = hex_grid_type_shares.add_prefix("bldg_type_share_")
+    buildings = _add_grid_fts_to_buildings(buildings, hex_grid_type_shares)
 
     return buildings
 
@@ -381,29 +402,6 @@ def _calculate_poi_buffer_features(buildings: gpd.GeoDataFrame, pois_dir: str, r
 
     hex_grid_large_buffer = hex_grid[hex_grid.columns[-1]]
     buildings["distance_to_center"] = buffer.distance_to_h3_grid_max(buildings, hex_grid_large_buffer)
-
-    return buildings
-
-
-def _calculate_osm_buildings_buffer_features(
-    buildings: gpd.GeoDataFrame, osm_bldgs_dir: str, osm_buffer_dir:str, region_id: str
-) -> gpd.GeoDataFrame:
-    osm_buildings = osm.load_osm_buildings(osm_bldgs_dir, osm_buffer_dir, region_id)
-    osm_buildings = osm_buildings.to_crs(buildings.crs)
-
-    h3_indices_of_interest = pd.DataFrame(index=buildings['h3_index'])
-    hex_grid_type_shares = buffer.calculate_h3_buffer_shares(osm_buildings, "type", H3_RES, H3_BUFFER_SIZES, h3_indices_of_interest)
-    hex_grid_type_shares = hex_grid_type_shares.add_prefix("osm_type_share_")
-    buildings = _add_grid_fts_to_buildings(buildings, hex_grid_type_shares)
-
-    buffer_fts = {
-        "osm_avg_height": ("height", "mean"),
-        "osm_std_height": ("height", "std"),
-        "osm_max_height": ("height", "max"),
-        "osm_type_variety": ("type", "nunique"),
-    }
-    hex_grid = buffer.calculate_h3_buffer_features(osm_buildings, buffer_fts, H3_RES, H3_BUFFER_SIZES, h3_indices_of_interest)
-    buildings = _add_grid_fts_to_buildings(buildings, hex_grid)
 
     return buildings
 
