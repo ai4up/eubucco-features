@@ -42,6 +42,7 @@ def execute_feature_pipeline(
     hdd_path: str,
     pop_path: str,
     lau_path: str,
+    satclip_path: str,
     out_dir: str,
     log_file: str,
 ) -> None:
@@ -89,7 +90,7 @@ def execute_feature_pipeline(
         buildings = _calculate_nuts_region_features(buildings, lau_path, region_id)
 
     with LoggingContext(logger, feature_name="location_encoding"):
-        buildings = _calculate_location_encoding(buildings, lau_path, region_id)
+        buildings = _calculate_location_encoding(buildings, lau_path, satclip_path, region_id)
 
     with LoggingContext(logger, feature_name="buffer"):
         buildings = _calculate_building_buffer_features(buildings)
@@ -263,7 +264,9 @@ def _calculate_nuts_region_features(buildings: gpd.GeoDataFrame, lau_path: str, 
     return buildings
 
 
-def _calculate_location_encoding(buildings: gpd.GeoDataFrame, lau_path: str, region_id: str) -> gpd.GeoDataFrame:
+def _calculate_location_encoding(buildings: gpd.GeoDataFrame, lau_path: str, satclip_path: str, region_id: str) -> gpd.GeoDataFrame:
+    buildings = satclip.add_h3_embeddings(buildings, satclip_path)
+
     buildings["lng"] = buildings.centroid.to_crs("EPSG:4326").x
     buildings["lat"] = buildings.centroid.to_crs("EPSG:4326").y
 

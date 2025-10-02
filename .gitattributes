@@ -7,3 +7,6 @@ data/building-type-categories-v1.csv  !filter !diff !merge text
 data/osm_type_matches_v1.csv  !filter !diff !merge text
 data/osm-building-tag-values.json filter=lfs diff=lfs merge=lfs -text
 tests/data/osm-bldgs/Vaugneray_buffer.gpkg filter=lfs diff=lfs merge=lfs -text
+tests/data/satclip_res8_pca64_test_region.parquet filter=lfs diff=lfs merge=lfs -text
+tests/data/blgs filter=lfs diff=lfs merge=lfs -text
+tests/data/blgs/Vaugneray.parquet filter=lfs diff=lfs merge=lfs -text

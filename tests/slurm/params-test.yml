@@ -9,6 +9,7 @@ cdd_path: [/p/projects/eubucco/eubucco-features/data/CDD_historical_mean_v1.nc]
 hdd_path: [/p/projects/eubucco/eubucco-features/data/HDD_historical_mean_v1.nc]
 pop_path: [/p/projects/eubucco/eubucco-features/data/GHS_POP_test_region.tif]
 lau_path: [/p/projects/eubucco/eubucco-features/data/NUTS_LAU_attr_test_region.csv]
+satclip_path: [/p/projects/eubucco/eubucco-features/tests/data/satclip_res8_pca64_test_region.parquet]
 out_dir: [/p/projects/eubucco/eubucco-features/tests/]
 log_file: [/p/projects/eubucco/eubucco-features/tests/logs/pipeline.log]
 region_id:
