@@ -13,6 +13,7 @@ from util import (
     building_type_harmonization,
     center,
     distance_nearest,
+    extract_largest_polygon_from_multipolygon,
     load_buildings,
     load_GHS_built_up,
     load_nuts_attr,
@@ -111,7 +112,7 @@ def execute_feature_pipeline(
 
 def _preprocess(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     buildings = buildings.to_crs(CRS)
-    buildings = building.remove_buildings_with_multiple_parts(buildings)
+    buildings.geometry = buildings.geometry.apply(extract_largest_polygon_from_multipolygon)
     buildings["h3_index"] = buffer.h3_index(buildings, H3_RES)
 
     type_mapping = building_type_harmonization()

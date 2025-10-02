@@ -12,7 +12,7 @@ from .data import (
     store_features,
 )
 from .raster import raster_to_gdf, read_area, read_value
-from .spatial import bbox, center, distance_nearest, simplified_rectangular_buffer, sjoin_nearest_cols, snearest, snearest_attr, transform_crs
+from .spatial import bbox, center, distance_nearest, extract_largest_polygon_from_multipolygon, simplified_rectangular_buffer, sjoin_nearest_cols, snearest, snearest_attr, transform_crs
 
 __all__ = [
     "building_type_harmonization",
@@ -22,6 +22,7 @@ __all__ = [
     "load_pois",
     "load_nuts_attr",
     "nuts_geometries",
+    "extract_largest_polygon_from_multipolygon",
     "simplified_rectangular_buffer",
     "store_features",
     "sjoin_nearest_cols",

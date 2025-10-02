@@ -3,7 +3,7 @@ from typing import Dict, List, Union
 import geopandas as gpd
 import pandas as pd
 from pyproj import Transformer
-from shapely.geometry import Point, box
+from shapely.geometry import MultiPolygon, Point, box
 from shapely.geometry.base import BaseGeometry
 from shapely.ops import transform
 
@@ -103,3 +103,10 @@ def transform_crs(geom: BaseGeometry, source_crs: str, target_crs: str) -> BaseG
 
 def simplified_rectangular_buffer(geoms: gpd.GeoSeries, size: float) -> gpd.GeoSeries:
     return geoms.simplify(0.1).buffer(size, join_style="mitre")
+
+
+def extract_largest_polygon_from_multipolygon(geom):
+    if isinstance(geom, MultiPolygon):
+        return max(geom.geoms, key=lambda a: a.area)
+
+    return geom
