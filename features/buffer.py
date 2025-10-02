@@ -1,6 +1,7 @@
 from collections.abc import Iterable
 from typing import Callable, Dict, List, Tuple, Union
 
+import numpy as np
 import pandas as pd
 import geopandas as gpd
 import h3
@@ -34,7 +35,7 @@ def aggregate_to_h3_grid(
     return hex_grid
 
 
-def calculate_h3_grid_shares(gdf: gpd.GeoDataFrame, col: str, res: int) -> gpd.GeoDataFrame:
+def calculate_h3_grid_shares(gdf: gpd.GeoDataFrame, col: str, res: int, dropna: bool = False) -> gpd.GeoDataFrame:
     """
     Calculate the proportions of unique values in a column for each H3 hexagonal grid cell.
 
@@ -49,7 +50,10 @@ def calculate_h3_grid_shares(gdf: gpd.GeoDataFrame, col: str, res: int) -> gpd.G
     if "h3_index" not in gdf.columns:
         gdf["h3_index"] = h3_index(gdf, res)
 
-    hex_grid = gdf.groupby(["h3_index", col]).size() / gdf.groupby("h3_index").size()
+    if dropna:
+        gdf = gdf.dropna(subset=[col])
+
+    hex_grid = gdf.groupby(["h3_index", col]).size()
 
     return hex_grid
 
@@ -77,21 +81,28 @@ def calculate_h3_buffer_features(
     if grid_cells is None:
         grid_cells = grid_values
     nbh_operation = _determine_neighborhood_agg_operation(operation)
-    agg_grid = _calcuate_hex_rings_aggregate(grid_cells, grid_values, nbh_operation, res, k)
+    agg_grid = _calculate_hex_rings_aggregate(grid_cells, grid_values, nbh_operation, res, k)
 
     return agg_grid
 
 
 def calculate_h3_buffer_shares(
-    gdf: gpd.GeoDataFrame, col: str, h3_res: int, k: Union[int, List[int]], grid_cells: pd.DataFrame = None
+    gdf: gpd.GeoDataFrame, col: str, h3_res: int, k: Union[int, List[int]], grid_cells: pd.DataFrame = None, dropna: bool = False, n_min: int = 1
 ) -> gpd.GeoDataFrame:
-    grid_shares = calculate_h3_grid_shares(gdf, col, h3_res)
-    grid_shares = grid_shares.unstack(level=col, fill_value=0)
+    grid_counts = calculate_h3_grid_shares(gdf, col, h3_res, dropna)
+    grid_counts = grid_counts.unstack(level=col, fill_value=0)
     if grid_cells is None:
-        grid_cells = grid_shares
-    agg_grid_shares = _calcuate_hex_rings_aggregate(grid_cells, grid_shares, "mean", h3_res, k)
+        grid_cells = grid_counts
+    agg_grid = _calculate_hex_rings_aggregate(grid_cells, grid_counts, "sum", h3_res, k)
+    ft_suffixes = [ft_suffix(h3_res, j) for j in _ensure_iterable(k)]
+    for suffix in ft_suffixes:
+        cols = agg_grid.filter(like=suffix)
+        totals = cols.sum(axis=1)
+        shares = cols.div(totals, axis=0)
+        shares[totals < n_min] = np.nan
+        agg_grid[cols.columns] = shares
 
-    return agg_grid_shares
+    return agg_grid
 
 
 def h3_index(gdf: Union[gpd.GeoSeries, gpd.GeoDataFrame], res: int) -> List[str]:
@@ -138,7 +149,7 @@ def ft_suffix(res: int, k: int = 0) -> str:
     return f"within_buffer_{area:.2f}km2"
 
 
-def _calcuate_hex_rings_aggregate(
+def _calculate_hex_rings_aggregate(
     grid_cells: pd.DataFrame, grid_values: pd.DataFrame, operation: Union[str, List, Dict, Callable], res: int, k: Union[int, List[int]]
 ) -> pd.DataFrame:
     aggregates = []
