@@ -112,8 +112,10 @@ def execute_feature_pipeline(
 
 def _preprocess(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     buildings = buildings.to_crs(CRS)
-    buildings.geometry = buildings.geometry.apply(extract_largest_polygon_from_multipolygon)
     buildings["h3_index"] = buffer.h3_index(buildings, H3_RES)
+
+    buildings["bldg_multi_part"] = buildings.geometry.type == "MultiPolygon"
+    buildings.geometry = buildings.geometry.apply(extract_largest_polygon_from_multipolygon)
 
     type_mapping = building_type_harmonization()
     types = set(type_mapping.values())
