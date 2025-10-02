@@ -1,24 +1,20 @@
 import os
-from pathlib import Path
-from typing import Callable, Dict, Iterator, Tuple, Union
+from typing import Callable, Iterator, Tuple, Union
 
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-from shapely import wkt
 from shapely.geometry import MultiPolygon, Polygon
 
 import util
 
-module_dir = os.path.dirname(__file__)
-BUILDING_TYPE_CATEGORIES_FILE = os.path.join(module_dir, "..", "data", "building-type-categories-v1.csv")
 CRS_UNI = "EPSG:3035"
 GEOMETRY_COL = "geometry"
 
 
 def load_buildings(buildings_dir: str, region_id: str) -> gpd.GeoDataFrame:
-    bldgs_file = _find_file(buildings_dir, f"{region_id}.gpkg")
-    buildings = gpd.read_file(bldgs_file)
+    bldgs_file = os.path.join(buildings_dir, f"{region_id}.parquet")
+    buildings = gpd.read_parquet(bldgs_file)
 
     return buildings
 
@@ -94,14 +90,6 @@ def store_features(buildings: gpd.GeoDataFrame, out_dir: str, region_id: str):
     buildings.to_parquet(out_file)
 
 
-def building_type_harmonization(residential: bool = False) -> Dict[str, str]:
-    bldg_types = pd.read_csv(BUILDING_TYPE_CATEGORIES_FILE)
-    type_col = "residential_type" if residential else "type"
-    type_mapping = bldg_types.set_index("type_source")[type_col].to_dict()
-
-    return type_mapping
-
-
 def nuts_geometries(nuts_path: str, crs: str, buffer: int = 0) -> Iterator[Tuple[str, Union[Polygon, MultiPolygon]]]:
     nuts = gpd.read_file(nuts_path)
     nuts = nuts.dissolve("NUTS_ID")
@@ -132,22 +120,8 @@ def download_all_nuts(download_func: Callable, nuts_path: str, out_path: str, bu
         gdf.to_file(file_path, driver="GPKG")
 
 
-def _find_file(data_dir: str, pattern: str) -> Path:
-    try:
-        return next(Path(data_dir).rglob(pattern))
-    except StopIteration:
-        raise Exception(f"File {pattern} could not be found in {data_dir}.")
-
-
 def _load_gpkg(data_dir: str, region_id: str) -> gpd.GeoDataFrame:
     gdf_file = os.path.join(data_dir, f"{region_id}.gpkg")
     gdf = gpd.read_file(gdf_file)
-
-    return gdf
-
-
-def _load_csv_geom(path: Path) -> gpd.GeoDataFrame:
-    df = pd.read_csv(path)
-    gdf = gpd.GeoDataFrame(df, geometry=df[GEOMETRY_COL].apply(wkt.loads), crs=CRS_UNI)
 
     return gdf

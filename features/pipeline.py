@@ -10,7 +10,6 @@ from features import block, buffer, building, landuse, neighbors, poi, populatio
 from log import LoggingContext, setup_logger
 from util import (
     bbox,
-    building_type_harmonization,
     center,
     distance_nearest,
     extract_largest_polygon_from_multipolygon,
@@ -116,22 +115,6 @@ def _preprocess(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 
     buildings["bldg_multi_part"] = buildings.geometry.type == "MultiPolygon"
     buildings.geometry = buildings.geometry.apply(extract_largest_polygon_from_multipolygon)
-
-    type_mapping = building_type_harmonization()
-    types = set(type_mapping.values())
-    types.remove(np.nan)
-    buildings["type"] = buildings["type_source"].map(type_mapping)
-    buildings["type"] = buildings["type"].astype(CategoricalDtype(categories=types))
-
-    res_type_mapping = building_type_harmonization(residential=True)
-    res_types = set(res_type_mapping.values())
-    res_types.remove(np.nan)
-    buildings["residential_type"] = buildings["type_source"].map(res_type_mapping)
-    buildings["residential_type"] = buildings["residential_type"].astype(CategoricalDtype(categories=res_types))
-
-    buildings["height"] = buildings["height"].astype(float)
-    buildings["floors"] = buildings["floors"].astype(float)
-    buildings["age"] = buildings["age"].astype(float)
 
     buildings["bldg_height"] = buildings["height"]
     buildings["bldg_age"] = buildings["age"]
