@@ -343,28 +343,31 @@ def _calculate_building_buffer_features(buildings: gpd.GeoDataFrame) -> gpd.GeoD
     hex_grid = buffer.calculate_h3_buffer_features(buildings, buffer_fts, H3_RES, H3_BUFFER_SIZES)
     buildings = _add_grid_fts_to_buildings(buildings, hex_grid)
 
-    for cat, ft in [
-        ("bldg", "height"),
-        ("bldg", "age"),
-        ("bldg", "footprint_area"),
-        ("bldg", "perimeter"),
-        ("bldg", "elongation"),
-        ("bldg", "convexity"),
-        ("bldg", "orientation"),
-        ("bldg", "distance_closest"),
-        ("block", "footprint_area"),
-        ("block", "perimeter"),
-        ("block", "elongation"),
-        ("block", "convexity"),
-        ("block", "orientation"),
-        ("block", "corners"),
-        ("block", "length"),
-        ("street", "distance"),
-        ("street", "size"),
-    ]:
-        for s in H3_BUFFER_SIZES:
-            suffix = buffer.ft_suffix(H3_RES, s)
+    for s in H3_BUFFER_SIZES:
+        suffix = buffer.ft_suffix(H3_RES, s)
+        for cat, ft in [
+            ("bldg", "height"),
+            ("bldg", "age"),
+            ("bldg", "footprint_area"),
+            ("bldg", "perimeter"),
+            ("bldg", "elongation"),
+            ("bldg", "convexity"),
+            ("bldg", "orientation"),
+            ("bldg", "distance_closest"),
+            ("block", "footprint_area"),
+            ("block", "perimeter"),
+            ("block", "elongation"),
+            ("block", "convexity"),
+            ("block", "orientation"),
+            ("block", "corners"),
+            ("block", "length"),
+            ("street", "distance"),
+            ("street", "size"),
+        ]:
             buildings[f"{cat}_diff_{ft}_{suffix}"] = buildings[f"{cat}_avg_{ft}_{suffix}"] - buildings[f"{cat}_{ft}"]
+            buildings[f"{cat}_diff_std_{ft}_{suffix}"] = buildings[f"{cat}_diff_{ft}_{suffix}"] / buildings[f"{cat}_std_{ft}_{suffix}"]
+
+        buildings[f"bldg_diff_std_shape_{suffix}"] = buildings[[f"bldg_diff_std_{ft}_{suffix}" for ft in ["footprint_area", "perimeter", "elongation", "convexity", "orientation", "distance_closest"]]].abs().mean(axis=1)
 
     h3_indices_of_interest = pd.DataFrame(index=buildings['h3_index'].unique())
     hex_grid_type_shares = buffer.calculate_h3_buffer_shares(buildings, "bldg_type", H3_RES, H3_BUFFER_SIZES, h3_indices_of_interest, dropna=True, n_min=5)
