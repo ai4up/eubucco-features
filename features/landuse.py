@@ -1,7 +1,7 @@
 import geopandas as gpd
 import pandas as pd
 
-from util import bbox, transform_crs
+from util import bbox, center, transform_crs
 
 # CORINE landuse classes https://land.copernicus.eu/en/products/corine-land-cover
 CORINE_LU_CLASS_COL = "Code_18"
@@ -49,7 +49,7 @@ def distance_to_coast(buildings: gpd.GeoDataFrame, oceans_path: str) -> pd.Serie
     ocean_geom = oceans.union_all()
     ocean_geom = transform_crs(ocean_geom, oceans.crs, buildings.crs)
 
-    approx_dis = buildings.geometry.iloc[0].distance(ocean_geom)
+    approx_dis = center(buildings).distance(ocean_geom)
     if approx_dis > 50000:
         return approx_dis
 
