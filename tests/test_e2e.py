@@ -26,7 +26,7 @@ def test_pipeline():
     satclip_path = os.path.join(test_data_dir, "satclip_res8_pca64_test_region.parquet")
     out_dir = test_dir
     log_file = os.path.join(test_dir, "logs", "features.log")
-    out_file = os.path.join(out_dir, f"{region_id}.gpkg")
+    out_file = os.path.join(out_dir, f"{region_id}.parquet")
 
     Path(out_file).unlink(missing_ok=True)
     execute_feature_pipeline(

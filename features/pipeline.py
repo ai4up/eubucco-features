@@ -48,7 +48,7 @@ def execute_feature_pipeline(
 ) -> None:
     logger = setup_logger(log_file=log_file)
 
-    out_file = os.path.join(out_dir, f"{region_id}.gpkg")
+    out_file = os.path.join(out_dir, f"{region_id}.parquet")
     if os.path.exists(out_file):
         logger.info(f"Skipping feature engineering for region {region_id} because already done.")
         return
