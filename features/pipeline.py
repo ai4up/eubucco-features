@@ -117,9 +117,10 @@ def _preprocess(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     buildings["bldg_multi_part"] = buildings.geometry.type == "MultiPolygon"
     buildings.geometry = buildings.geometry.apply(extract_largest_polygon_from_multipolygon)
 
-    buildings["bldg_height"] = buildings["height"]
-    buildings["bldg_age"] = buildings["age"]
-    buildings["bldg_type"] = buildings["type"]
+    train_mask = buildings.sample(frac=0.8, random_state=42).index
+    buildings["bldg_height"] = buildings["height"].loc[train_mask]
+    buildings["bldg_age"] = buildings["age"].loc[train_mask]
+    buildings["bldg_type"] = buildings["type"].loc[train_mask]
 
     return buildings
 
@@ -214,24 +215,24 @@ def _calculate_population_features(buildings: gpd.GeoDataFrame, pop_file: str) -
 
 
 def _calculate_neighbor_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
-    buildings["neighbors_distance_public"] = neighbors.distance_to_building(buildings, "type", "public")
-    buildings["neighbors_distance_industry"] = neighbors.distance_to_building(buildings, "type", "industrial")
-    buildings["neighbors_distance_commercial"] = neighbors.distance_to_building(buildings, "type", "commercial")
-    buildings["neighbors_distance_agriculture"] = neighbors.distance_to_building(buildings, "type", "agricultural")
-    buildings["neighbors_distance_residential"] = neighbors.distance_to_building(buildings, "type", "residential")
+    buildings["neighbors_distance_public"] = neighbors.distance_to_building(buildings, "bldg_type", "public")
+    buildings["neighbors_distance_industry"] = neighbors.distance_to_building(buildings, "bldg_type", "industrial")
+    buildings["neighbors_distance_commercial"] = neighbors.distance_to_building(buildings, "bldg_type", "commercial")
+    buildings["neighbors_distance_agriculture"] = neighbors.distance_to_building(buildings, "bldg_type", "agricultural")
+    buildings["neighbors_distance_residential"] = neighbors.distance_to_building(buildings, "bldg_type", "residential")
     buildings["neighbors_distance_non_residential"] = buildings[["neighbors_distance_public", "neighbors_distance_industry", "neighbors_distance_commercial", "neighbors_distance_agriculture"]].min(axis=1)
 
-    buildings["neighbors_closest_building_height"] = neighbors.closest_building(buildings, "height")
-    buildings["neighbors_distance_low_rise"] = neighbors.distance_to_building(buildings, "height", [0, 10])
-    buildings["neighbors_distance_low_medium_rise"] = neighbors.distance_to_building(buildings, "height", [10, 20])
-    buildings["neighbors_distance_medium_rise"] = neighbors.distance_to_building(buildings, "height", [20, 30])
-    buildings["neighbors_distance_high_rise"] = neighbors.distance_to_building(buildings, "height", [30, np.inf])
+    buildings["neighbors_closest_building_height"] = neighbors.closest_building(buildings, "bldg_height")
+    buildings["neighbors_distance_low_rise"] = neighbors.distance_to_building(buildings, "bldg_height", [0, 10])
+    buildings["neighbors_distance_low_medium_rise"] = neighbors.distance_to_building(buildings, "bldg_height", [10, 20])
+    buildings["neighbors_distance_medium_rise"] = neighbors.distance_to_building(buildings, "bldg_height", [20, 30])
+    buildings["neighbors_distance_high_rise"] = neighbors.distance_to_building(buildings, "bldg_height", [30, np.inf])
 
-    buildings["neighbors_closest_building_age"] = neighbors.closest_building(buildings, "age")
-    buildings["neighbors_distance_prior_1900"] = neighbors.distance_to_building(buildings, "age", [0, 1900])
-    buildings["neighbors_distance_1900_1970"] = neighbors.distance_to_building(buildings, "age", [1900, 1970])
-    buildings["neighbors_distance_1970_2000"] = neighbors.distance_to_building(buildings, "age", [1970, 2000])
-    buildings["neighbors_distance_after_2000"] = neighbors.distance_to_building(buildings, "age", [2000, np.inf])
+    buildings["neighbors_closest_building_age"] = neighbors.closest_building(buildings, "bldg_age")
+    buildings["neighbors_distance_prior_1900"] = neighbors.distance_to_building(buildings, "bldg_age", [0, 1900])
+    buildings["neighbors_distance_1900_1970"] = neighbors.distance_to_building(buildings, "bldg_age", [1900, 1970])
+    buildings["neighbors_distance_1970_2000"] = neighbors.distance_to_building(buildings, "bldg_age", [1970, 2000])
+    buildings["neighbors_distance_after_2000"] = neighbors.distance_to_building(buildings, "bldg_age", [2000, np.inf])
 
     return buildings
 
