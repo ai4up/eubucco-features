@@ -1,11 +1,12 @@
 jobs:
-   - name: feature-engineering
-     script: /p/projects/eubucco/eubucco-features/slurm/run.py
-     param_generator_file: /p/projects/eubucco/eubucco-features/tests/slurm/params-test.yml
-     log_dir: /p/projects/eubucco/eubucco-features/tests/logs/
-     resources:
-       cpus: 1
-       time: "01:00:00"
+  - name: feature-engineering
+    script: /p/projects/eubucco/eubucco-features/slurm/ft-eng.py
+    param_generator_file: /p/projects/eubucco/eubucco-features/tests/slurm/params-test.yml
+    log_dir: /p/projects/eubucco/eubucco-features/tests/logs/
+    resources:
+      cpus: 1
+      mem: 3000
+      time: "01:00:00"
 
 properties:
   conda_env: eubucco-features
