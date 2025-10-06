@@ -241,14 +241,15 @@ def _calculate_GHS_built_up_features(buildings: gpd.GeoDataFrame, built_up_file:
     built_up = load_GHS_built_up(built_up_file, area)
     built_up = built_up.to_crs(buildings.crs)
 
-    nearest = snearest_attr(buildings, built_up, attr=["use_type", "height"], max_distance=100)
-    nearest["use_type"] = pd.Categorical(nearest["use_type"], categories=["residential", "non-residential"])
-    buildings["ghs_closest_height"] = nearest["height"]
-    buildings["ghs_closest_use_type"] = nearest["use_type"]
-    buildings = pd.get_dummies(buildings, columns=["ghs_closest_use_type"])
-
+    res_areas = built_up[built_up["use_type"] == "residential"]
+    non_res_areas = built_up[built_up["use_type"] == "non-residential"]
     high_rise_areas = built_up[built_up["high_rise"]]
+
+    buildings["ghs_distance_residential"] = distance_nearest(buildings, res_areas, max_distance=1000)
+    buildings["ghs_distance_non_residential"] = distance_nearest(buildings, non_res_areas, max_distance=1000)
     buildings["ghs_distance_high_rise"] = distance_nearest(buildings, high_rise_areas, max_distance=1000)
+
+    buildings["ghs_closest_height"] = snearest_attr(buildings, built_up, attr="height", max_distance=100)["height"]
 
     return buildings
 
