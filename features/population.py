@@ -5,9 +5,17 @@ import util
 from features import buffer
 
 
+def load_population(population_file: str, area: gpd.GeoSeries, point_geom: bool) -> gpd.GeoDataFrame:
+    population_raster, city_meta = util.read_area(population_file, area)
+    population = util.raster_to_gdf(population_raster[0], city_meta, point=point_geom)
+    population = population.rename(columns={"values": "population"})
+
+    return population
+
+
 def count_local_population(buildings: gpd.GeoDataFrame, population_file: str) -> pd.Series:
     area = util.bbox(buildings, buffer=1000)
-    pop = util.load_population(population_file, area, point_geom=False)
+    pop = load_population(population_file, area, point_geom=False)
     pop = pop.to_crs(buildings.crs)
 
     bldg_centroids = buildings.centroid.to_frame()
@@ -18,7 +26,7 @@ def count_local_population(buildings: gpd.GeoDataFrame, population_file: str) ->
 
 def count_population_in_buffer(buildings: gpd.GeoDataFrame, population_file: str, h3_res: int) -> pd.Series:
     area = util.bbox(buildings, buffer=1000)
-    pop = util.load_population(population_file, area, point_geom=True)
+    pop = load_population(population_file, area, point_geom=True)
 
     h3_idx = f"h3_{h3_res}"
     buffer_fts = {"total_population": ("population", "sum")}

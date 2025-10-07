@@ -5,11 +5,35 @@ import shapely
 
 from util import bbox, transform_crs, distance_nearest
 
-# CORINE landuse classes https://land.copernicus.eu/en/products/corine-land-cover
-CORINE_LU_CLASS_COL = "Code_18"
-CORINE_LU_CLASSES = {"agricultural": [211, 212, 213, 221, 222, 223, 231, 241, 242, 243, 244], "industrial": [121], "dense_urban": [111]}
 CORINE_CRS = "EPSG:3035"
 OCEANS_CRS = "EPSG:3857"
+
+# CORINE landuse classes https://land.copernicus.eu/en/products/corine-land-cover
+CORINE_LU_CLASS_COL = "Code_18"
+CORINE_LU_CLASSES = {
+    "agricultural": [211, 212, 213, 221, 222, 223, 231, 241, 242, 243, 244],
+    "industrial": [121],
+    "dense_urban": [111],
+}
+
+
+def load_landuse(landuse_path: str, buildings: gpd.GeoDataFrame) -> pd.Series:
+    """
+    Load and preprocess land use data for the area around the buildings.
+
+    Args:
+        landuse_path: The file path to the land use data.
+        buildings: A GeoDataFrame containing building geometries.
+
+    Returns:
+        A GeoDataFrame containing the tiled land use data.
+    """
+    box = bbox(buildings, crs=CORINE_CRS, buffer=1000)
+    lu = gpd.read_file(landuse_path, bbox=box)
+    lu = lu.to_crs(buildings.crs)
+    lu = _tile_landuse(lu)
+
+    return lu
 
 
 def distance_to_landuse(buildings: gpd.GeoDataFrame, lu: gpd.GeoDataFrame, category: str) -> pd.Series:
@@ -28,25 +52,6 @@ def distance_to_landuse(buildings: gpd.GeoDataFrame, lu: gpd.GeoDataFrame, categ
     dis = distance_nearest(buildings.centroid, lu, max_distance=1000)
 
     return dis
-
-
-def load_landuse(buildings: gpd.GeoDataFrame, landuse_path: str) -> pd.Series:
-    """
-    Load and preprocess land use data for the area around the buildings.
-
-    Args:
-        buildings: A GeoDataFrame containing building geometries.
-        landuse_path: The file path to the land use data.
-
-    Returns:
-        A GeoDataFrame containing the tiled land use data.
-    """
-    box = bbox(buildings, crs=CORINE_CRS, buffer=1000)
-    lu = gpd.read_file(landuse_path, bbox=box)
-    lu = lu.to_crs(buildings.crs)
-    lu = _tile_landuse(lu)
-
-    return lu
 
 
 def distance_to_coast(buildings: gpd.GeoDataFrame, oceans_path: str) -> pd.Series:

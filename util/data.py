@@ -2,14 +2,7 @@ import os
 from typing import Callable, Iterator, Tuple, Union
 
 import geopandas as gpd
-import numpy as np
-import pandas as pd
 from shapely.geometry import MultiPolygon, Polygon
-
-import util
-
-CRS_UNI = "EPSG:3035"
-GEOMETRY_COL = "geometry"
 
 
 def load_buildings(buildings_dir: str, region_id: str) -> gpd.GeoDataFrame:
@@ -17,72 +10,6 @@ def load_buildings(buildings_dir: str, region_id: str) -> gpd.GeoDataFrame:
     buildings = gpd.read_parquet(bldgs_file)
 
     return buildings
-
-
-def load_streets(streets_dir: str, region_id: str) -> gpd.GeoDataFrame:
-    return _load_gpkg(streets_dir, region_id)
-
-
-def load_pois(pois_dir: str, region_id: str) -> gpd.GeoDataFrame:
-    return _load_gpkg(pois_dir, region_id)
-
-
-def load_population(population_file: str, area: gpd.GeoSeries, point_geom: bool) -> gpd.GeoDataFrame:
-    population_raster, city_meta = util.read_area(population_file, area)
-    population = util.raster_to_gdf(population_raster[0], city_meta, point=point_geom)
-    population = population.rename(columns={"values": "population"})
-
-    return population
-
-
-def load_elevation(elevation_file: str, area: gpd.GeoSeries, point_geom: bool) -> gpd.GeoDataFrame:
-    elevation_raster, city_meta = util.read_area(elevation_file, area)
-    elevation = util.raster_to_gdf(elevation_raster[0], city_meta, point=point_geom)
-    elevation = elevation.rename(columns={"values": "elevation"})
-
-    return elevation
-
-
-def load_GHS_built_up(built_up_file: str, area: gpd.GeoSeries) -> gpd.GeoDataFrame:
-    built_up_raster, city_meta = util.read_area(built_up_file, area)
-    built_up = util.raster_to_gdf(built_up_raster[0], city_meta)
-    built_up = built_up.rename(columns={"values": "class"})
-
-    use_types = {
-        "residential": [11, 12, 13, 14, 15],
-        "non-residential": [21, 22, 23, 24, 25],
-    }
-    heights = {
-        4.5: [12, 22],  # 3-6m
-        10.5: [13, 23],  # 6-15m
-        22.5: [14, 24],  # 15-30m
-        50: [15, 25],  # 30m+
-    }
-    greeness_NDVI = {
-        1: 0.15,  # low vegetation surfaces NDVI <= 0.3
-        2: 0.4,  # medium vegetation surfaces 0.3 < NDVI <=0.5
-        3: 0.75,  # high vegetation surfaces NDVI > 0.5
-    }
-
-    def reverse(d):
-        return {value: key for key, values in d.items() for value in values}
-
-    built_up["height"] = built_up["class"].map(reverse(heights))
-    built_up["high_rise"] = built_up["class"].isin([15, 25])
-    built_up["use_type"] = built_up["class"].map(reverse(use_types))
-    built_up["NDVI"] = built_up["class"].map(greeness_NDVI)
-
-    return built_up
-
-
-def load_nuts_attr(lau_path: str) -> pd.DataFrame:
-    nuts = pd.read_csv(lau_path)
-    nuts = nuts.drop_duplicates(subset=["NUTS_ID_3"])
-    nuts = nuts.set_index("NUTS_ID_3")
-    nuts_attr = ["MOUNT_TYPE", "COAST_TYPE", "URBN_TYPE"]
-    nuts[nuts_attr] = nuts[nuts_attr].replace(0, np.nan)
-
-    return nuts
 
 
 def store_features(buildings: gpd.GeoDataFrame, out_dir: str, region_id: str):
@@ -120,7 +47,7 @@ def download_all_nuts(download_func: Callable, nuts_path: str, out_path: str, bu
         gdf.to_file(file_path, driver="GPKG")
 
 
-def _load_gpkg(data_dir: str, region_id: str) -> gpd.GeoDataFrame:
+def load_gpkg(data_dir: str, region_id: str) -> gpd.GeoDataFrame:
     gdf_file = os.path.join(data_dir, f"{region_id}.gpkg")
     gdf = gpd.read_file(gdf_file)
 

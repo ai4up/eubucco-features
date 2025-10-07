@@ -7,7 +7,7 @@ import osmnx as ox
 from networkx.exception import NetworkXPointlessConcept
 from shapely.geometry import Polygon
 
-from util import distance_nearest, sjoin_nearest_cols
+from util import distance_nearest, load_gpkg, sjoin_nearest_cols
 
 ROAD_SIZE: Dict[str, int] = {
     "motorway": 7,
@@ -42,6 +42,13 @@ def download(area: Polygon) -> gpd.GeoDataFrame:
 
     except NetworkXPointlessConcept:
         return None
+
+
+def load_streets(streets_dir: str, region_id: str, crs: int) -> gpd.GeoDataFrame:
+    streets = load_gpkg(streets_dir, region_id)
+    streets = streets.to_crs(crs)
+
+    return streets
 
 
 def distance_to_closest_street(buildings: gpd.GeoDataFrame, streets: gpd.GeoDataFrame) -> gpd.GeoSeries:

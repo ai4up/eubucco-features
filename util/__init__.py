@@ -1,30 +1,24 @@
 from .data import (
     download_all_nuts,
     load_buildings,
-    load_elevation,
-    load_GHS_built_up,
-    load_nuts_attr,
-    load_pois,
-    load_population,
-    load_streets,
+    load_gpkg,
     nuts_geometries,
     store_features,
 )
 from .raster import raster_to_gdf, read_area, read_value
-from .spatial import bbox, center, distance_nearest, extract_largest_polygon_from_multipolygon, simplified_rectangular_buffer, sjoin_nearest_cols, snearest, snearest_attr, transform_crs
+from .spatial import bbox, center, distance_nearest, distance_to_max, extract_largest_polygon_from_multipolygon, simplified_rectangular_buffer, sjoin_nearest_cols, snearest, snearest_attr, transform_crs
 
 __all__ = [
     "download_all_nuts",
     "load_buildings",
-    "load_streets",
-    "load_pois",
-    "load_nuts_attr",
+    "load_gpkg",
     "nuts_geometries",
     "extract_largest_polygon_from_multipolygon",
     "simplified_rectangular_buffer",
     "store_features",
     "sjoin_nearest_cols",
     "distance_nearest",
+    "distance_to_max",
     "snearest",
     "snearest_attr",
     "bbox",
@@ -33,7 +27,4 @@ __all__ = [
     "read_area",
     "read_value",
     "raster_to_gdf",
-    "load_population",
-    "load_elevation",
-    "load_GHS_built_up",
 ]

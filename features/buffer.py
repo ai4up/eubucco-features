@@ -125,25 +125,6 @@ def h3_index(gdf: Union[gpd.GeoSeries, gpd.GeoDataFrame], res: int) -> List[str]
     return h3_idx
 
 
-def distance_to_h3_grid_max(gdf: gpd.GeoDataFrame, s: pd.Series):
-    """
-    Calculate the distance from each geometry in a GeoDataFrame to the geometry
-    corresponding to the maximum value in a given H3-indexed Series.
-
-    Args:
-        gdf: A GeoDataFrame.
-        s: A Series with an H3 index.
-
-    Returns:
-        A Series containing the distances to the location with the maximum value.
-    """
-    h3_peak = s.idxmax()
-    peak = _h3_to_geo(h3_peak, gdf.crs)
-    dis = gdf.distance(peak)
-
-    return dis
-
-
 def ft_suffix(res: int, k: int = 0) -> str:
     area = _calculate_buffer_area(res, k)
     return f"within_buffer_{area:.2f}km2"

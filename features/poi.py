@@ -6,7 +6,7 @@ import pandas as pd
 from networkx.exception import NetworkXPointlessConcept
 from shapely.geometry import Polygon
 
-from util import distance_nearest
+from util import distance_nearest, load_gpkg
 
 _education = [
     "university",
@@ -72,6 +72,13 @@ def download(area: Polygon) -> gpd.GeoDataFrame:
 
     except NetworkXPointlessConcept:
         return None
+
+
+def load_pois(pois_dir: str, region_id: str, crs: int) -> gpd.GeoDataFrame:
+    pois = load_gpkg(pois_dir, region_id)
+    pois = pois.to_crs(crs)
+
+    return pois
 
 
 def distance_to_closest_poi(buildings: gpd.GeoDataFrame, pois: gpd.GeoDataFrame, category=None) -> gpd.GeoSeries:

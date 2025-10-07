@@ -72,6 +72,13 @@ def distance_nearest(left: gpd.GeoDataFrame, right: gpd.GeoDataFrame, max_distan
     return s
 
 
+def distance_to_max(gdf: gpd.GeoDataFrame, attr: str):
+    peak = gdf[attr].idxmax()
+    dis = gdf.distance(gdf.loc[peak, "geometry"])
+
+    return dis
+
+
 def bbox(geom: Union[gpd.GeoSeries, gpd.GeoDataFrame], crs: str = None, buffer: float = None) -> gpd.GeoSeries:
     bounds = geom.total_bounds
     gs = gpd.GeoSeries([box(*bounds)], crs=geom.crs)
