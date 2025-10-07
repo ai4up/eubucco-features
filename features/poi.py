@@ -41,7 +41,6 @@ OSM_TAGS = {
         "amenity": _third_places + _necessities + _healthcare,
         "shop": True,
     },
-    "office": {},
     "industrial": {
         "industrial": True,
         "landuse": ["industrial"],
