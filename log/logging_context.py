@@ -1,4 +1,5 @@
 import logging
+import psutil
 from datetime import datetime
 
 
@@ -19,7 +20,9 @@ class LoggingContext:
     def __exit__(self, exc_type, exc_value, traceback):
         end_time = datetime.now()
         duration = end_time - self.start_time
-        self.logger.info(f"Exiting context for feature: {self.feature_name}. Duration: {duration}")
+        duration_str = str(duration).split(".")[0]  # Truncate microseconds
+        mem = _current_memory_usage()
+        self.logger.info(f"Exiting context for feature: {self.feature_name} [Duration: {duration_str} hours. Memory usage: {mem:.2f} GB.]")
 
         # Log any exceptions that occurred
         if exc_type:
@@ -42,3 +45,10 @@ class LoggingContext:
 
         # Provide the `feature_name` to the filter
         return FeatureNameFilter(self.feature_name)
+
+
+def _current_memory_usage():
+    process = psutil.Process()
+    mem = process.memory_info().rss / (1024 ** 3)  # in GB
+    return mem
+
