@@ -1,7 +1,9 @@
+import numpy as np
 import geopandas as gpd
 import pandas as pd
+import shapely
 
-from util import bbox, transform_crs
+from util import bbox, transform_crs, distance_nearest
 
 # CORINE landuse classes https://land.copernicus.eu/en/products/corine-land-cover
 CORINE_LU_CLASS_COL = "Code_18"
@@ -24,10 +26,11 @@ def distance_to_landuse(buildings: gpd.GeoDataFrame, category: str, landuse_path
     """
     box = bbox(buildings, crs=CORINE_CRS, buffer=1000)
     lu = gpd.read_file(landuse_path, bbox=box)
-
     lu = lu[lu[CORINE_LU_CLASS_COL].astype(int).isin(CORINE_LU_CLASSES[category])]
-    lu = lu.to_crs(buildings.crs).union_all()
-    dis = buildings.centroid.distance(lu)
+    lu = lu.to_crs(buildings.crs)
+    lu = _tile_landuse(lu)
+
+    dis = distance_nearest(buildings.centroid, lu, max_distance=1000)
 
     return dis
 
@@ -57,3 +60,17 @@ def distance_to_coast(buildings: gpd.GeoDataFrame, oceans_path: str) -> pd.Serie
         approx_dis.loc[near_mask] = buildings.loc[near_mask].centroid.distance(ocean_geom)
 
     return buildings.centroid.distance(ocean_geom)
+
+
+def _tile_landuse(lu: gpd.GeoDataFrame, tile_size: int = 1000) -> gpd.GeoDataFrame:
+    bounds = lu.total_bounds
+    xmin, ymin, xmax, ymax = bounds
+    xs = np.arange(xmin, xmax + tile_size, tile_size)
+    ys = np.arange(ymin, ymax + tile_size, tile_size)
+    tiles = [shapely.box(x, y, x + tile_size, y + tile_size) for x in xs for y in ys]
+    grid = gpd.GeoDataFrame(geometry=tiles, crs=lu.crs)
+
+    # Intersect polygons with grid
+    lu_tiled = gpd.overlay(lu, grid, how="intersection")
+
+    return lu_tiled
