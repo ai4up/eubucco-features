@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import rasterio.mask
 import rasterio.transform
+from scipy.ndimage import distance_transform_edt
 from shapely.geometry import box
 
 
@@ -69,3 +70,41 @@ def read_value(filepath: str, lon: float, lat: float, approx: bool = False):
             value = np.nanmean(values)
 
     return value
+
+
+def read_values(filepath: str, points: gpd.GeoSeries) -> pd.Series:
+    with rasterio.open(filepath) as src:
+        if points.crs != src.crs:
+            points = points.to_crs(src.crs)
+
+        # Extract raster values for (x, y) pairs
+        coords = [(pt.x, pt.y) for pt in points]
+        values = list(src.sample(coords))
+        values = np.array(values).squeeze()
+
+        # Mask missings
+        values = np.where(values == src.nodata, np.nan, values)
+
+    return pd.Series(values, index=points.index)
+
+
+def distance_nearest_cell(gdf: gpd.GeoDataFrame, raster_data: np.ndarray, meta: dict, mask: np.ndarray) -> pd.Series:
+    if not np.any(mask):
+        return pd.Series(np.nan, index=gdf.index)
+
+    # Compute distance transform (in meters)
+    px_size = meta["transform"].a
+    dist_pixels = distance_transform_edt(~mask)
+    dist_meters = dist_pixels * px_size
+
+    # Sample distances at centroid coordinates (set out-of-bounds to NaN)
+    geoms = gdf.centroid
+    rows, cols = rasterio.transform.rowcol(meta["transform"], geoms.x, geoms.y)
+    dist_values = np.full(len(geoms), np.nan)
+    valid = (
+        (rows >= 0) & (rows < raster_data.shape[0]) &
+        (cols >= 0) & (cols < raster_data.shape[1])
+    )
+    dist_values[valid] = dist_meters[rows[valid], cols[valid]]
+
+    return pd.Series(dist_values, index=gdf.index)
