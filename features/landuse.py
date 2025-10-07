@@ -7,7 +7,7 @@ from util import bbox, transform_crs, distance_nearest
 
 # CORINE landuse classes https://land.copernicus.eu/en/products/corine-land-cover
 CORINE_LU_CLASS_COL = "Code_18"
-CORINE_LU_CLASSES = {"agricultural": [211, 212, 213, 221, 222, 223, 231, 241, 242, 243, 244], "industrial": [121]}
+CORINE_LU_CLASSES = {"agricultural": [211, 212, 213, 221, 222, 223, 231, 241, 242, 243, 244], "industrial": [121], "dense_urban": [111]}
 CORINE_CRS = "EPSG:3035"
 OCEANS_CRS = "EPSG:3857"
 
