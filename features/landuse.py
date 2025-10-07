@@ -12,7 +12,7 @@ CORINE_CRS = "EPSG:3035"
 OCEANS_CRS = "EPSG:3857"
 
 
-def distance_to_landuse(buildings: gpd.GeoDataFrame, category: str, landuse_path: str) -> pd.Series:
+def distance_to_landuse(buildings: gpd.GeoDataFrame, lu: gpd.GeoDataFrame, category: str) -> pd.Series:
     """
     Calculate the distance from each building to the nearest land use area of a specified category.
 
@@ -24,15 +24,29 @@ def distance_to_landuse(buildings: gpd.GeoDataFrame, category: str, landuse_path
     Returns:
         A Series containing the distances from each building to the nearest land use area of the specified category.
     """
-    box = bbox(buildings, crs=CORINE_CRS, buffer=1000)
-    lu = gpd.read_file(landuse_path, bbox=box)
     lu = lu[lu[CORINE_LU_CLASS_COL].astype(int).isin(CORINE_LU_CLASSES[category])]
-    lu = lu.to_crs(buildings.crs)
-    lu = _tile_landuse(lu)
-
     dis = distance_nearest(buildings.centroid, lu, max_distance=1000)
 
     return dis
+
+
+def load_landuse(buildings: gpd.GeoDataFrame, landuse_path: str) -> pd.Series:
+    """
+    Load and preprocess land use data for the area around the buildings.
+
+    Args:
+        buildings: A GeoDataFrame containing building geometries.
+        landuse_path: The file path to the land use data.
+
+    Returns:
+        A GeoDataFrame containing the tiled land use data.
+    """
+    box = bbox(buildings, crs=CORINE_CRS, buffer=1000)
+    lu = gpd.read_file(landuse_path, bbox=box)
+    lu = lu.to_crs(buildings.crs)
+    lu = _tile_landuse(lu)
+
+    return lu
 
 
 def distance_to_coast(buildings: gpd.GeoDataFrame, oceans_path: str) -> pd.Series:
