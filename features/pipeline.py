@@ -178,7 +178,10 @@ def _calculate_poi_features(buildings: gpd.GeoDataFrame, pois_dir: str, region_i
     pois = load_pois(pois_dir, region_id)
     pois = pois.to_crs(buildings.crs)
 
-    buildings["poi_distance"] = poi.distance_to_closest_poi(buildings, pois)
+    buildings["poi_distance_commercial"] = poi.distance_to_closest_poi(buildings, pois, category="commercial")
+    buildings["poi_distance_industrial"] = poi.distance_to_closest_poi(buildings, pois, category="industrial")
+    buildings["poi_distance_education"] = poi.distance_to_closest_poi(buildings, pois, category="education")
+    buildings["poi_distance_non_residential"] = buildings[["poi_distance_commercial", "poi_distance_industrial", "poi_distance_education"]].min(axis=1)
 
     return buildings
 
