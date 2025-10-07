@@ -111,9 +111,9 @@ def _filter(df, tags):
     mask = pd.Series(True, index=df.index)
     for col, value in tags.items():
         if isinstance(value, list):
-            mask &= df[col].isin(value)
+            mask |= df[col].isin(value)
         elif value is True:
-            mask &= df[col].notna()
+            mask |= df[col].notna()
         else:
             raise ValueError(f"Creating filter mask failed due to unsupported value type: {type(value)}")
 
