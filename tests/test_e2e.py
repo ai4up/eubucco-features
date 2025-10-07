@@ -16,7 +16,7 @@ def test_pipeline():
     streets_dir = os.path.join(test_data_dir, "streets")
     pois_dir = os.path.join(test_data_dir, "pois")
     GHS_built_up_path = os.path.join(test_data_dir, "GHS_BUILT_test_region.tif")
-    corine_lu_path = os.path.join(test_data_dir, "CORINE_landuse_test_region.gpkg")
+    corine_lu_path = os.path.join(test_data_dir, "CORINE_landuse_test_region.tif")
     oceans_path = os.path.join(test_data_dir, "OSM_oceans_test_region.gpkg")
     topo_path = os.path.join(test_data_dir, "GMTED_topography_test_region.tif")
     cdd_path = os.path.join(test_data_dir, "CDD_historical_mean_v1.nc")

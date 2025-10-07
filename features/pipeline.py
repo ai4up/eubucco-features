@@ -218,11 +218,11 @@ def _calculate_poi_features(buildings: gpd.GeoDataFrame, pois_dir: str, region_i
 
 
 def _calculate_landuse_features(buildings: gpd.GeoDataFrame, lu_path: str, oceans_path: str) -> gpd.GeoDataFrame:
-    lu = landuse.load_landuse(lu_path, buildings)
+    lu, lu_meta = landuse.load_landuse(lu_path, buildings)
 
-    buildings["lu_distance_industrial"] = landuse.distance_to_landuse(buildings, lu, "industrial")
-    buildings["lu_distance_agriculture"] = landuse.distance_to_landuse(buildings, lu, "agricultural")
-    buildings["lu_distance_dense_urban"] = landuse.distance_to_landuse(buildings, lu, "dense_urban")
+    buildings["lu_distance_industrial"] = landuse.distance_to_landuse(buildings, lu, lu_meta, "industrial")
+    buildings["lu_distance_agriculture"] = landuse.distance_to_landuse(buildings, lu, lu_meta, "agricultural")
+    buildings["lu_distance_dense_urban"] = landuse.distance_to_landuse(buildings, lu, lu_meta, "dense_urban")
     buildings["lu_distance_coast"] = landuse.distance_to_coast(buildings, oceans_path)
 
     return buildings
