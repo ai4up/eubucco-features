@@ -247,11 +247,12 @@ def _calculate_GHS_built_up_features(buildings: gpd.GeoDataFrame, built_up_file:
     non_res_areas = built_up[built_up["use_type"] == "non-residential"]
     high_rise_areas = built_up[built_up["high_rise"]]
 
-    buildings["ghs_distance_residential"] = distance_nearest(buildings, res_areas, max_distance=1000)
-    buildings["ghs_distance_non_residential"] = distance_nearest(buildings, non_res_areas, max_distance=1000)
-    buildings["ghs_distance_high_rise"] = distance_nearest(buildings, high_rise_areas, max_distance=1000)
+    bldg_centroids = buildings.centroid
+    buildings["ghs_distance_residential"] = distance_nearest(bldg_centroids, res_areas, max_distance=1000)
+    buildings["ghs_distance_non_residential"] = distance_nearest(bldg_centroids, non_res_areas, max_distance=1000)
+    buildings["ghs_distance_high_rise"] = distance_nearest(bldg_centroids, high_rise_areas, max_distance=1000)
 
-    buildings["ghs_closest_height"] = snearest_attr(buildings, built_up, attr="height", max_distance=100)["height"]
+    buildings["ghs_closest_height"] = snearest_attr(bldg_centroids, built_up, attr="height", max_distance=100)["height"]
 
     return buildings
 
