@@ -6,6 +6,8 @@ import pandas as pd
 from networkx.exception import NetworkXPointlessConcept
 from shapely.geometry import Polygon
 
+from util import distance_nearest
+
 _education = [
     "university",
     "school",
@@ -86,8 +88,7 @@ def distance_to_closest_poi(buildings: gpd.GeoDataFrame, pois: gpd.GeoDataFrame,
     if category:
         pois = _filter(pois, OSM_TAGS[category])
 
-    any_poi = pois.geometry.union_all()
-    dis = buildings.centroid.distance(any_poi)
+    dis = distance_nearest(buildings.centroid, pois, max_distance=1000)
 
     return dis
 
