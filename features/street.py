@@ -7,7 +7,7 @@ import osmnx as ox
 from networkx.exception import NetworkXPointlessConcept
 from shapely.geometry import Polygon
 
-import util
+from util import distance_nearest, sjoin_nearest_cols
 
 ROAD_SIZE: Dict[str, int] = {
     "motorway": 7,
@@ -55,8 +55,7 @@ def distance_to_closest_street(buildings: gpd.GeoDataFrame, streets: gpd.GeoData
     Returns:
         A GeoSeries containing the distance to the closest street for each building.
     """
-    street_network = streets.geometry.union_all()
-    dis = buildings.distance(street_network)
+    dis = distance_nearest(buildings, streets, max_distance=100)
 
     return dis
 
@@ -81,7 +80,7 @@ def closest_street_features(buildings: gpd.GeoDataFrame, streets: gpd.GeoDataFra
         buildings["bldg_orientation"] = momepy.orientation(buildings)
 
     streets["size"] = streets["highway"].apply(_preprocess_highway_type)
-    buildings = util.sjoin_nearest_cols(
+    buildings = sjoin_nearest_cols(
         buildings, streets, cols=["size", "street_orientation"], distance_col="distance", max_distance=100
     )
     buildings["street_alignment"] = (buildings["bldg_orientation"] - buildings["street_orientation"]).abs()
