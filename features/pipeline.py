@@ -222,11 +222,11 @@ def _calculate_population_features(buildings: gpd.GeoDataFrame, pop_file: str) -
 
 def _calculate_neighbor_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     buildings["neighbors_distance_public"] = neighbors.distance_to_building(buildings, "bldg_type", "public")
-    buildings["neighbors_distance_industry"] = neighbors.distance_to_building(buildings, "bldg_type", "industrial")
+    buildings["neighbors_distance_industrial"] = neighbors.distance_to_building(buildings, "bldg_type", "industrial")
     buildings["neighbors_distance_commercial"] = neighbors.distance_to_building(buildings, "bldg_type", "commercial")
     buildings["neighbors_distance_agriculture"] = neighbors.distance_to_building(buildings, "bldg_type", "agricultural")
     buildings["neighbors_distance_residential"] = neighbors.distance_to_building(buildings, "bldg_type", "residential")
-    buildings["neighbors_distance_non_residential"] = buildings[["neighbors_distance_public", "neighbors_distance_industry", "neighbors_distance_commercial", "neighbors_distance_agriculture"]].min(axis=1)
+    buildings["neighbors_distance_non_residential"] = buildings[["neighbors_distance_public", "neighbors_distance_industrial", "neighbors_distance_commercial", "neighbors_distance_agriculture"]].min(axis=1)
 
     buildings["neighbors_closest_building_height"] = neighbors.closest_building(buildings, "bldg_height")
     buildings["neighbors_distance_low_rise"] = neighbors.distance_to_building(buildings, "bldg_height", [0, 10])
