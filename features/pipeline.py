@@ -34,7 +34,7 @@ from util import (
 )
 
 H3_RES = 10
-H3_BUFFER_SIZES = [1, 4]  # corresponds to a buffer of 0.1 and 0.9 km^2
+H3_BUFFER_SIZES = [0, 1, 4]  # corresponds to a buffer of 0.1 and 0.9 km^2
 CRS = 3035
 
 
@@ -107,8 +107,8 @@ def execute_feature_pipeline(
     with LoggingContext(logger, feature_name="buffer_poi"):
         buildings = _calculate_poi_buffer_features(buildings, pois_dir, region_id)
 
-    # with LoggingContext(logger, feature_name="buffer_GHS_built_up"):
-    #     buildings = _calculate_GHS_built_up_buffer_features(buildings, built_up_path)
+    with LoggingContext(logger, feature_name="buffer_GHS_built_up"):
+        buildings = _calculate_GHS_built_up_buffer_features(buildings, built_up_path)
 
     with LoggingContext(logger, feature_name="buffer_population"):
         buildings = _calculate_population_buffer_features(buildings, pop_path)
@@ -162,13 +162,22 @@ def _calculate_block_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     blocks["block_footprint_area"] = blocks.area
     blocks["block_avg_footprint_area"] = blocks["block_buildings"].apply(lambda b: b.area.mean())
     blocks["block_std_footprint_area"] = blocks["block_buildings"].apply(lambda b: b.area.std())
+    blocks["block_normalized_perimeter_index"] = building.calculate_norm_perimeter(blocks)
+    blocks["block_area_perimeter_ratio"] = blocks["block_footprint_area"] / blocks["block_perimeter"]
+    blocks["block_phi"] = building.calculate_phi(blocks)
     blocks["block_longest_axis_length"] = momepy.longest_axis_length(blocks)
     blocks["block_elongation"] = momepy.elongation(blocks)
     blocks["block_convexity"] = momepy.convexity(blocks)
+    blocks["block_rectangularity"] = momepy.equivalent_rectangular_index(blocks)
     blocks["block_orientation"] = momepy.orientation(blocks)
     blocks["block_corners"] = momepy.corners(blocks.simplify(0.5), eps=45)
+    blocks["block_shared_wall_length"] = momepy.shared_walls(blocks)
+    blocks["block_rel_courtyard_size"] = momepy.courtyard_area(blocks) / blocks.area
+    blocks["block_touches"] = building.calculate_touches(blocks, id_col="block_uuid")
+    blocks["block_distance_closest"] = building.calculate_distance_to_closest_building(blocks)
 
     buildings = block.merge_blocks_and_buildings(blocks, buildings)
+    buildings = _fill_block_na_with_bldg_features(buildings)
 
     return buildings
 
@@ -223,7 +232,7 @@ def _calculate_landuse_features(buildings: gpd.GeoDataFrame, lu_path: str, ocean
     buildings["lu_distance_industrial"] = landuse.distance_to_landuse(buildings, lu, meta, "industrial")
     buildings["lu_distance_agriculture"] = landuse.distance_to_landuse(buildings, lu, meta, "agricultural")
     buildings["lu_distance_dense_urban"] = landuse.distance_to_landuse(buildings, lu, meta, "dense_urban")
-    buildings["lu_distance_coast"] = landuse.distance_to_coast(buildings, oceans_path)
+    buildings["lu_distance_coast"] = landuse.distance_to_coast(buildings, oceans_path) # accounts for 95% of landuse computation time
 
     return buildings
 
@@ -236,7 +245,9 @@ def _calculate_GHS_built_up_features(buildings: gpd.GeoDataFrame, built_up_file:
     buildings["ghs_distance_non_residential"] = builtup.distance_to_ghs_class(bldg_centroids, built_up, meta, "non-residential")
     buildings["ghs_distance_high_rise"] = builtup.distance_to_ghs_class(bldg_centroids, built_up, meta, "high-rise")
     buildings["ghs_closest_height"] = builtup.ghs_height(bldg_centroids, built_up_file)
-    buildings["ghs_closest_type"] = builtup.ghs_type(bldg_centroids, built_up_file)
+    buildings["ghs_closest_height_pooled_3"] = builtup.ghs_height_pooled(bldg_centroids, built_up, meta, window_size=3)
+    buildings["ghs_closest_height_pooled_5"] = builtup.ghs_height_pooled(bldg_centroids, built_up, meta, window_size=5)
+    buildings["ghs_closest_height_pooled_10"] = builtup.ghs_height_pooled(bldg_centroids, built_up, meta, window_size=10)
 
     return buildings
 
@@ -339,6 +350,30 @@ def _calculate_building_buffer_features(buildings: gpd.GeoDataFrame) -> gpd.GeoD
         "block_avg_corners": ("block_corners", "mean"),
         "block_std_corners": ("block_corners", "std"),
         "block_max_corners": ("block_corners", "max"),
+        "block_avg_rectangularity": ("block_rectangularity", "mean"),
+        "block_std_rectangularity": ("block_rectangularity", "std"),
+        "block_max_rectangularity": ("block_rectangularity", "max"),
+        "block_avg_shared_wall_length": ("block_shared_wall_length", "mean"),
+        "block_std_shared_wall_length": ("block_shared_wall_length", "std"),
+        "block_max_shared_wall_length": ("block_shared_wall_length", "max"),
+        "block_avg_rel_courtyard_size": ("block_rel_courtyard_size", "mean"),
+        "block_std_rel_courtyard_size": ("block_rel_courtyard_size", "std"),
+        "block_max_rel_courtyard_size": ("block_rel_courtyard_size", "max"),
+        "block_avg_touches": ("block_touches", "mean"),
+        "block_std_touches": ("block_touches", "std"),
+        "block_max_touches": ("block_touches", "max"),
+        "block_avg_distance_closest": ("block_distance_closest", "mean"),
+        "block_std_distance_closest": ("block_distance_closest", "std"),
+        "block_max_distance_closest": ("block_distance_closest", "max"),
+        "block_avg_normalized_perimeter_index": ("block_normalized_perimeter_index", "mean"),
+        "block_std_normalized_perimeter_index": ("block_normalized_perimeter_index", "std"),
+        "block_max_normalized_perimeter_index": ("block_normalized_perimeter_index", "max"),
+        "block_avg_area_perimeter_ratio": ("block_area_perimeter_ratio", "mean"),
+        "block_std_area_perimeter_ratio": ("block_area_perimeter_ratio", "std"),
+        "block_max_area_perimeter_ratio": ("block_area_perimeter_ratio", "max"),
+        "block_avg_phi": ("block_phi", "mean"),
+        "block_std_phi": ("block_phi", "std"),
+        "block_max_phi": ("block_phi", "max"),
         "block_avg_length": ("block_length", "mean"),
         "block_std_length": ("block_length", "std"),
         "block_max_length": ("block_length", "max"),
@@ -369,6 +404,14 @@ def _calculate_building_buffer_features(buildings: gpd.GeoDataFrame) -> gpd.GeoD
             ("block", "orientation"),
             ("block", "corners"),
             ("block", "length"),
+            ("block", "rectangularity"),
+            ("block", "shared_wall_length"),
+            ("block", "rel_courtyard_size"),
+            ("block", "touches"),
+            ("block", "distance_closest"),
+            ("block", "normalized_perimeter_index"),
+            ("block", "area_perimeter_ratio"),
+            ("block", "phi"),
             ("street", "distance"),
             ("street", "size"),
         ]:
@@ -404,21 +447,30 @@ def _calculate_poi_buffer_features(buildings: gpd.GeoDataFrame, pois_dir: str, r
     return buildings
 
 
-# def _calculate_GHS_built_up_buffer_features(buildings: gpd.GeoDataFrame, built_up_file: str) -> gpd.GeoDataFrame:
-#     built_up = builtup.load_built_up(built_up_file, buildings)
+def _calculate_GHS_built_up_buffer_features(buildings: gpd.GeoDataFrame, built_up_file: str) -> gpd.GeoDataFrame:
+    bu_raster, meta = builtup.load_built_up(built_up_file, buildings)
 
-#     buffer_fts = {
-#         "ghs_greenness": ("NDVI", "mean"),
-#         "ghs_height": ("height", "mean"),
-#     }
-#     buildings = _add_h3_buffer_features(buildings, built_up, buffer_fts)
+    for size in [100, 500]:
+        buildings[f"ghs_height_buffer_{size}"] = builtup.ghs_mean_height(buildings, bu_raster, meta, size)
+        buildings[f"ghs_greenness_buffer_{size}"] = builtup.ghs_mean_ndvi(buildings, bu_raster, meta, size)
+        buildings[f"ghs_type_share_residential_buffer_{size}"] = builtup.ghs_type_share(buildings, bu_raster, meta, size, "residential")
+        buildings[f"ghs_type_share_non_residential_buffer_{size}"] = builtup.ghs_type_share(buildings, bu_raster, meta, size, "non-residential")
 
-#     h3_cells = pd.DataFrame(index=buildings['h3_index'].unique())
-#     hex_grid_type_shares = buffer.calculate_h3_buffer_shares(built_up, "use_type", H3_RES, H3_BUFFER_SIZES, h3_cells)
-#     hex_grid_type_shares = hex_grid_type_shares.add_prefix("ghs_use_type_share_")
-#     buildings = _add_grid_fts_to_buildings(buildings, hex_grid_type_shares)
 
-#     return buildings
+    # built_up = builtup.load_built_up(built_up_file, buildings)
+
+    # buffer_fts = {
+    #     "ghs_greenness": ("NDVI", "mean"),
+    #     "ghs_height": ("height", "mean"),
+    # }
+    # buildings = _add_h3_buffer_features(buildings, built_up, buffer_fts)
+
+    # h3_cells = pd.DataFrame(index=buildings['h3_index'].unique())
+    # hex_grid_type_shares = buffer.calculate_h3_buffer_shares(built_up, "use_type", H3_RES, H3_BUFFER_SIZES, h3_cells)
+    # hex_grid_type_shares = hex_grid_type_shares.add_prefix("ghs_use_type_share_")
+    # buildings = _add_grid_fts_to_buildings(buildings, hex_grid_type_shares)
+
+    return buildings
 
 
 def _calculate_interaction_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
@@ -428,6 +480,9 @@ def _calculate_interaction_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataF
 
     buildings["i_distance_to_built_x_population"] = (
         buildings["bldg_distance_closest"] * buildings[f"population_{pop_suffix}"]
+    )
+    buildings["i_distance_to_built_x_population_x_footprint_area"] = (
+        buildings["bldg_distance_closest"] * buildings[f"population_{pop_suffix}"] * np.log(buildings["bldg_footprint_area"])
     )
     buildings["i_distance_to_built_x_total_footprint_area"] = (
         buildings["bldg_distance_closest"] * (buildings[f"bldg_total_footprint_area_{suffix}"] / 1000)
@@ -449,3 +504,32 @@ def _add_h3_buffer_features(buildings: gpd.GeoDataFrame, gdf: gpd.GeoDataFrame, 
 
 def _add_grid_fts_to_buildings(buildings, grid):
     return buildings.merge(grid, left_on="h3_index", right_index=True, how="left")
+
+
+def _fill_block_na_with_bldg_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    fts = [
+        "perimeter",
+        "footprint_area",
+        "normalized_perimeter_index",
+        "area_perimeter_ratio",
+        "phi",
+        "longest_axis_length",
+        "elongation",
+        "convexity",
+        "rectangularity",
+        "orientation",
+        "corners",
+        "shared_wall_length",
+        "rel_courtyard_size",
+        "touches",
+        "distance_closest",
+    ]
+
+    for ft in fts:
+        buildings["block_" + ft] = buildings["block_" + ft].fillna(buildings["bldg_" + ft])
+
+    buildings["block_length"] = buildings["block_length"].fillna(1)
+    buildings["block_std_footprint_area"] = buildings["block_std_footprint_area"].fillna(0)
+    buildings["block_avg_footprint_area"] = buildings["block_avg_footprint_area"].fillna(buildings["bldg_footprint_area"])
+
+    return buildings

@@ -97,7 +97,7 @@ def distance_to_closest_poi(buildings: gpd.GeoDataFrame, pois: gpd.GeoDataFrame,
 
     dis = distance_nearest(buildings.centroid, pois, max_distance=1000)
 
-    return dis
+    return dis.fillna(1000)
 
 
 def _merge_tags(*dicts):
