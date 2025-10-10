@@ -376,7 +376,7 @@ def _calculate_building_buffer_features(buildings: gpd.GeoDataFrame) -> gpd.GeoD
             ("street", "size"),
         ]:
             buildings[f"{cat}_diff_{ft}_{suffix}"] = buildings[f"{cat}_avg_{ft}_{suffix}"] - buildings[f"{cat}_{ft}"]
-            buildings[f"{cat}_diff_std_{ft}_{suffix}"] = buildings[f"{cat}_diff_{ft}_{suffix}"] / buildings[f"{cat}_std_{ft}_{suffix}"]
+            buildings[f"{cat}_diff_std_{ft}_{suffix}"] = (buildings[f"{cat}_diff_{ft}_{suffix}"] / buildings[f"{cat}_std_{ft}_{suffix}"]).replace([np.inf, -np.inf], 0)
 
         buildings[f"bldg_diff_std_shape_{suffix}"] = buildings[[f"bldg_diff_std_{ft}_{suffix}" for ft in ["footprint_area", "perimeter", "elongation", "convexity", "orientation", "distance_closest"]]].abs().mean(axis=1)
 
