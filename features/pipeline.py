@@ -78,6 +78,9 @@ def execute_feature_pipeline(
     with LoggingContext(logger, feature_name="neighbors"):
         buildings = _calculate_neighbor_features(buildings)
 
+    with LoggingContext(logger, feature_name="microsoft_heights"):
+        buildings = _calculate_microsoft_height_features(buildings)
+
     with LoggingContext(logger, feature_name="street"):
         buildings = _calculate_street_features(buildings, streets_dir, region_id)
 
@@ -130,9 +133,13 @@ def _preprocess(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     buildings["bldg_multi_part"] = buildings.geometry.type == "MultiPolygon"
     buildings.geometry = buildings.geometry.apply(extract_largest_polygon_from_multipolygon)
 
-    buildings["bldg_height"] = buildings["height"]
-    buildings["bldg_age"] = buildings["age"]
-    buildings["bldg_type"] = buildings["type"]
+    bldgs_gt_attrs = buildings[buildings["source_dataset"].str.contains("osm|gov")]
+    buildings["bldg_height"] = bldgs_gt_attrs["height"]
+    buildings["bldg_age"] = bldgs_gt_attrs["age"]
+    buildings["bldg_type"] = bldgs_gt_attrs["type"]
+
+    buildings["bldg_msft_height"] = buildings[buildings["source_dataset"] == "msft"]["height"]
+    buildings["bldg_msft_height"] = buildings["bldg_msft_height"].fillna(buildings["msft_height_merged"])
 
     return buildings
 
@@ -234,6 +241,16 @@ def _calculate_neighbor_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFram
     buildings["neighbors_distance_1900_1970"] = neighbors.distance_to_building(buildings, "bldg_age", [1900, 1970])
     buildings["neighbors_distance_1970_2000"] = neighbors.distance_to_building(buildings, "bldg_age", [1970, 2000])
     buildings["neighbors_distance_after_2000"] = neighbors.distance_to_building(buildings, "bldg_age", [2000, np.inf])
+
+    return buildings
+
+
+def _calculate_microsoft_height_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    buildings["bldg_msft_height_closest"] = neighbors.closest_building(buildings, "bldg_msft_height")
+    buildings["bldg_msft_distance_low_rise"] = neighbors.distance_to_building(buildings, "bldg_msft_height", [0, 10])
+    buildings["bldg_msft_distance_low_medium_rise"] = neighbors.distance_to_building(buildings, "bldg_msft_height", [10, 20])
+    buildings["bldg_msft_distance_medium_rise"] = neighbors.distance_to_building(buildings, "bldg_msft_height", [20, 30])
+    buildings["bldg_msft_distance_high_rise"] = neighbors.distance_to_building(buildings, "bldg_msft_height", [30, np.inf])
 
     return buildings
 
@@ -343,6 +360,10 @@ def _calculate_building_buffer_features(buildings: gpd.GeoDataFrame) -> gpd.GeoD
         "bldg_min_age": ("bldg_age", "min"),
         "bldg_std_age": ("bldg_age", "std"),
         "bldg_type_variety": ("bldg_type", "nunique"),
+        "bldg_avg_msft_height": ("bldg_msft_height", "mean"),
+        "bldg_max_msft_height": ("bldg_msft_height", "max"),
+        "bldg_min_msft_height": ("bldg_msft_height", "min"),
+        "bldg_std_msft_height": ("bldg_msft_height", "std"),
         "bldg_total_footprint_area": ("bldg_footprint_area", "sum"),
         "bldg_avg_footprint_area": ("bldg_footprint_area", "mean"),
         "bldg_std_footprint_area": ("bldg_footprint_area", "std"),
@@ -417,15 +438,16 @@ def _calculate_building_buffer_features(buildings: gpd.GeoDataFrame) -> gpd.GeoD
     }
     buildings = _add_h3_buffer_features(buildings, buildings, buffer_fts)
 
-    h3_cells = pd.DataFrame(index=buildings['h3_index'].unique())
+    h3_cells = pd.DataFrame(index=buildings["h3_index"].unique())
     target_var_buffer_fts = {"bldg_avg_height": "bldg_height", "bldg_avg_age": "bldg_age"}
     buildings = buffer.add_h3_buffer_mean_excluding_self(buildings, target_var_buffer_fts, H3_RES, H3_BUFFER_SIZES, grid_cells=h3_cells)
 
     for s in H3_BUFFER_SIZES:
         suffix = buffer.ft_suffix(H3_RES, s)
         for cat, ft in [
-            ("bldg", "height"),
             ("bldg", "age"),
+            ("bldg", "height"),
+            ("bldg", "msft_height"),
             ("bldg", "footprint_area"),
             ("bldg", "perimeter"),
             ("bldg", "elongation"),
@@ -515,7 +537,7 @@ def _calculate_interaction_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataF
 
 
 def _add_h3_buffer_features(buildings: gpd.GeoDataFrame, gdf: gpd.GeoDataFrame, operation: Dict[str, Tuple[str, Callable]]) -> gpd.GeoDataFrame:
-    h3_cells = pd.DataFrame(index=buildings['h3_index'].unique())
+    h3_cells = pd.DataFrame(index=buildings["h3_index"].unique())
     hex_grid = buffer.calculate_h3_buffer_features(gdf, operation, H3_RES, H3_BUFFER_SIZES, h3_cells)
     buildings = _add_grid_fts_to_buildings(buildings, hex_grid)
 
