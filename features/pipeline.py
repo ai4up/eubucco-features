@@ -162,11 +162,19 @@ def _calculate_block_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     blocks["block_footprint_area"] = blocks.area
     blocks["block_avg_footprint_area"] = blocks["block_buildings"].apply(lambda b: b.area.mean())
     blocks["block_std_footprint_area"] = blocks["block_buildings"].apply(lambda b: b.area.std())
+    blocks["block_normalized_perimeter_index"] = building.calculate_norm_perimeter(blocks)
+    blocks["block_area_perimeter_ratio"] = blocks["block_footprint_area"] / blocks["block_perimeter"]
+    blocks["block_phi"] = building.calculate_phi(blocks)
     blocks["block_longest_axis_length"] = momepy.longest_axis_length(blocks)
     blocks["block_elongation"] = momepy.elongation(blocks)
     blocks["block_convexity"] = momepy.convexity(blocks)
+    blocks["block_rectangularity"] = momepy.equivalent_rectangular_index(blocks)
     blocks["block_orientation"] = momepy.orientation(blocks)
     blocks["block_corners"] = momepy.corners(blocks.simplify(0.5), eps=45)
+    blocks["block_shared_wall_length"] = momepy.shared_walls(blocks)
+    blocks["block_rel_courtyard_size"] = momepy.courtyard_area(blocks) / blocks.area
+    blocks["block_touches"] = building.calculate_touches(blocks, id_col="block_uuid")
+    blocks["block_distance_closest"] = building.calculate_distance_to_closest_building(blocks)
 
     buildings = block.merge_blocks_and_buildings(blocks, buildings)
 
@@ -342,6 +350,30 @@ def _calculate_building_buffer_features(buildings: gpd.GeoDataFrame) -> gpd.GeoD
         "block_avg_corners": ("block_corners", "mean"),
         "block_std_corners": ("block_corners", "std"),
         "block_max_corners": ("block_corners", "max"),
+        "block_avg_rectangularity": ("block_rectangularity", "mean"),
+        "block_std_rectangularity": ("block_rectangularity", "std"),
+        "block_max_rectangularity": ("block_rectangularity", "max"),
+        "block_avg_shared_wall_length": ("block_shared_wall_length", "mean"),
+        "block_std_shared_wall_length": ("block_shared_wall_length", "std"),
+        "block_max_shared_wall_length": ("block_shared_wall_length", "max"),
+        "block_avg_rel_courtyard_size": ("block_rel_courtyard_size", "mean"),
+        "block_std_rel_courtyard_size": ("block_rel_courtyard_size", "std"),
+        "block_max_rel_courtyard_size": ("block_rel_courtyard_size", "max"),
+        "block_avg_touches": ("block_touches", "mean"),
+        "block_std_touches": ("block_touches", "std"),
+        "block_max_touches": ("block_touches", "max"),
+        "block_avg_distance_closest": ("block_distance_closest", "mean"),
+        "block_std_distance_closest": ("block_distance_closest", "std"),
+        "block_max_distance_closest": ("block_distance_closest", "max"),
+        "block_avg_normalized_perimeter_index": ("block_normalized_perimeter_index", "mean"),
+        "block_std_normalized_perimeter_index": ("block_normalized_perimeter_index", "std"),
+        "block_max_normalized_perimeter_index": ("block_normalized_perimeter_index", "max"),
+        "block_avg_area_perimeter_ratio": ("block_area_perimeter_ratio", "mean"),
+        "block_std_area_perimeter_ratio": ("block_area_perimeter_ratio", "std"),
+        "block_max_area_perimeter_ratio": ("block_area_perimeter_ratio", "max"),
+        "block_avg_phi": ("block_phi", "mean"),
+        "block_std_phi": ("block_phi", "std"),
+        "block_max_phi": ("block_phi", "max"),
         "block_avg_length": ("block_length", "mean"),
         "block_std_length": ("block_length", "std"),
         "block_max_length": ("block_length", "max"),
@@ -372,6 +404,14 @@ def _calculate_building_buffer_features(buildings: gpd.GeoDataFrame) -> gpd.GeoD
             ("block", "orientation"),
             ("block", "corners"),
             ("block", "length"),
+            ("block", "rectangularity"),
+            ("block", "shared_wall_length"),
+            ("block", "rel_courtyard_size"),
+            ("block", "touches"),
+            ("block", "distance_closest"),
+            ("block", "normalized_perimeter_index"),
+            ("block", "area_perimeter_ratio"),
+            ("block", "phi"),
             ("street", "distance"),
             ("street", "size"),
         ]:

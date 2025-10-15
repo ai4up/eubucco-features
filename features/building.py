@@ -13,10 +13,10 @@ def calculate_phi(buildings: gpd.GeoDataFrame) -> pd.Series:
     return buildings.area / circle_area
 
 
-def calculate_touches(buildings: gpd.GeoDataFrame) -> pd.Series:
+def calculate_touches(buildings: gpd.GeoDataFrame, id_col: str = "id") -> pd.Series:
     touching_pairs = gpd.sjoin(buildings, buildings, predicate="intersects")
-    touches = touching_pairs.groupby("id_left").size() - 1
-    return buildings["id"].map(touches).fillna(0).astype(int)
+    touches = touching_pairs.groupby(f"{id_col}_left").size() - 1
+    return buildings[id_col].map(touches).fillna(0).astype(int)
 
 
 def calculate_norm_perimeter(buildings: gpd.GeoDataFrame) -> pd.Series:
