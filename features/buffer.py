@@ -189,9 +189,6 @@ def _calcuate_hex_ring_aggregate(
     # Add column with neighboring hexagons
     neighbors = grid_cells.h3.k_ring(k=k)["h3_k_ring"]
 
-    # Add self to the neighbor list
-    neighbors[:] = [[i] + n for i, n in zip(neighbors.index, neighbors)]
-
     # Perform aggregate operation (e.g. mean) across the hexagons in the neighborhood
     agg = neighbors.apply(lambda x: grid_values.reindex(x).agg(operation))
 
