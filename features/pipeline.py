@@ -31,6 +31,7 @@ from util import (
     snearest_attr,
     store_features,
     transform_crs,
+    sample_representative_validation_set_across_attributes,
 )
 
 H3_RES = 10
@@ -68,6 +69,9 @@ def execute_feature_pipeline(
     with LoggingContext(logger, feature_name="building"):
         buildings = _calculate_building_features(buildings)
 
+    with LoggingContext(logger, feature_name="validation_set"):
+        buildings = _create_validation_set_and_mask_target_attributes(buildings)
+        
     with LoggingContext(logger, feature_name="blocks"):
         buildings = _calculate_block_features(buildings)
 
@@ -126,12 +130,39 @@ def _preprocess(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     buildings["bldg_multi_part"] = buildings.geometry.type == "MultiPolygon"
     buildings.geometry = buildings.geometry.apply(extract_largest_polygon_from_multipolygon)
 
-    val_idx = buildings[buildings["dataset"].isin(["gov", "osm"])].sample(frac=0.2, random_state=42).index
-    val_mask = buildings.index.isin(val_idx)
+    buildings["bldg_height"] = buildings["height"]
+    buildings["bldg_age"] = buildings["age"]
+    buildings["bldg_type"] = buildings["type"]
+
+    return buildings
+
+
+def _create_validation_set_and_mask_target_attributes(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    bldg_attrs = [
+        "bldg_footprint_area",
+        "bldg_perimeter",
+        "bldg_normalized_perimeter_index",
+        "bldg_area_perimeter_ratio",
+        "bldg_phi",
+        "bldg_longest_axis_length",
+        "bldg_elongation",
+        "bldg_convexity",
+        "bldg_rectangularity",
+        "bldg_orientation",
+        "bldg_corners",
+        "bldg_shared_wall_length",
+        "bldg_rel_courtyard_size",
+        "bldg_touches",
+        "bldg_distance_closest",
+    ]
+    bldgs_w_gt_attrs = buildings[buildings["source_dataset"].str.contains("osm|gov")]
+    val_mask_gt = sample_representative_validation_set_across_attributes(bldgs_w_gt_attrs, ["height", "type"], bldg_attrs, val_size=0.2)
+    val_mask = buildings.index.isin(bldgs_w_gt_attrs.index[val_mask_gt])
+
     buildings["validation"] = val_mask
-    buildings["bldg_height"] = buildings[~val_mask]["height"]
-    buildings["bldg_age"] = buildings[~val_mask]["age"]
-    buildings["bldg_type"] = buildings[~val_mask]["type"]
+    buildings.loc[val_mask, "bldg_height"] = np.nan
+    buildings.loc[val_mask, "bldg_age"] = np.nan
+    buildings.loc[val_mask, "bldg_type"] = np.nan
 
     return buildings
 
