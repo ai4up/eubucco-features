@@ -34,7 +34,7 @@ from util import (
 )
 
 H3_RES = 10
-H3_BUFFER_SIZES = [1, 4]  # corresponds to a buffer of 0.1 and 0.9 km^2
+H3_BUFFER_SIZES = [0, 1, 4]  # corresponds to a buffer of 0.02, 0.1 and 0.9 km^2
 CRS = 3035
 
 
