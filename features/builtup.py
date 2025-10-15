@@ -44,7 +44,7 @@ def distance_to_ghs_class(buildings: gpd.GeoDataFrame, bu_raster: np.ndarray, bu
     target_classes = (GHS_USE_TYPES | GHS_HEIGHT_CATS)[category]
     mask = np.isin(bu_raster, target_classes)
 
-    dis = util.distance_nearest_cell(buildings, bu_raster, bu_meta, mask)
+    dis = util.distance_nearest_cell(buildings, bu_raster, bu_meta, mask).fillna(1_000_000)
 
     return dis
 
