@@ -87,7 +87,9 @@ def add_h3_buffer_mean_excluding_self(
             count_col = f"_count_{col}_{suffix}"
             loo_mean_col = f"{col_mean}_{suffix}"
 
-            gdf[loo_mean_col] = (gdf[sum_col] - gdf[col]) / (gdf[count_col] - 1)
+            na_mask = gdf[col].isna()
+            gdf.loc[na_mask, loo_mean_col] = gdf[sum_col] / gdf[count_col]
+            gdf.loc[~na_mask, loo_mean_col] = (gdf[sum_col] - gdf[col]) / (gdf[count_col] - 1)
             gdf.loc[gdf[count_col] <= 1, loo_mean_col] = np.nan
             gdf = gdf.drop(columns=[sum_col, count_col])
 
