@@ -192,8 +192,8 @@ def _nanmean_pooling(raster_data: np.ndarray, size: int) -> np.ndarray:
     summed = uniform_filter(data_filled, size=size, mode="nearest") * (size * size)
 
     # Mean ignoring NaNs
-    mean = np.divide(summed, count, where=count > 0)
-    mean[count == 0] = np.nan  # keep fully-NaN windows as NaN
+    mean = np.divide(summed, count, where=count > 0.001)
+    mean[count < 0.001] = np.nan  # keep fully-NaN windows as NaN
 
     return mean
 
