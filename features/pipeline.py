@@ -126,10 +126,12 @@ def _preprocess(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     buildings["bldg_multi_part"] = buildings.geometry.type == "MultiPolygon"
     buildings.geometry = buildings.geometry.apply(extract_largest_polygon_from_multipolygon)
 
-    train_mask = buildings.sample(frac=0.8, random_state=42).index
-    buildings["bldg_height"] = buildings["height"].loc[train_mask]
-    buildings["bldg_age"] = buildings["age"].loc[train_mask]
-    buildings["bldg_type"] = buildings["type"].loc[train_mask]
+    val_idx = buildings[buildings["dataset"].isin(["gov", "osm"])].sample(frac=0.2, random_state=42).index
+    val_mask = buildings.index.isin(val_idx)
+    buildings["validation"] = val_mask
+    buildings["bldg_height"] = buildings[~val_mask]["height"]
+    buildings["bldg_age"] = buildings[~val_mask]["age"]
+    buildings["bldg_type"] = buildings[~val_mask]["type"]
 
     return buildings
 
