@@ -134,9 +134,9 @@ def _preprocess(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     buildings.geometry = buildings.geometry.apply(extract_largest_polygon_from_multipolygon)
 
     bldgs_gt_attrs = buildings[buildings["source_dataset"].str.contains("osm|gov")]
-    buildings["bldg_height"] = bldgs_gt_attrs["height"]
-    buildings["bldg_age"] = bldgs_gt_attrs["age"]
-    buildings["bldg_type"] = bldgs_gt_attrs["type"]
+    buildings["bldg_height"] = bldgs_gt_attrs["height"].fillna(bldgs_gt_attrs["osm_height_merged"])
+    buildings["bldg_age"] = bldgs_gt_attrs["age"].fillna(bldgs_gt_attrs["osm_age_merged"])
+    buildings["bldg_type"] = bldgs_gt_attrs["type"].fillna(bldgs_gt_attrs["osm_type_merged"])
 
     buildings["bldg_msft_height"] = buildings[buildings["source_dataset"] == "msft"]["height"]
     buildings["bldg_msft_height"] = buildings["bldg_msft_height"].fillna(buildings["msft_height_merged"])
