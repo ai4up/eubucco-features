@@ -55,10 +55,8 @@ CLC_MAPPING = [
 import numpy as np
 import geopandas as gpd
 import pandas as pd
-import rasterio
-from scipy.ndimage import distance_transform_edt
 
-from util import bbox, transform_crs, read_area
+from util import bbox, transform_crs, read_area, distance_nearest_cell
 
 CORINE_CRS = "EPSG:3035"
 OCEANS_CRS = "EPSG:3857"
@@ -108,25 +106,7 @@ def distance_to_landuse(buildings: gpd.GeoDataFrame, lu_raster: np.ndarray, lu_m
     target_classes = CORINE_LU_MAPPING[category]
     mask = np.isin(lu_raster, target_classes)
 
-    if not np.any(mask):
-        return pd.Series(np.nan, index=buildings.index)
-
-    # Compute distance transform (in meters)
-    px_size = lu_meta["transform"].a
-    dist_pixels = distance_transform_edt(~mask)
-    dist_meters = dist_pixels * px_size
-
-    # Sample distances at centroid coordinates (set out-of-bounds to NaN)
-    geoms = buildings.centroid
-    rows, cols = rasterio.transform.rowcol(lu_meta["transform"], geoms.x, geoms.y)
-    dist_values = np.full(len(geoms), np.nan)
-    valid = (
-        (rows >= 0) & (rows < lu_raster.shape[0]) &
-        (cols >= 0) & (cols < lu_raster.shape[1])
-    )
-    dist_values[valid] = dist_meters[rows[valid], cols[valid]]
-
-    return pd.Series(dist_values, index=buildings.index)
+    return distance_nearest_cell(buildings, lu_raster, lu_meta, mask)
 
 
 def distance_to_coast(buildings: gpd.GeoDataFrame, oceans_path: str) -> pd.Series:

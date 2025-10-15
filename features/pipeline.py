@@ -229,28 +229,27 @@ def _calculate_poi_features(buildings: gpd.GeoDataFrame, pois_dir: str, region_i
 
 
 def _calculate_landuse_features(buildings: gpd.GeoDataFrame, lu_path: str, oceans_path: str) -> gpd.GeoDataFrame:
-    lu, lu_meta = landuse.load_landuse(lu_path, buildings)
+    lu, meta = landuse.load_landuse(lu_path, buildings)
 
-    buildings["lu_distance_industrial"] = landuse.distance_to_landuse(buildings, lu, lu_meta, "industrial")
-    buildings["lu_distance_agriculture"] = landuse.distance_to_landuse(buildings, lu, lu_meta, "agricultural")
-    buildings["lu_distance_dense_urban"] = landuse.distance_to_landuse(buildings, lu, lu_meta, "dense_urban")
+    buildings["lu_distance_industrial"] = landuse.distance_to_landuse(buildings, lu, meta, "industrial")
+    buildings["lu_distance_agriculture"] = landuse.distance_to_landuse(buildings, lu, meta, "agricultural")
+    buildings["lu_distance_dense_urban"] = landuse.distance_to_landuse(buildings, lu, meta, "dense_urban")
     buildings["lu_distance_coast"] = landuse.distance_to_coast(buildings, oceans_path)
 
     return buildings
 
 
 def _calculate_GHS_built_up_features(buildings: gpd.GeoDataFrame, built_up_file: str) -> gpd.GeoDataFrame:
-    built_up = builtup.load_built_up(built_up_file, buildings)
+    built_up, meta = builtup.load_built_up(built_up_file, buildings)
 
     bldg_centroids = buildings.centroid
-    res_areas = built_up[built_up["use_type"] == "residential"]
-    non_res_areas = built_up[built_up["use_type"] == "non-residential"]
-    high_rise_areas = built_up[built_up["high_rise"]]
-
-    buildings["ghs_distance_residential"] = distance_nearest(bldg_centroids, res_areas, max_distance=1000)
-    buildings["ghs_distance_non_residential"] = distance_nearest(bldg_centroids, non_res_areas, max_distance=1000)
-    buildings["ghs_distance_high_rise"] = distance_nearest(bldg_centroids, high_rise_areas, max_distance=1000)
-    buildings["ghs_closest_height"] = snearest_attr(bldg_centroids, built_up, attr="height", max_distance=100)["height"]
+    buildings["ghs_distance_residential"] = builtup.distance_to_ghs_class(bldg_centroids, built_up, meta, "residential")
+    buildings["ghs_distance_non_residential"] = builtup.distance_to_ghs_class(bldg_centroids, built_up, meta, "non-residential")
+    buildings["ghs_distance_high_rise"] = builtup.distance_to_ghs_class(bldg_centroids, built_up, meta, "high-rise")
+    buildings["ghs_closest_height"] = builtup.ghs_height(bldg_centroids, built_up, meta)
+    buildings["ghs_closest_height_pooled_3"] = builtup.ghs_height_pooled(bldg_centroids, built_up, meta, window_size=3)
+    buildings["ghs_closest_height_pooled_5"] = builtup.ghs_height_pooled(bldg_centroids, built_up, meta, window_size=5)
+    buildings["ghs_closest_height_pooled_10"] = builtup.ghs_height_pooled(bldg_centroids, built_up, meta, window_size=10)
 
     return buildings
 
@@ -425,7 +424,6 @@ def _calculate_building_buffer_features(buildings: gpd.GeoDataFrame) -> gpd.GeoD
 
         buildings[f"bldg_diff_std_shape_{suffix}"] = buildings[[f"bldg_diff_std_{ft}_{suffix}" for ft in ["footprint_area", "perimeter", "elongation", "convexity", "orientation", "distance_closest"]]].abs().mean(axis=1)
 
-    h3_cells = pd.DataFrame(index=buildings['h3_index'].unique())
     hex_grid_type_shares = buffer.calculate_h3_buffer_shares(buildings, "bldg_type", H3_RES, H3_BUFFER_SIZES, h3_cells, dropna=True, n_min=5)
     hex_grid_type_shares = hex_grid_type_shares.add_prefix("bldg_type_share_")
     buildings = _add_grid_fts_to_buildings(buildings, hex_grid_type_shares)
@@ -453,18 +451,13 @@ def _calculate_poi_buffer_features(buildings: gpd.GeoDataFrame, pois_dir: str, r
 
 
 def _calculate_GHS_built_up_buffer_features(buildings: gpd.GeoDataFrame, built_up_file: str) -> gpd.GeoDataFrame:
-    built_up = builtup.load_built_up(built_up_file, buildings)
+    bu_raster, meta = builtup.load_built_up(built_up_file, buildings)
 
-    buffer_fts = {
-        "ghs_greenness": ("NDVI", "mean"),
-        "ghs_height": ("height", "mean"),
-    }
-    buildings = _add_h3_buffer_features(buildings, built_up, buffer_fts)
-
-    h3_cells = pd.DataFrame(index=buildings['h3_index'].unique())
-    hex_grid_type_shares = buffer.calculate_h3_buffer_shares(built_up, "use_type", H3_RES, H3_BUFFER_SIZES, h3_cells)
-    hex_grid_type_shares = hex_grid_type_shares.add_prefix("ghs_use_type_share_")
-    buildings = _add_grid_fts_to_buildings(buildings, hex_grid_type_shares)
+    for size in [100, 500]:
+        buildings[f"ghs_height_buffer_{size}"] = builtup.ghs_mean_height(buildings, bu_raster, meta, size)
+        buildings[f"ghs_greenness_buffer_{size}"] = builtup.ghs_mean_ndvi(buildings, bu_raster, meta, size)
+        buildings[f"ghs_type_share_residential_buffer_{size}"] = builtup.ghs_type_share(buildings, bu_raster, meta, size, "residential")
+        buildings[f"ghs_type_share_non_residential_buffer_{size}"] = builtup.ghs_type_share(buildings, bu_raster, meta, size, "non-residential")
 
     return buildings
 

@@ -5,7 +5,7 @@ from .data import (
     nuts_geometries,
     store_features,
 )
-from .raster import raster_to_gdf, read_area, read_value
+from .raster import distance_nearest_cell, raster_to_gdf, read_area, read_value, read_values, read_values_pooled, area_mean, map_values
 from .spatial import bbox, center, distance_nearest, distance_to_max, extract_largest_polygon_from_multipolygon, simplified_rectangular_buffer, sjoin_nearest_cols, snearest, snearest_attr, transform_crs
 
 __all__ = [
@@ -26,5 +26,10 @@ __all__ = [
     "transform_crs",
     "read_area",
     "read_value",
+    "read_values",
+    "read_values_pooled",
     "raster_to_gdf",
+    "distance_nearest_cell",
+    "area_mean",
+    "map_values",
 ]
