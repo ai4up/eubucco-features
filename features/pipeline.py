@@ -473,6 +473,9 @@ def _calculate_interaction_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataF
     buildings["i_distance_to_built_x_population"] = (
         buildings["bldg_distance_closest"] * buildings[f"population_{pop_suffix}"]
     )
+    buildings["i_distance_to_built_x_population_x_footprint_area"] = (
+        buildings["bldg_distance_closest"] * buildings[f"population_{pop_suffix}"] * np.log(buildings["bldg_footprint_area"])
+    )
     buildings["i_distance_to_built_x_total_footprint_area"] = (
         buildings["bldg_distance_closest"] * (buildings[f"bldg_total_footprint_area_{suffix}"] / 1000)
     )
