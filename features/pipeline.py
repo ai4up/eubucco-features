@@ -177,6 +177,7 @@ def _calculate_block_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     blocks["block_distance_closest"] = building.calculate_distance_to_closest_building(blocks)
 
     buildings = block.merge_blocks_and_buildings(blocks, buildings)
+    buildings = _fill_block_na_with_bldg_features(buildings)
 
     return buildings
 
@@ -492,3 +493,32 @@ def _add_h3_buffer_features(buildings: gpd.GeoDataFrame, gdf: gpd.GeoDataFrame, 
 
 def _add_grid_fts_to_buildings(buildings, grid):
     return buildings.merge(grid, left_on="h3_index", right_index=True, how="left")
+
+
+def _fill_block_na_with_bldg_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    fts = [
+        "perimeter",
+        "footprint_area",
+        "normalized_perimeter_index",
+        "area_perimeter_ratio",
+        "phi",
+        "longest_axis_length",
+        "elongation",
+        "convexity",
+        "rectangularity",
+        "orientation",
+        "corners",
+        "shared_wall_length",
+        "rel_courtyard_size",
+        "touches",
+        "distance_closest",
+    ]
+
+    for ft in fts:
+        buildings["block_" + ft] = buildings["block_" + ft].fillna(buildings["bldg_" + ft])
+
+    buildings["block_length"] = buildings["block_length"].fillna(1)
+    buildings["block_std_footprint_area"] = buildings["block_std_footprint_area"].fillna(0)
+    buildings["block_avg_footprint_area"] = buildings["block_avg_footprint_area"].fillna(buildings["bldg_footprint_area"])
+
+    return buildings
