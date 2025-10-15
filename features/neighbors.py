@@ -23,4 +23,4 @@ def distance_to_building(
 
     dis = util.distance_nearest(buildings, subset, max_distance=1000, exclusive=True)
 
-    return dis
+    return dis.fillna(1000)

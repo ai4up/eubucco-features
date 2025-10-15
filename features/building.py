@@ -28,4 +28,4 @@ def _circle_perimeter(area: pd.Series) -> pd.Series:
 
 
 def calculate_distance_to_closest_building(buildings: gpd.GeoDataFrame) -> pd.Series:
-    return util.distance_nearest(buildings, buildings, max_distance=100)
+    return util.distance_nearest(buildings, buildings, max_distance=100).fillna(100)
