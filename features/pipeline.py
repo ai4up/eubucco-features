@@ -137,6 +137,7 @@ def _preprocess(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     buildings["bldg_height"] = bldgs_gt_attrs["height"].fillna(bldgs_gt_attrs["osm_height_merged"])
     buildings["bldg_age"] = bldgs_gt_attrs["age"].fillna(bldgs_gt_attrs["osm_age_merged"])
     buildings["bldg_type"] = bldgs_gt_attrs["type"].fillna(bldgs_gt_attrs["osm_type_merged"])
+    buildings["bldg_res_type"] = bldgs_gt_attrs["residential_type"].fillna(bldgs_gt_attrs["osm_residential_type_merged"])
 
     buildings["bldg_msft_height"] = buildings[buildings["source_dataset"] == "msft"]["height"]
     buildings["bldg_msft_height"] = buildings["bldg_msft_height"].fillna(buildings["msft_height_merged"])
@@ -170,6 +171,7 @@ def _create_validation_set_and_mask_target_attributes(buildings: gpd.GeoDataFram
     buildings.loc[val_mask, "bldg_height"] = np.nan
     buildings.loc[val_mask, "bldg_age"] = np.nan
     buildings.loc[val_mask, "bldg_type"] = np.nan
+    buildings.loc[val_mask, "bldg_res_type"] = np.nan
 
     return buildings
 
@@ -228,6 +230,10 @@ def _calculate_neighbor_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFram
     buildings["neighbors_distance_commercial"] = neighbors.distance_to_building(buildings, "bldg_type", "commercial")
     buildings["neighbors_distance_agriculture"] = neighbors.distance_to_building(buildings, "bldg_type", "agricultural")
     buildings["neighbors_distance_residential"] = neighbors.distance_to_building(buildings, "bldg_type", "residential")
+    buildings["neighbors_distance_residential_AB"] = neighbors.distance_to_building(buildings, "bldg_res_type", "apartment block")
+    buildings["neighbors_distance_residential_SFH"] = neighbors.distance_to_building(buildings, "bldg_res_type", "detached single-family house")
+    buildings["neighbors_distance_residential_TH"] = neighbors.distance_to_building(buildings, "bldg_res_type", "terraced house")
+    buildings["neighbors_distance_residential_DH"] = neighbors.distance_to_building(buildings, "bldg_res_type", "semi-detached duplex house")
     buildings["neighbors_distance_non_residential"] = buildings[["neighbors_distance_public", "neighbors_distance_industrial", "neighbors_distance_commercial", "neighbors_distance_agriculture"]].min(axis=1)
 
     buildings["neighbors_closest_building_height"] = neighbors.closest_building(buildings, "bldg_height")
@@ -360,6 +366,7 @@ def _calculate_building_buffer_features(buildings: gpd.GeoDataFrame) -> gpd.GeoD
         "bldg_min_age": ("bldg_age", "min"),
         "bldg_std_age": ("bldg_age", "std"),
         "bldg_type_variety": ("bldg_type", "nunique"),
+        "bldg_res_type_variety": ("bldg_res_type", "nunique"),
         "bldg_avg_msft_height": ("bldg_msft_height", "mean"),
         "bldg_max_msft_height": ("bldg_msft_height", "max"),
         "bldg_min_msft_height": ("bldg_msft_height", "min"),
@@ -480,6 +487,10 @@ def _calculate_building_buffer_features(buildings: gpd.GeoDataFrame) -> gpd.GeoD
     hex_grid_type_shares = buffer.calculate_h3_buffer_shares(buildings, "bldg_type", H3_RES, H3_BUFFER_SIZES, h3_cells, dropna=True, n_min=5)
     hex_grid_type_shares = hex_grid_type_shares.add_prefix("bldg_type_share_")
     buildings = _add_grid_fts_to_buildings(buildings, hex_grid_type_shares)
+
+    hex_grid_res_type_shares = buffer.calculate_h3_buffer_shares(buildings, "bldg_res_type", H3_RES, H3_BUFFER_SIZES, h3_cells, dropna=True, n_min=5)
+    hex_grid_res_type_shares = hex_grid_res_type_shares.add_prefix("bldg_res_type_share_")
+    buildings = _add_grid_fts_to_buildings(buildings, hex_grid_res_type_shares)
 
     return buildings
 
