@@ -306,11 +306,9 @@ def _calculate_location_encoding(buildings: gpd.GeoDataFrame, lau_path: str, sat
 def _calculate_building_buffer_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     buffer_fts = {
         "bldg_n": ("bldg_footprint_area", "count"),
-        "bldg_avg_height": ("bldg_height", "mean"),
         "bldg_max_height": ("bldg_height", "max"),
         "bldg_min_height": ("bldg_height", "min"),
         "bldg_std_height": ("bldg_height", "std"),
-        "bldg_avg_age": ("bldg_age", "mean"),
         "bldg_max_age": ("bldg_age", "max"),
         "bldg_min_age": ("bldg_age", "min"),
         "bldg_std_age": ("bldg_age", "std"),
@@ -388,6 +386,10 @@ def _calculate_building_buffer_features(buildings: gpd.GeoDataFrame) -> gpd.GeoD
         "street_max_size": ("street_size", "max"),
     }
     buildings = _add_h3_buffer_features(buildings, buildings, buffer_fts)
+
+    h3_cells = pd.DataFrame(index=buildings['h3_index'].unique())
+    target_var_buffer_fts = {"bldg_avg_height": "bldg_height", "bldg_avg_age": "bldg_age"}
+    buildings = buffer.add_h3_buffer_mean_excluding_self(buildings, target_var_buffer_fts, H3_RES, H3_BUFFER_SIZES, grid_cells=h3_cells)
 
     for s in H3_BUFFER_SIZES:
         suffix = buffer.ft_suffix(H3_RES, s)

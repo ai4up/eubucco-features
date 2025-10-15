@@ -58,6 +58,42 @@ def calculate_h3_grid_shares(gdf: gpd.GeoDataFrame, col: str, res: int, dropna: 
     return hex_grid
 
 
+def add_h3_buffer_mean_excluding_self(
+    gdf: gpd.GeoDataFrame, cols: Dict[str, str], res: int, k: Union[int, List[int]], grid_cells: pd.DataFrame = None
+) -> gpd.GeoDataFrame:
+    """
+        Calculate leaf-one-out average in buffer for a GeoDataFrame based on H3 indexes.
+
+    Args:
+        gdf: A GeoDataFrame to be aggreated.
+        cols:  A dictionary specifying the columns to calculate leave-one-out means for. The keys are the names
+               of the new features, and the values are the column names to calculate the means for.
+        res: H3 resolution level.
+        k:  The number of hexagonal rings to include in the buffer. Provide a list to calculate features
+            for multiple buffer sizes.
+        grid_cells: Optional list of H3 indexes to calculate features for.
+
+    Returns:
+        A hexagonal grid with the calculated buffer features.
+    """
+    operations = {f"_{op}_{col}": (col, op) for col in cols.values() for op in ["sum", "count"]}
+    grid = calculate_h3_buffer_features(gdf, operations, res, k, grid_cells)
+    gdf = gdf.merge(grid, left_on="h3_index", right_index=True, how="left")
+
+    for col_mean, col in cols.items():
+        for j in _ensure_iterable(k):
+            suffix = ft_suffix(res, j)
+            sum_col = f"_sum_{col}_{suffix}"
+            count_col = f"_count_{col}_{suffix}"
+            loo_mean_col = f"{col_mean}_{suffix}"
+
+            gdf[loo_mean_col] = (gdf[sum_col] - gdf[col]) / (gdf[count_col] - 1)
+            gdf.loc[gdf[count_col] <= 1, loo_mean_col] = np.nan
+            gdf = gdf.drop(columns=[sum_col, count_col])
+
+    return gdf
+
+
 def calculate_h3_buffer_features(
     gdf: gpd.GeoDataFrame, operation: Dict[str, Tuple[str, Callable]], res: int, k: Union[int, List[int]], grid_cells: pd.DataFrame = None
 ) -> gpd.GeoDataFrame:
