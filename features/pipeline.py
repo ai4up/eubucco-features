@@ -348,7 +348,7 @@ def _calculate_nuts_region_features(buildings: gpd.GeoDataFrame, lau_path: str, 
 def _calculate_location_encoding(buildings: gpd.GeoDataFrame, lau_path: str, satclip_path: str, region_id: str) -> gpd.GeoDataFrame:
     nuts = region.load_nuts_attr(lau_path)
 
-    buildings = region.add_country_one_hot(buildings, nuts, region_id)
+    buildings = region.add_country(buildings, nuts, region_id)
     buildings = satclip.add_h3_embeddings(buildings, satclip_path)
     buildings["lng"] = buildings.centroid.to_crs("EPSG:4326").x
     buildings["lat"] = buildings.centroid.to_crs("EPSG:4326").y

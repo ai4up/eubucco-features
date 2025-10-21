@@ -14,10 +14,9 @@ def load_nuts_attr(lau_path: str) -> pd.DataFrame:
     return nuts
 
 
-def add_country_one_hot(buildings: gpd.GeoDataFrame, nuts: pd.DataFrame, region_id: str) -> gpd.GeoDataFrame:
+def add_country(buildings: gpd.GeoDataFrame, nuts: pd.DataFrame, region_id: str) -> gpd.GeoDataFrame:
     countries = nuts["CNTR_CODE"].unique()
     buildings["country"] = nuts.loc[region_id]["CNTR_CODE"]
     buildings["country"] = buildings["country"].astype(CategoricalDtype(categories=countries))
-    buildings = pd.get_dummies(buildings, columns=["country"])
 
     return buildings
