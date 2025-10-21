@@ -139,7 +139,7 @@ def _preprocess(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     buildings["bldg_type"] = bldgs_gt_attrs["type"].fillna(bldgs_gt_attrs["osm_type_merged"])
     buildings["bldg_res_type"] = bldgs_gt_attrs["residential_type"].fillna(bldgs_gt_attrs["osm_residential_type_merged"])
 
-    buildings["bldg_msft_height"] = buildings[buildings["source_dataset"] == "msft"]["height"]
+    buildings["bldg_msft_height"] = buildings[buildings["source_dataset"] == "msft"]["height"].astype(float)
     buildings["bldg_msft_height"] = buildings["bldg_msft_height"].fillna(buildings["msft_height_merged"])
 
     return buildings
