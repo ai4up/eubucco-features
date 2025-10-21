@@ -125,22 +125,28 @@ def calculate_h3_buffer_features(
 
 
 def calculate_h3_buffer_shares(
-    gdf: gpd.GeoDataFrame, col: str, h3_res: int, k: Union[int, List[int]], grid_cells: pd.DataFrame = None, dropna: bool = False, n_min: int = 1
+    gdf: gpd.GeoDataFrame, col: str, h3_res: int, k: Union[int, List[int]], grid_cells: pd.DataFrame = None, dropna: bool = False, n_min: int = 1, exclude_self: bool = False
 ) -> gpd.GeoDataFrame:
     grid_counts = calculate_h3_grid_shares(gdf, col, h3_res, dropna)
     grid_counts = grid_counts.unstack(level=col, fill_value=0)
     if grid_cells is None:
         grid_cells = grid_counts
     agg_grid = _calculate_hex_rings_aggregate(grid_cells, grid_counts, "sum", h3_res, k)
+    exploded_grid = gdf[["h3_index", col]].merge(agg_grid, left_on="h3_index", right_index=True, how="left")
+
     ft_suffixes = [ft_suffix(h3_res, j) for j in _ensure_iterable(k)]
     for suffix in ft_suffixes:
-        cols = agg_grid.filter(like=suffix)
-        totals = cols.sum(axis=1)
-        shares = cols.div(totals, axis=0)
-        shares[totals < n_min] = np.nan
-        agg_grid[cols.columns] = shares
+        if exclude_self:
+            for t, idx in exploded_grid.groupby(col, dropna=True, observed=True).groups.items():
+                exploded_grid.loc[idx, f'{t}_{suffix}'] -= 1
 
-    return agg_grid
+        counts = exploded_grid.filter(like=suffix)
+        totals = counts.sum(axis=1)
+        shares = counts.div(totals, axis=0)
+        shares[totals < n_min] = np.nan
+        exploded_grid[counts.columns] = shares
+
+    return exploded_grid.drop(columns=["h3_index", col])
 
 
 def h3_index(gdf: Union[gpd.GeoSeries, gpd.GeoDataFrame], res: int) -> List[str]:

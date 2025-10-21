@@ -23,12 +23,10 @@ from features import (
 from log import LoggingContext, setup_logger
 from util import (
     center,
-    distance_nearest,
     distance_to_max,
     extract_largest_polygon_from_multipolygon,
     load_buildings,
     read_value,
-    snearest_attr,
     store_features,
     transform_crs,
     sample_representative_validation_set_across_attributes,
@@ -492,13 +490,11 @@ def _calculate_building_buffer_features(buildings: gpd.GeoDataFrame) -> gpd.GeoD
 
         buildings[f"bldg_diff_std_shape_{suffix}"] = buildings[[f"bldg_diff_std_{ft}_{suffix}" for ft in ["footprint_area", "perimeter", "elongation", "convexity", "orientation", "distance_closest"]]].abs().mean(axis=1)
 
-    hex_grid_type_shares = buffer.calculate_h3_buffer_shares(buildings, "bldg_type", H3_RES, H3_BUFFER_SIZES, h3_cells, dropna=True, n_min=5)
-    hex_grid_type_shares = hex_grid_type_shares.add_prefix("bldg_type_share_")
-    buildings = _add_grid_fts_to_buildings(buildings, hex_grid_type_shares)
+    hex_grid_type_shares = buffer.calculate_h3_buffer_shares(buildings, "bldg_type", H3_RES, H3_BUFFER_SIZES, h3_cells, dropna=True, n_min=4, exclude_self=True)
+    buildings = buildings.join(hex_grid_type_shares.add_prefix("bldg_type_share_"), how="left")
 
-    hex_grid_res_type_shares = buffer.calculate_h3_buffer_shares(buildings, "bldg_res_type", H3_RES, H3_BUFFER_SIZES, h3_cells, dropna=True, n_min=5)
-    hex_grid_res_type_shares = hex_grid_res_type_shares.add_prefix("bldg_res_type_share_")
-    buildings = _add_grid_fts_to_buildings(buildings, hex_grid_res_type_shares)
+    hex_grid_res_type_shares = buffer.calculate_h3_buffer_shares(buildings, "bldg_res_type", H3_RES, H3_BUFFER_SIZES, h3_cells, dropna=True, n_min=4, exclude_self=True)
+    buildings = buildings.join(hex_grid_res_type_shares.add_prefix("bldg_res_type_share_"), how="left")
 
     return buildings
 
