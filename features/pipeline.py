@@ -335,12 +335,20 @@ def _calculate_population_features(buildings: gpd.GeoDataFrame, pop_file: str) -
 
 
 def _calculate_nuts_region_features(buildings: gpd.GeoDataFrame, lau_path: str, region_id: str) -> gpd.GeoDataFrame:
+    """
+    Add NUTS region attributes to buildings GeoDataFrame.
+    See https://ropengov.github.io/giscoR/reference/gisco_nuts.html for attribute metadata.
+    """
     nuts = region.load_nuts_attr(lau_path)
 
     region_attr = nuts.loc[region_id]
-    buildings["nuts_mountain_type"] = region_attr["MOUNT_TYPE"]
-    buildings["nuts_coast_type"] = region_attr["COAST_TYPE"]
-    buildings["nuts_urban_type"] = region_attr["URBN_TYPE"]
+    buildings["nuts_mountain_type"] = str(region_attr["MOUNT_TYPE"])
+    buildings["nuts_coast_type"] = str(region_attr["COAST_TYPE"])
+    buildings["nuts_urban_type"] = str(region_attr["URBN_TYPE"])
+
+    buildings["nuts_mountain_type"] = pd.Categorical(buildings["nuts_mountain_type"], categories=["1", "2", "3", "4"])
+    buildings["nuts_coast_type"] = pd.Categorical(buildings["nuts_coast_type"], categories=["1", "2", "3"])
+    buildings["nuts_urban_type"] = pd.Categorical(buildings["nuts_urban_type"], categories=["1", "2", "3"])
 
     return buildings
 
