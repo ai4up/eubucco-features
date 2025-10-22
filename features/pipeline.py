@@ -132,13 +132,20 @@ def _preprocess(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     buildings.geometry = buildings.geometry.apply(extract_largest_polygon_from_multipolygon)
 
     bldgs_gt_attrs = buildings[buildings["source_dataset"].str.contains("osm|gov")]
-    buildings["bldg_height"] = bldgs_gt_attrs["height"].fillna(bldgs_gt_attrs["osm_height_merged"])
-    buildings["bldg_age"] = bldgs_gt_attrs["age"].fillna(bldgs_gt_attrs["osm_age_merged"])
-    buildings["bldg_type"] = bldgs_gt_attrs["type"].fillna(bldgs_gt_attrs["osm_type_merged"])
-    buildings["bldg_res_type"] = bldgs_gt_attrs["residential_type"].fillna(bldgs_gt_attrs["osm_residential_type_merged"])
+    buildings["bldg_height"] = bldgs_gt_attrs["height"]
+    buildings["bldg_age"] = bldgs_gt_attrs["age"]
+    buildings["bldg_type"] = bldgs_gt_attrs["type"]
+    buildings["bldg_res_type"] = bldgs_gt_attrs["residential_type"]
+
+    if "osm_height_merged" in bldgs_gt_attrs.columns:
+        bldgs_gt_attrs["height"].fillna(bldgs_gt_attrs["osm_height_merged"], inplace=True)
+        bldgs_gt_attrs["age"].fillna(bldgs_gt_attrs["osm_age_merged"], inplace=True)
+        bldgs_gt_attrs["type"].fillna(bldgs_gt_attrs["osm_type_merged"], inplace=True)
+        bldgs_gt_attrs["residential_type"].fillna(bldgs_gt_attrs["osm_residential_type_merged"], inplace=True)
 
     buildings["bldg_msft_height"] = buildings[buildings["source_dataset"] == "msft"]["height"].astype(float)
-    buildings["bldg_msft_height"] = buildings["bldg_msft_height"].fillna(buildings["msft_height_merged"])
+    if "msft_height_merged" in buildings.columns:
+        buildings["bldg_msft_height"].fillna(buildings["msft_height_merged"], inplace=True)
 
     return buildings
 
