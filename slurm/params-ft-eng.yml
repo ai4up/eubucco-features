@@ -1,4 +1,4 @@
-bldgs_dir: [/p/projects/eubucco/data/2-database-nuts-level-v1-gov]
+bldgs_dir: [/p/projects/eubucco/data/4-merged-dataset-ml-cleaned]
 streets_dir: [/p/projects/eubucco/data/2-database-nuts-level-v1-streets]
 pois_dir: [/p/projects/eubucco/data/2-database-nuts-level-v1-pois]
 built_up_path: [/p/projects/eubucco/eubucco-features/data/GHS_BUILT_C_MSZ_E2018_GLOBE_R2023A_54009_10_V1_0.tif]
@@ -10,7 +10,7 @@ hdd_path: [/p/projects/eubucco/eubucco-features/data/HDD_historical_mean_v1.nc]
 pop_path: [/p/projects/eubucco/eubucco-features/data/GHS_POP_E2020_GLOBE_R2023A_54009_100_V1_0.tif]
 lau_path: [/p/projects/eubucco/data/0-raw-data/lau/lau_nuts_extra.csv]
 satclip_path: [/p/projects/eubucco/eubucco-features/data/satclip_europe_res8_pca64.parquet]
-out_dir: [/p/projects/eubucco/data/3-ml-inputs-v1]
+out_dir: [/p/projects/eubucco/data/5-feature-engineering]
 log_file: [/p/projects/eubucco/logs/v1_0-db/feature-engineering/pipeline.log]
 region_id:
   - AT111

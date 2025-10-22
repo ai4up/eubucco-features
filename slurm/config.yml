@@ -30,15 +30,18 @@ jobs:
     param_generator_file: /p/projects/eubucco/eubucco-features/slurm/params-ft-eng.yml
     log_dir: /p/projects/eubucco/logs/v1_0-db/feature-engineering
     resources:
-      cpus: 8
+      cpus: 4
+      mem: 20000
       time: "24:00:00"
     special_cases:
       - name: large-regions
         files:
-          path: "{{bldgs_dir}}/**/{{region_id}}.gpkg"
-          size_min: 500000000
+          path: "{{bldgs_dir}}/{{region_id}}.parquet"
+          size_min: 100000000
         resources:
-          mem: 300000
+          cpu: 8
+          mem: 60000
+          time: "7-00:00:00"
 
 properties:
   conda_env: eubucco-features
