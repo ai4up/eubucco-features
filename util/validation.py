@@ -9,7 +9,7 @@ def sample_representative_validation_set_across_attributes(
         target_attrs: list[str],
         representative_attrs: list[str],
         val_size: float,
-    ) -> gpd.GeoDataFrame:
+    ) -> np.typing.NDArray[np.bool_]:
     """
     Generate a representative validation set for inferring missing building attributes
     by selecting buildings that are close to the unlabeled buildings in feature space
@@ -33,7 +33,7 @@ def sample_representative_validation_set(
         attr: str,
         representative_attrs: list[str],
         val_size: float,
-    ) -> gpd.GeoDataFrame:
+    ) -> np.typing.NDArray[np.bool_]:
     """
     Generate a representative validation set for inferring missing building attributes
     by selecting buildings that are close to the unlabeled buildings in feature space.
@@ -46,6 +46,14 @@ def sample_representative_validation_set(
     na_mask = gdf[attr].isna()
     df_labeled = gdf[~na_mask]
     df_unlabeled = gdf[na_mask]
+
+    # return a random sample mask when there are no missing attributes
+    if df_unlabeled.empty:
+        return np.random.rand(len(gdf)) < val_size
+
+    # return empty sample mask when there are no attributes
+    if df_labeled.empty:
+        return np.zeros(len(gdf), dtype=bool)
 
     X_labeled = df_labeled[representative_attrs]
     X_unlabeled = df_unlabeled[representative_attrs]
