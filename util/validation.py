@@ -38,6 +38,11 @@ def sample_representative_validation_set(
     Generate a representative validation set for inferring missing building attributes
     by selecting buildings that are close to the unlabeled buildings in feature space.
     """
+    gdf = gdf[representative_attrs + [attr]].replace([np.inf, -np.inf], np.nan)
+
+    for col in representative_attrs:
+        gdf[col] = gdf[col].fillna(gdf[col].mean())
+
     na_mask = gdf[attr].isna()
     df_labeled = gdf[~na_mask]
     df_unlabeled = gdf[na_mask]
