@@ -117,6 +117,9 @@ def _merge_tags(*dicts):
 def _filter(df, tags):
     mask = pd.Series(False, index=df.index)
     for col, value in tags.items():
+        if col not in df.columns:
+            continue
+
         if isinstance(value, list):
             mask |= df[col].isin(value)
         elif value is True:
