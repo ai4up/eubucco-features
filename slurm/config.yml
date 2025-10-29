@@ -39,7 +39,7 @@ jobs:
           path: "{{bldgs_dir}}/{{region_id}}.parquet"
           size_min: 100000000
         resources:
-          cpu: 8
+          cpus: 8
           mem: 60000
           time: "7-00:00:00"
 
