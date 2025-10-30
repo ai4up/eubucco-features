@@ -230,19 +230,19 @@ def _calculate_block_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     blocks["block_corners"] = momepy.corners(blocks.simplify(0.5), eps=45)
     blocks["block_shared_wall_length"] = momepy.shared_walls(blocks)
     blocks["block_rel_courtyard_size"] = momepy.courtyard_area(blocks) / blocks.area
-    blocks["block_touches"] = building.calculate_touches(blocks, id_col="block_uuid")
+    blocks["block_touches"] = building.calculate_touches(blocks, id_col="block_id")
     blocks["block_distance_closest"] = building.calculate_distance_to_closest_building(blocks)
 
     buildings = block.merge_blocks_and_buildings(blocks, buildings)
 
-    buildings["block_avg_footprint_area"] = buildings.groupby("block_uuid")["bldg_footprint_area"].transform("mean")
-    buildings["block_std_footprint_area"] = buildings.groupby("block_uuid")["bldg_footprint_area"].transform("std")
-    buildings["block_avg_perimeter"] = buildings.groupby("block_uuid")["bldg_perimeter"].transform("mean")
-    buildings["block_std_perimeter"] = buildings.groupby("block_uuid")["bldg_perimeter"].transform("std")
-    buildings["block_avg_elongation"] = buildings.groupby("block_uuid")["bldg_elongation"].transform("mean")
-    buildings["block_std_elongation"] = buildings.groupby("block_uuid")["bldg_elongation"].transform("std")
-    buildings["block_avg_orientation"] = buildings.groupby("block_uuid")["bldg_orientation"].transform("mean")
-    buildings["block_std_orientation"] = buildings.groupby("block_uuid")["bldg_orientation"].transform("std")
+    buildings["block_avg_footprint_area"] = buildings.groupby("block_id")["bldg_footprint_area"].transform("mean")
+    buildings["block_std_footprint_area"] = buildings.groupby("block_id")["bldg_footprint_area"].transform("std")
+    buildings["block_avg_perimeter"] = buildings.groupby("block_id")["bldg_perimeter"].transform("mean")
+    buildings["block_std_perimeter"] = buildings.groupby("block_id")["bldg_perimeter"].transform("std")
+    buildings["block_avg_elongation"] = buildings.groupby("block_id")["bldg_elongation"].transform("mean")
+    buildings["block_std_elongation"] = buildings.groupby("block_id")["bldg_elongation"].transform("std")
+    buildings["block_avg_orientation"] = buildings.groupby("block_id")["bldg_orientation"].transform("mean")
+    buildings["block_std_orientation"] = buildings.groupby("block_id")["bldg_orientation"].transform("std")
 
     buildings["block_diff_footprint_area"] = buildings["block_avg_footprint_area"] - buildings["bldg_footprint_area"]
     buildings["block_diff_std_footprint_area"] = buildings["block_diff_footprint_area"] / buildings["block_std_footprint_area"]

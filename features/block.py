@@ -24,7 +24,7 @@ def generate_blocks(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
                 "geometry": block_geometry,
                 "building_ids": building_ids.values,
                 "block_buildings": block_buildings.values,
-                "block_uuid": uuid.uuid4().hex[:16],
+                "block_id": uuid.uuid4().hex[:16],
             }
         )
 
@@ -33,7 +33,7 @@ def generate_blocks(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         blocks_gdf.geometry = simplified_rectangular_buffer(blocks_gdf, 0.01)  # ensure all geometries are Polygons and valid
         blocks_gdf.geometry = blocks_gdf.geometry.apply(extract_largest_polygon_from_multipolygon)
     else:
-        blocks_gdf = gpd.GeoDataFrame(columns=["geometry", "building_ids", "block_buildings", "block_uuid"])
+        blocks_gdf = gpd.GeoDataFrame(columns=["geometry", "building_ids", "block_buildings", "block_id"])
 
     print(
         f"Generated {len(blocks_gdf)} blocks with on average "
