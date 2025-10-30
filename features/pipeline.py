@@ -136,16 +136,23 @@ def _preprocess(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     buildings["bldg_age"] = bldgs_gt_attrs["age"]
     buildings["bldg_type"] = bldgs_gt_attrs["type"]
     buildings["bldg_res_type"] = bldgs_gt_attrs["residential_type"]
+    buildings["bldg_msft_height"] = buildings[buildings["source_dataset"] == "msft"]["height"]
+    buildings["bldg_msft_height"] = buildings["bldg_msft_height"].astype(float)
 
-    if "osm_height_merged" in bldgs_gt_attrs.columns:
-        bldgs_gt_attrs["height"].fillna(bldgs_gt_attrs["osm_height_merged"], inplace=True)
-        bldgs_gt_attrs["age"].fillna(bldgs_gt_attrs["osm_age_merged"], inplace=True)
-        bldgs_gt_attrs["type"].fillna(bldgs_gt_attrs["osm_type_merged"], inplace=True)
-        bldgs_gt_attrs["residential_type"].fillna(bldgs_gt_attrs["osm_residential_type_merged"], inplace=True)
+    buildings = _fill_missing_attributes_with_merged(buildings)
 
-    buildings["bldg_msft_height"] = buildings[buildings["source_dataset"] == "msft"]["height"].astype(float)
+    return buildings
+
+
+def _fill_missing_attributes_with_merged(buildings: gpd.GeoDataFrame) -> None:
+    if "osm_height_merged" in buildings.columns:
+        buildings["bldg_height"] = buildings["bldg_height"].fillna(buildings["osm_height_merged"])
+        buildings["bldg_age"] = buildings["bldg_age"].fillna(buildings["osm_age_merged"])
+        buildings["bldg_type"] = buildings["bldg_type"].fillna(buildings["osm_type_merged"])
+        buildings["bldg_res_type"] = buildings["bldg_res_type"].fillna(buildings["osm_residential_type_merged"])
+
     if "msft_height_merged" in buildings.columns:
-        buildings["bldg_msft_height"].fillna(buildings["msft_height_merged"], inplace=True)
+        buildings["bldg_msft_height"] = buildings["bldg_msft_height"].fillna(buildings["msft_height_merged"])
 
     return buildings
 
