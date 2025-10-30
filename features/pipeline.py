@@ -212,10 +212,8 @@ def _calculate_block_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     blocks = block.generate_blocks(buildings)
 
     blocks["block_length"] = blocks["building_ids"].apply(len)
-    blocks["block_perimeter"] = blocks.length
     blocks["block_footprint_area"] = blocks.area
-    blocks["block_avg_footprint_area"] = blocks["block_buildings"].apply(lambda b: b.area.mean())
-    blocks["block_std_footprint_area"] = blocks["block_buildings"].apply(lambda b: b.area.std())
+    blocks["block_perimeter"] = blocks.length
     blocks["block_normalized_perimeter_index"] = building.calculate_norm_perimeter(blocks)
     blocks["block_area_perimeter_ratio"] = blocks["block_footprint_area"] / blocks["block_perimeter"]
     blocks["block_phi"] = building.calculate_phi(blocks)
@@ -231,6 +229,25 @@ def _calculate_block_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     blocks["block_distance_closest"] = building.calculate_distance_to_closest_building(blocks)
 
     buildings = block.merge_blocks_and_buildings(blocks, buildings)
+
+    buildings["block_avg_footprint_area"] = buildings.groupby("block_uuid")["bldg_footprint_area"].transform("mean")
+    buildings["block_std_footprint_area"] = buildings.groupby("block_uuid")["bldg_footprint_area"].transform("std")
+    buildings["block_avg_perimeter"] = buildings.groupby("block_uuid")["bldg_perimeter"].transform("mean")
+    buildings["block_std_perimeter"] = buildings.groupby("block_uuid")["bldg_perimeter"].transform("std")
+    buildings["block_avg_elongation"] = buildings.groupby("block_uuid")["bldg_elongation"].transform("mean")
+    buildings["block_std_elongation"] = buildings.groupby("block_uuid")["bldg_elongation"].transform("std")
+    buildings["block_avg_orientation"] = buildings.groupby("block_uuid")["bldg_orientation"].transform("mean")
+    buildings["block_std_orientation"] = buildings.groupby("block_uuid")["bldg_orientation"].transform("std")
+
+    buildings["block_diff_footprint_area"] = buildings["block_avg_footprint_area"] - buildings["bldg_footprint_area"]
+    buildings["block_diff_std_footprint_area"] = buildings["block_diff_footprint_area"] / buildings["block_std_footprint_area"]
+    buildings["block_diff_perimeter"] = buildings["block_avg_perimeter"] - buildings["bldg_perimeter"]
+    buildings["block_diff_std_perimeter"] = buildings["block_diff_perimeter"] / buildings["block_std_perimeter"]
+    buildings["block_diff_elongation"] = buildings["block_avg_elongation"] - buildings["bldg_elongation"]
+    buildings["block_diff_std_elongation"] = buildings["block_diff_elongation"] / buildings["block_std_elongation"]
+    buildings["block_diff_orientation"] = buildings["block_avg_orientation"] - buildings["bldg_orientation"]
+    buildings["block_diff_std_orientation"] = buildings["block_diff_orientation"] / buildings["block_std_orientation"]
+
     buildings = _fill_block_na_with_bldg_features(buildings)
 
     return buildings
@@ -600,7 +617,17 @@ def _fill_block_na_with_bldg_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDat
         buildings["block_" + ft] = buildings["block_" + ft].fillna(buildings["bldg_" + ft])
 
     buildings["block_length"] = buildings["block_length"].fillna(1)
-    buildings["block_std_footprint_area"] = buildings["block_std_footprint_area"].fillna(0)
-    buildings["block_avg_footprint_area"] = buildings["block_avg_footprint_area"].fillna(buildings["bldg_footprint_area"])
+
+    fts = [
+        "perimeter",
+        "footprint_area",
+        "elongation",
+        "orientation",
+    ]
+    for ft in fts:
+        buildings["block_std_" + ft] = buildings["block_std_" + ft].fillna(0)
+        buildings["block_avg_" + ft] = buildings["block_avg_" + ft].fillna(buildings["bldg_" + ft])
+        buildings["block_diff_" + ft] = buildings["block_diff_" + ft].fillna(0)
+        buildings["block_diff_std_" + ft] = buildings["block_diff_std_" + ft].replace([np.inf, -np.inf], 0)
 
     return buildings
