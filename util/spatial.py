@@ -1,5 +1,6 @@
 from typing import Dict, List, Union
 
+import numpy as np
 import geopandas as gpd
 import pandas as pd
 from pyproj import Transformer
@@ -77,6 +78,18 @@ def distance_to_max(gdf: gpd.GeoDataFrame, attr: str):
     dis = gdf.distance(gdf.loc[peak, "geometry"])
 
     return dis
+
+
+def count_dwithin(
+    gdf1: gpd.GeoDataFrame, gdf2: gpd.GeoDataFrame, distance: float
+) -> np.ndarray:
+    buildings_idx, _ = gdf1.sindex.query(
+        gdf2.geometry, predicate="dwithin", distance=distance
+    )
+
+    counts = np.bincount(buildings_idx, minlength=len(gdf1))
+
+    return counts
 
 
 def bbox(geom: Union[gpd.GeoSeries, gpd.GeoDataFrame], crs: str = None, buffer: float = None) -> gpd.GeoSeries:

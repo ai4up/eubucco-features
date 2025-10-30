@@ -1,6 +1,7 @@
 import os
 from typing import Callable, Iterator, Tuple, Union
 
+import numpy as np
 import geopandas as gpd
 from shapely.geometry import MultiPolygon, Polygon
 

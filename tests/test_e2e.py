@@ -15,6 +15,7 @@ def test_pipeline():
     bldgs_dir = os.path.join(test_data_dir, "bldgs-881f902143fffff")
     streets_dir = os.path.join(test_data_dir, "streets")
     pois_dir = os.path.join(test_data_dir, "pois")
+    addresses_path = os.path.join(test_data_dir, "overture_addresses_test_region.parquet")
     GHS_built_up_path = os.path.join(test_data_dir, "GHS_BUILT_test_region.tif")
     corine_lu_path = os.path.join(test_data_dir, "CORINE_landuse_test_region.tif")
     oceans_path = os.path.join(test_data_dir, "OSM_oceans_test_region.gpkg")
@@ -32,6 +33,7 @@ def test_pipeline():
     execute_feature_pipeline(
         region_id,
         bldgs_dir,
+        addresses_path,
         streets_dir,
         pois_dir,
         GHS_built_up_path,

@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 
 from features import (
+    address,
     block,
     buffer,
     building,
@@ -40,6 +41,7 @@ CRS = 3035
 def execute_feature_pipeline(
     region_id: str,
     bldgs_dir: str,
+    addresses_path: str,
     streets_dir: str,
     pois_dir: str,
     built_up_path: str,
@@ -69,7 +71,7 @@ def execute_feature_pipeline(
 
     with LoggingContext(logger, feature_name="validation_set"):
         buildings = _create_validation_set_and_mask_target_attributes(buildings)
-        
+
     with LoggingContext(logger, feature_name="blocks"):
         buildings = _calculate_block_features(buildings)
 
@@ -79,12 +81,14 @@ def execute_feature_pipeline(
     with LoggingContext(logger, feature_name="microsoft_heights"):
         buildings = _calculate_microsoft_height_features(buildings)
 
+    with LoggingContext(logger, feature_name="address"):
+        buildings = _calculate_address_features(buildings, addresses_path)
+
     with LoggingContext(logger, feature_name="street"):
         buildings = _calculate_street_features(buildings, streets_dir, region_id)
 
     with LoggingContext(logger, feature_name="poi"):
         buildings = _calculate_poi_features(buildings, pois_dir, region_id)
-
     with LoggingContext(logger, feature_name="landuse"):
         buildings = _calculate_landuse_features(buildings, lu_path, oceans_path)
 
@@ -290,6 +294,17 @@ def _calculate_microsoft_height_features(buildings: gpd.GeoDataFrame) -> gpd.Geo
     return buildings
 
 
+def _calculate_address_features(buildings: gpd.GeoDataFrame, addresses_path: str) -> gpd.GeoDataFrame:
+    addresses = address.load_addresses(addresses_path, buildings)
+
+    buildings["address_count"] = address.building_address_count(buildings, addresses)
+    buildings["address_unit_count"] = address.building_address_unit_count(buildings, addresses)
+    buildings["address_distance"] = address.distance_to_closest_address(buildings, addresses)
+
+
+    return buildings
+
+
 def _calculate_street_features(buildings: gpd.GeoDataFrame, streets_dir: str, region_id: str) -> gpd.GeoDataFrame:
     streets = street.load_streets(streets_dir, region_id, CRS)
 
@@ -479,6 +494,14 @@ def _calculate_building_buffer_features(buildings: gpd.GeoDataFrame) -> gpd.GeoD
         "street_avg_size": ("street_size", "mean"),
         "street_std_size": ("street_size", "std"),
         "street_max_size": ("street_size", "max"),
+        "address_total_count": ("address_count", "sum"),
+        "address_avg_count": ("address_count", "mean"),
+        "address_std_count": ("address_count", "std"),
+        "address_max_count": ("address_count", "max"),
+        "address_total_unit_count": ("address_unit_count", "sum"),
+        "address_avg_unit_count": ("address_unit_count", "mean"),
+        "address_std_unit_count": ("address_unit_count", "std"),
+        "address_max_unit_count": ("address_unit_count", "max"),
     }
     buildings = _add_h3_buffer_features(buildings, buildings, buffer_fts)
 
@@ -515,6 +538,8 @@ def _calculate_building_buffer_features(buildings: gpd.GeoDataFrame) -> gpd.GeoD
             ("block", "phi"),
             ("street", "distance"),
             ("street", "size"),
+            ("address", "count"),
+            ("address", "unit_count"),
         ]:
             buildings[f"{cat}_diff_{ft}_{suffix}"] = buildings[f"{cat}_avg_{ft}_{suffix}"] - buildings[f"{cat}_{ft}"]
             buildings[f"{cat}_diff_std_{ft}_{suffix}"] = (buildings[f"{cat}_diff_{ft}_{suffix}"] / buildings[f"{cat}_std_{ft}_{suffix}"]).replace([np.inf, -np.inf], 0)
