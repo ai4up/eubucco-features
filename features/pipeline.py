@@ -125,6 +125,7 @@ def execute_feature_pipeline(
     with LoggingContext(logger, feature_name="interaction"):
         buildings = _calculate_interaction_features(buildings)
 
+    buildings = _postprocess(buildings)
     store_features(buildings, out_dir, region_id)
 
 
@@ -654,5 +655,13 @@ def _fill_block_na_with_bldg_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDat
         buildings["block_avg_" + ft] = buildings["block_avg_" + ft].fillna(buildings["bldg_" + ft])
         buildings["block_diff_" + ft] = buildings["block_diff_" + ft].fillna(0)
         buildings["block_diff_std_" + ft] = buildings["block_diff_std_" + ft].replace([np.inf, -np.inf], 0)
+
+    return buildings
+
+
+def _postprocess(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    fts_cols = buildings.filter(
+        regex='^(bldg|block|neighbors|poi|address|street|lu|ghs|nuts|satclip|cdd|hdd|elevation|ruggedness|lat|lng|country|population|distance_to_center|i_)').columns
+    buildings[fts_cols] = buildings[fts_cols].replace([None, -np.inf, np.inf], np.nan)
 
     return buildings
