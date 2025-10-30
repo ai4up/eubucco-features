@@ -301,8 +301,10 @@ def _calculate_microsoft_height_features(buildings: gpd.GeoDataFrame) -> gpd.Geo
 def _calculate_address_features(buildings: gpd.GeoDataFrame, addresses_path: str) -> gpd.GeoDataFrame:
     addresses = address.load_addresses(addresses_path, buildings)
 
-    buildings["address_count"] = address.building_address_count(buildings, addresses)
-    buildings["address_unit_count"] = address.building_address_unit_count(buildings, addresses)
+    buildings["address_count_5"] = address.building_address_count(buildings, addresses, 5)
+    buildings["address_count_10"] = address.building_address_count(buildings, addresses, 10)
+    buildings["address_unit_count_5"] = address.building_address_unit_count(buildings, addresses, 5)
+    buildings["address_unit_count_10"] = address.building_address_unit_count(buildings, addresses, 10)
     buildings["address_distance"] = address.distance_to_closest_address(buildings, addresses)
 
 
@@ -498,14 +500,14 @@ def _calculate_building_buffer_features(buildings: gpd.GeoDataFrame) -> gpd.GeoD
         "street_avg_size": ("street_size", "mean"),
         "street_std_size": ("street_size", "std"),
         "street_max_size": ("street_size", "max"),
-        "address_total_count": ("address_count", "sum"),
-        "address_avg_count": ("address_count", "mean"),
-        "address_std_count": ("address_count", "std"),
-        "address_max_count": ("address_count", "max"),
-        "address_total_unit_count": ("address_unit_count", "sum"),
-        "address_avg_unit_count": ("address_unit_count", "mean"),
-        "address_std_unit_count": ("address_unit_count", "std"),
-        "address_max_unit_count": ("address_unit_count", "max"),
+        "address_total_count": ("address_count_5", "sum"),
+        "address_avg_count": ("address_count_5", "mean"),
+        "address_std_count": ("address_count_5", "std"),
+        "address_max_count": ("address_count_5", "max"),
+        "address_total_unit_count": ("address_unit_count_5", "sum"),
+        "address_avg_unit_count": ("address_unit_count_5", "mean"),
+        "address_std_unit_count": ("address_unit_count_5", "std"),
+        "address_max_unit_count": ("address_unit_count_5", "max"),
     }
     buildings = _add_h3_buffer_features(buildings, buildings, buffer_fts)
 
@@ -542,8 +544,8 @@ def _calculate_building_buffer_features(buildings: gpd.GeoDataFrame) -> gpd.GeoD
             ("block", "phi"),
             ("street", "distance"),
             ("street", "size"),
-            ("address", "count"),
-            ("address", "unit_count"),
+            ("address", "count_5"),
+            ("address", "unit_count_5"),
         ]:
             buildings[f"{cat}_diff_{ft}_{suffix}"] = buildings[f"{cat}_avg_{ft}_{suffix}"] - buildings[f"{cat}_{ft}"]
             buildings[f"{cat}_diff_std_{ft}_{suffix}"] = (buildings[f"{cat}_diff_{ft}_{suffix}"] / buildings[f"{cat}_std_{ft}_{suffix}"]).replace([np.inf, -np.inf], 0)
