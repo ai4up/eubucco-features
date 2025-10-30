@@ -15,7 +15,7 @@ def add_h3_embeddings(buildings: gpd.GeoDataFrame, satclip_path: str) -> gpd.Geo
     Returns:
         A GeoDataFrame with the merged SatCLIP embeddings.
     """
-    embeddings = pd.read_parquet(satclip_path)
+    embeddings = pd.read_parquet(satclip_path).add_prefix("satclip_")
     buildings['h3_08'] = buffer.h3_index(buildings, 8)
     buildings = buildings.merge(embeddings, left_on='h3_08', right_index=True, how="left")
 
