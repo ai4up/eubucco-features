@@ -214,7 +214,10 @@ def _calculate_building_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFram
 
 
 def _calculate_block_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
-    blocks = block.generate_blocks(buildings)
+    if "block_id" not in buildings.columns:
+        blocks = block.generate_blocks(buildings)
+    else:
+        blocks = block.generate_blocks_from_ids(buildings)
 
     blocks["block_length"] = blocks["building_ids"].apply(len)
     blocks["block_footprint_area"] = blocks.area
