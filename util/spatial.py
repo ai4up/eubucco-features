@@ -82,14 +82,14 @@ def distance_to_max(gdf: gpd.GeoDataFrame, attr: str):
 
 def count_dwithin(
     gdf1: gpd.GeoDataFrame, gdf2: gpd.GeoDataFrame, distance: float
-) -> np.ndarray:
-    buildings_idx, _ = gdf1.sindex.query(
+) -> pd.Series:
+    _, gdf1_idx = gdf1.sindex.query(
         gdf2.geometry, predicate="dwithin", distance=distance
     )
+    counts = np.bincount(gdf1_idx, minlength=len(gdf1))
+    s = pd.Series(counts, index=gdf1.index, name="count")
 
-    counts = np.bincount(buildings_idx, minlength=len(gdf1))
-
-    return counts
+    return s
 
 
 def bbox(geom: Union[gpd.GeoSeries, gpd.GeoDataFrame], crs: str = None, buffer: float = None) -> gpd.GeoSeries:
