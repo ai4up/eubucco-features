@@ -61,7 +61,7 @@ def snearest(left: gpd.GeoDataFrame, right: gpd.GeoDataFrame, max_distance: floa
     return nearest
 
 
-def distance_nearest(left: gpd.GeoDataFrame, right: gpd.GeoDataFrame, max_distance: float = None, exclusive: bool = False) -> pd.DataFrame:
+def distance_nearest(left: gpd.GeoDataFrame, right: gpd.GeoDataFrame, max_distance: float = None, exclusive: bool = False) -> pd.Series:
     exclusive = left is right or exclusive
     (left_i, _), dis = right.sindex.nearest(
         left.geometry, return_all=False, return_distance=True, max_distance=max_distance, exclusive=exclusive
