@@ -233,7 +233,6 @@ def _calculate_block_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     blocks["block_corners"] = momepy.corners(blocks.simplify(0.5), eps=45)
     blocks["block_shared_wall_length"] = momepy.shared_walls(blocks)
     blocks["block_rel_courtyard_size"] = momepy.courtyard_area(blocks) / blocks.area
-    blocks["block_touches"] = building.calculate_touches(blocks, id_col="block_id")
     blocks["block_distance_closest"] = building.calculate_distance_to_closest_building(blocks)
 
     buildings = block.merge_blocks_and_buildings(blocks, buildings)
@@ -476,9 +475,6 @@ def _calculate_building_buffer_features(buildings: gpd.GeoDataFrame) -> gpd.GeoD
         "block_avg_rel_courtyard_size": ("block_rel_courtyard_size", "mean"),
         "block_std_rel_courtyard_size": ("block_rel_courtyard_size", "std"),
         "block_max_rel_courtyard_size": ("block_rel_courtyard_size", "max"),
-        "block_avg_touches": ("block_touches", "mean"),
-        "block_std_touches": ("block_touches", "std"),
-        "block_max_touches": ("block_touches", "max"),
         "block_avg_distance_closest": ("block_distance_closest", "mean"),
         "block_std_distance_closest": ("block_distance_closest", "std"),
         "block_max_distance_closest": ("block_distance_closest", "max"),
@@ -537,7 +533,6 @@ def _calculate_building_buffer_features(buildings: gpd.GeoDataFrame) -> gpd.GeoD
             ("block", "rectangularity"),
             ("block", "shared_wall_length"),
             ("block", "rel_courtyard_size"),
-            ("block", "touches"),
             ("block", "distance_closest"),
             ("block", "normalized_perimeter_index"),
             ("block", "area_perimeter_ratio"),
@@ -640,7 +635,6 @@ def _fill_block_na_with_bldg_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDat
         "corners",
         "shared_wall_length",
         "rel_courtyard_size",
-        "touches",
         "distance_closest",
     ]
 
