@@ -236,7 +236,6 @@ def _calculate_block_features(buildings: gpd.GeoDataFrame, blocks: gpd.GeoDataFr
     blocks["block_orientation"] = momepy.orientation(blocks)
     blocks["block_corners"] = momepy.corners(blocks.simplify(0.5), eps=45)
     blocks["block_corners_area_ratio"] = blocks["block_corners"] / blocks["block_footprint_area"]
-    blocks["block_shared_wall_length"] = momepy.shared_walls(blocks)
     blocks["block_rel_courtyard_size"] = momepy.courtyard_area(blocks) / blocks["block_footprint_area"]
     blocks["block_distance_closest"] = building.calculate_distance_to_closest_building(blocks)
 
@@ -481,9 +480,6 @@ def _calculate_building_buffer_features(buildings: gpd.GeoDataFrame) -> gpd.GeoD
         "block_avg_rectangularity": ("block_rectangularity", "mean"),
         "block_std_rectangularity": ("block_rectangularity", "std"),
         "block_max_rectangularity": ("block_rectangularity", "max"),
-        "block_avg_shared_wall_length": ("block_shared_wall_length", "mean"),
-        "block_std_shared_wall_length": ("block_shared_wall_length", "std"),
-        "block_max_shared_wall_length": ("block_shared_wall_length", "max"),
         "block_avg_rel_courtyard_size": ("block_rel_courtyard_size", "mean"),
         "block_std_rel_courtyard_size": ("block_rel_courtyard_size", "std"),
         "block_max_rel_courtyard_size": ("block_rel_courtyard_size", "max"),
@@ -543,7 +539,6 @@ def _calculate_building_buffer_features(buildings: gpd.GeoDataFrame) -> gpd.GeoD
             ("block", "corners"),
             ("block", "length"),
             ("block", "rectangularity"),
-            ("block", "shared_wall_length"),
             ("block", "rel_courtyard_size"),
             ("block", "distance_closest"),
             ("block", "normalized_perimeter_index"),
@@ -646,7 +641,6 @@ def _fill_block_na_with_bldg_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDat
         "orientation",
         "corners",
         "corners_area_ratio",
-        "shared_wall_length",
         "rel_courtyard_size",
         "distance_closest",
     ]
