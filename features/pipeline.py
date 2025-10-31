@@ -78,9 +78,6 @@ def execute_feature_pipeline(
     with LoggingContext(logger, feature_name="neighbors"):
         buildings = _calculate_neighbor_features(buildings)
 
-    with LoggingContext(logger, feature_name="microsoft_heights"):
-        buildings = _calculate_microsoft_height_features(buildings)
-
     with LoggingContext(logger, feature_name="address"):
         buildings = _calculate_address_features(buildings, addresses_path)
 
@@ -284,21 +281,17 @@ def _calculate_neighbor_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFram
     buildings["neighbors_distance_medium_rise"] = neighbors.distance_to_building(buildings, "bldg_height", [20, 30])
     buildings["neighbors_distance_high_rise"] = neighbors.distance_to_building(buildings, "bldg_height", [30, np.inf])
 
+    buildings["neighbors_closest_msft_height"] = neighbors.closest_building(buildings, "bldg_msft_height")
+    buildings["neighbors_distance_msft_low_rise"] = neighbors.distance_to_building(buildings, "bldg_msft_height", [0, 10])
+    buildings["neighbors_distance_msft_low_medium_rise"] = neighbors.distance_to_building(buildings, "bldg_msft_height", [10, 20])
+    buildings["neighbors_distance_msft_medium_rise"] = neighbors.distance_to_building(buildings, "bldg_msft_height", [20, 30])
+    buildings["neighbors_distance_msft_high_rise"] = neighbors.distance_to_building(buildings, "bldg_msft_height", [30, np.inf])
+
     buildings["neighbors_closest_building_age"] = neighbors.closest_building(buildings, "bldg_age")
     buildings["neighbors_distance_prior_1900"] = neighbors.distance_to_building(buildings, "bldg_age", [0, 1900])
     buildings["neighbors_distance_1900_1970"] = neighbors.distance_to_building(buildings, "bldg_age", [1900, 1970])
     buildings["neighbors_distance_1970_2000"] = neighbors.distance_to_building(buildings, "bldg_age", [1970, 2000])
     buildings["neighbors_distance_after_2000"] = neighbors.distance_to_building(buildings, "bldg_age", [2000, np.inf])
-
-    return buildings
-
-
-def _calculate_microsoft_height_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
-    buildings["bldg_msft_height_closest"] = neighbors.closest_building(buildings, "bldg_msft_height")
-    buildings["bldg_msft_distance_low_rise"] = neighbors.distance_to_building(buildings, "bldg_msft_height", [0, 10])
-    buildings["bldg_msft_distance_low_medium_rise"] = neighbors.distance_to_building(buildings, "bldg_msft_height", [10, 20])
-    buildings["bldg_msft_distance_medium_rise"] = neighbors.distance_to_building(buildings, "bldg_msft_height", [20, 30])
-    buildings["bldg_msft_distance_high_rise"] = neighbors.distance_to_building(buildings, "bldg_msft_height", [30, np.inf])
 
     return buildings
 
