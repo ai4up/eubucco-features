@@ -53,7 +53,7 @@ def calculate_h3_grid_shares(gdf: gpd.GeoDataFrame, col: str, res: int, dropna: 
     if dropna:
         gdf = gdf.dropna(subset=[col])
 
-    hex_grid = gdf.groupby(["h3_index", col]).size()
+    hex_grid = gdf.groupby(["h3_index", col], observed=False).size()
 
     return hex_grid
 
