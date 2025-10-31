@@ -206,7 +206,7 @@ def _calculate_building_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFram
     buildings["bldg_orientation"] = momepy.orientation(buildings)
     buildings["bldg_corners"] = momepy.corners(buildings.simplify(0.5), eps=45)
     buildings["bldg_shared_wall_length"] = momepy.shared_walls(buildings)
-    buildings["bldg_rel_courtyard_size"] = momepy.courtyard_area(buildings) / buildings.area
+    buildings["bldg_rel_courtyard_size"] = momepy.courtyard_area(buildings) / buildings["bldg_footprint_area"]
     buildings["bldg_touches"] = building.calculate_touches(buildings)
     buildings["bldg_distance_closest"] = building.calculate_distance_to_closest_building(buildings)
 
@@ -232,7 +232,7 @@ def _calculate_block_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     blocks["block_orientation"] = momepy.orientation(blocks)
     blocks["block_corners"] = momepy.corners(blocks.simplify(0.5), eps=45)
     blocks["block_shared_wall_length"] = momepy.shared_walls(blocks)
-    blocks["block_rel_courtyard_size"] = momepy.courtyard_area(blocks) / blocks.area
+    blocks["block_rel_courtyard_size"] = momepy.courtyard_area(blocks) / blocks["block_footprint_area"]
     blocks["block_distance_closest"] = building.calculate_distance_to_closest_building(blocks)
 
     buildings = block.merge_blocks_and_buildings(blocks, buildings)
