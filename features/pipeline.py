@@ -64,7 +64,7 @@ def execute_feature_pipeline(
         return
 
     buildings = load_buildings(bldgs_dir, region_id)
-    buildings = _preprocess(buildings)
+    buildings, blocks = _preprocess(buildings)
 
     with LoggingContext(logger, feature_name="building"):
         buildings = _calculate_building_features(buildings)
@@ -73,19 +73,20 @@ def execute_feature_pipeline(
         buildings = _create_validation_set_and_mask_target_attributes(buildings)
 
     with LoggingContext(logger, feature_name="blocks"):
-        buildings = _calculate_block_features(buildings)
+        buildings = _calculate_block_features(buildings, blocks)
 
     with LoggingContext(logger, feature_name="neighbors"):
         buildings = _calculate_neighbor_features(buildings)
 
     with LoggingContext(logger, feature_name="address"):
-        buildings = _calculate_address_features(buildings, addresses_path)
+        buildings = _calculate_address_features(buildings, blocks, addresses_path)
 
     with LoggingContext(logger, feature_name="street"):
         buildings = _calculate_street_features(buildings, streets_dir, region_id)
 
     with LoggingContext(logger, feature_name="poi"):
         buildings = _calculate_poi_features(buildings, pois_dir, region_id)
+
     with LoggingContext(logger, feature_name="landuse"):
         buildings = _calculate_landuse_features(buildings, lu_path, oceans_path)
 
@@ -143,7 +144,12 @@ def _preprocess(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 
     buildings = _fill_missing_attributes_with_merged(buildings)
 
-    return buildings
+    if "block_id" not in buildings.columns:
+        blocks = block.generate_blocks(buildings)
+    else:
+        blocks = block.generate_blocks_from_ids(buildings)
+
+    return buildings, blocks
 
 
 def _fill_missing_attributes_with_merged(buildings: gpd.GeoDataFrame) -> None:
@@ -215,12 +221,8 @@ def _calculate_building_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFram
     return buildings
 
 
-def _calculate_block_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
-    if "block_id" not in buildings.columns:
-        blocks = block.generate_blocks(buildings)
-    else:
-        blocks = block.generate_blocks_from_ids(buildings)
-
+def _calculate_block_features(buildings: gpd.GeoDataFrame, blocks: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    blocks = blocks.copy()
     blocks["block_length"] = blocks["building_ids"].apply(len)
     blocks["block_footprint_area"] = blocks.area
     blocks["block_perimeter"] = blocks.length
@@ -296,15 +298,23 @@ def _calculate_neighbor_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFram
     return buildings
 
 
-def _calculate_address_features(buildings: gpd.GeoDataFrame, addresses_path: str) -> gpd.GeoDataFrame:
+def _calculate_address_features(buildings: gpd.GeoDataFrame, blocks: gpd.GeoDataFrame, addresses_path: str) -> gpd.GeoDataFrame:
     addresses = address.load_addresses(addresses_path, buildings)
 
-    buildings["address_count_5"] = address.building_address_count(buildings, addresses, 5)
-    buildings["address_count_10"] = address.building_address_count(buildings, addresses, 10)
-    buildings["address_unit_count_5"] = address.building_address_unit_count(buildings, addresses, 5)
-    buildings["address_unit_count_10"] = address.building_address_unit_count(buildings, addresses, 10)
+    blocks = blocks.copy()
+    blocks["address_count_block"] = address.building_address_count(blocks, addresses)
+    blocks["address_unit_count_block"] = address.building_address_unit_count(blocks, addresses)
+    blocks["address_avg_count_block"] = blocks["address_count_block"] / blocks["building_ids"].apply(len)
+    blocks["address_avg_unit_count_block"] = blocks["address_unit_count_block"] / blocks["building_ids"].apply(len)
+
+    buildings = block.merge_blocks_and_buildings(blocks, buildings)
+
+    buildings["address_count"] = address.building_address_count(buildings, addresses)
+    buildings["address_unit_count"] = address.building_address_unit_count(buildings, addresses)
     buildings["address_distance"] = address.distance_to_closest_address(buildings, addresses)
 
+    buildings["address_diff_count_block"] = buildings["address_avg_count_block"] - buildings["address_count"]
+    buildings["address_diff_unit_count_block"] = buildings["address_avg_unit_count_block"] - buildings["address_unit_count"]
 
     return buildings
 
@@ -498,14 +508,14 @@ def _calculate_building_buffer_features(buildings: gpd.GeoDataFrame) -> gpd.GeoD
         "street_avg_size": ("street_size", "mean"),
         "street_std_size": ("street_size", "std"),
         "street_max_size": ("street_size", "max"),
-        "address_total_count": ("address_count_5", "sum"),
-        "address_avg_count": ("address_count_5", "mean"),
-        "address_std_count": ("address_count_5", "std"),
-        "address_max_count": ("address_count_5", "max"),
-        "address_total_unit_count": ("address_unit_count_5", "sum"),
-        "address_avg_unit_count": ("address_unit_count_5", "mean"),
-        "address_std_unit_count": ("address_unit_count_5", "std"),
-        "address_max_unit_count": ("address_unit_count_5", "max"),
+        "address_total_count": ("address_count", "sum"),
+        "address_avg_count": ("address_count", "mean"),
+        "address_std_count": ("address_count", "std"),
+        "address_max_count": ("address_count", "max"),
+        "address_total_unit_count": ("address_unit_count", "sum"),
+        "address_avg_unit_count": ("address_unit_count", "mean"),
+        "address_std_unit_count": ("address_unit_count", "std"),
+        "address_max_unit_count": ("address_unit_count", "max"),
     }
     buildings = _add_h3_buffer_features(buildings, buildings, buffer_fts)
 
@@ -541,8 +551,8 @@ def _calculate_building_buffer_features(buildings: gpd.GeoDataFrame) -> gpd.GeoD
             ("block", "phi"),
             ("street", "distance"),
             ("street", "size"),
-            ("address", "count_5"),
-            ("address", "unit_count_5"),
+            ("address", "count"),
+            ("address", "unit_count"),
         ]:
             buildings[f"{cat}_diff_{ft}_{suffix}"] = buildings[f"{cat}_avg_{ft}_{suffix}"] - buildings[f"{cat}_{ft}"]
             buildings[f"{cat}_diff_std_{ft}_{suffix}"] = (buildings[f"{cat}_diff_{ft}_{suffix}"] / buildings[f"{cat}_std_{ft}_{suffix}"]).replace([np.inf, -np.inf], 0)

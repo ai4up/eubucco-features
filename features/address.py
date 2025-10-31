@@ -11,15 +11,15 @@ def load_addresses(addresses_path: str, buildings: gpd.GeoDataFrame) -> gpd.GeoD
     return addresses
 
 
-def building_address_count(buildings: gpd.GeoDataFrame, addresses: gpd.GeoDataFrame, distance: float) -> pd.Series:
-    addr_counts = count_dwithin(buildings, addresses, distance=distance)
+def building_address_count(buildings: gpd.GeoDataFrame, addresses: gpd.GeoDataFrame, tolerance: float = 10) -> pd.Series:
+    addr_counts = count_dwithin(buildings, addresses, distance=tolerance)
 
     return addr_counts
 
 
-def building_address_unit_count(buildings: gpd.GeoDataFrame, addresses: gpd.GeoDataFrame, distance: float) -> pd.Series:
+def building_address_unit_count(buildings: gpd.GeoDataFrame, addresses: gpd.GeoDataFrame, tolerance: float = 10) -> pd.Series:
     address_units = addresses[addresses["number"].astype(str).str.contains(r"[A-Za-z]").fillna(False)]
-    addr_counts = count_dwithin(buildings, address_units, distance=distance)
+    addr_counts = count_dwithin(buildings, address_units, distance=tolerance)
 
     return addr_counts
 
