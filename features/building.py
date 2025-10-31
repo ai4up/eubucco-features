@@ -13,8 +13,8 @@ def calculate_phi(buildings: gpd.GeoDataFrame) -> pd.Series:
     return buildings.area / circle_area
 
 
-def calculate_touches(buildings: gpd.GeoDataFrame, id_col: str = "id") -> pd.Series:
-    touching_pairs = gpd.sjoin(buildings, buildings, predicate="intersects")
+def calculate_touches(buildings: gpd.GeoDataFrame, id_col: str = "id", min_area: float = 0) -> pd.Series:
+    touching_pairs = gpd.sjoin(buildings, buildings[buildings.area > min_area], predicate="intersects")
     touches = touching_pairs.groupby(f"{id_col}_left").size() - 1
     return buildings[id_col].map(touches).fillna(0).astype(int)
 
@@ -27,5 +27,5 @@ def _circle_perimeter(area: pd.Series) -> pd.Series:
     return 2 * np.sqrt(area * math.pi)
 
 
-def calculate_distance_to_closest_building(buildings: gpd.GeoDataFrame) -> pd.Series:
-    return util.distance_nearest(buildings, buildings, max_distance=100).fillna(100)
+def calculate_distance_to_closest_building(buildings: gpd.GeoDataFrame, min_area: float = 0) -> pd.Series:
+    return util.distance_nearest(buildings, buildings[buildings.area > min_area], max_distance=100).fillna(100)

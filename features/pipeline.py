@@ -177,8 +177,8 @@ def _create_validation_set_and_mask_target_attributes(buildings: gpd.GeoDataFram
         "bldg_corners",
         "bldg_shared_wall_length",
         "bldg_rel_courtyard_size",
-        "bldg_touches",
-        "bldg_distance_closest",
+        "bldg_touches_medium",
+        "bldg_distance_closest_medium",
     ]
     bldgs_w_gt_attrs = buildings[buildings["source_dataset"].str.contains("osm|gov")]
     val_mask_gt = sample_representative_validation_set_across_attributes(bldgs_w_gt_attrs, ["height", "type"], bldg_attrs, val_size=0.2)
@@ -208,8 +208,12 @@ def _calculate_building_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFram
     buildings["bldg_corners_area_ratio"] = buildings["bldg_corners"] / buildings["bldg_footprint_area"]
     buildings["bldg_shared_wall_length"] = momepy.shared_walls(buildings)
     buildings["bldg_rel_courtyard_size"] = momepy.courtyard_area(buildings) / buildings["bldg_footprint_area"]
-    buildings["bldg_touches"] = building.calculate_touches(buildings)
     buildings["bldg_distance_closest"] = building.calculate_distance_to_closest_building(buildings)
+    buildings["bldg_distance_closest_medium"] = building.calculate_distance_to_closest_building(buildings, min_area=80)
+    buildings["bldg_distance_closest_large"] = building.calculate_distance_to_closest_building(buildings, min_area=1000)
+    buildings["bldg_touches"] = building.calculate_touches(buildings)
+    buildings["bldg_touches_medium"] = building.calculate_touches(buildings, min_area=80)
+    buildings["bldg_touches_small"] = buildings["bldg_touches"] - buildings["bldg_touches_medium"]
 
     return buildings
 
@@ -446,9 +450,12 @@ def _calculate_building_buffer_features(buildings: gpd.GeoDataFrame) -> gpd.GeoD
         "bldg_avg_orientation": ("bldg_orientation", "mean"),
         "bldg_std_orientation": ("bldg_orientation", "std"),
         "bldg_max_orientation": ("bldg_orientation", "max"),
-        "bldg_avg_distance_closest": ("bldg_distance_closest", "mean"),
-        "bldg_std_distance_closest": ("bldg_distance_closest", "std"),
-        "bldg_max_distance_closest": ("bldg_distance_closest", "max"),
+        "bldg_avg_distance_closest": ("bldg_distance_closest_medium", "mean"),
+        "bldg_std_distance_closest": ("bldg_distance_closest_medium", "std"),
+        "bldg_max_distance_closest": ("bldg_distance_closest_medium", "max"),
+        "bldg_avg_touches": ("bldg_touches_medium", "mean"),
+        "bldg_std_touches": ("bldg_touches_medium", "std"),
+        "bldg_max_touches": ("bldg_touches_medium", "max"),
         "blocks_n": ("block_footprint_area", "count"),
         "block_avg_footprint_area": ("block_footprint_area", "mean"),
         "block_std_footprint_area": ("block_footprint_area", "std"),
@@ -595,13 +602,13 @@ def _calculate_interaction_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataF
     pop_suffix = buffer.ft_suffix(H3_RES - 2)
 
     buildings["i_distance_to_built_x_population"] = (
-        buildings["bldg_distance_closest"] * buildings[f"population_{pop_suffix}"]
+        buildings["bldg_distance_closest_medium"] * buildings[f"population_{pop_suffix}"]
     )
     buildings["i_distance_to_built_x_population_x_footprint_area"] = (
-        buildings["bldg_distance_closest"] * buildings[f"population_{pop_suffix}"] * np.log(buildings["bldg_footprint_area"])
+        buildings["bldg_distance_closest_medium"] * buildings[f"population_{pop_suffix}"] * np.log(buildings["bldg_footprint_area"])
     )
     buildings["i_distance_to_built_x_total_footprint_area"] = (
-        buildings["bldg_distance_closest"] * (buildings[f"bldg_total_footprint_area_{suffix}"] / 1000)
+        buildings["bldg_distance_closest_medium"] * (buildings[f"bldg_total_footprint_area_{suffix}"] / 1000)
     )
     buildings["i_population_per_footprint_area"] = (
         buildings[f"population_{pop_suffix}"] / (buildings[f"bldg_total_footprint_area_{suffix}"] / 1000)
