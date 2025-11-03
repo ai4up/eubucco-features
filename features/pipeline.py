@@ -136,6 +136,7 @@ def _preprocess(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 
     bldgs_gt_attrs = buildings[buildings["source_dataset"].str.contains("osm|gov")]
     buildings["bldg_height"] = bldgs_gt_attrs["height"]
+    buildings["bldg_floors"] = bldgs_gt_attrs["floors"]
     buildings["bldg_age"] = bldgs_gt_attrs["age"]
     buildings["bldg_type"] = bldgs_gt_attrs["type"]
     buildings["bldg_res_type"] = bldgs_gt_attrs["residential_type"]
@@ -155,6 +156,7 @@ def _preprocess(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 def _fill_missing_attributes_with_merged(buildings: gpd.GeoDataFrame) -> None:
     if "osm_height_merged" in buildings.columns:
         buildings["bldg_height"] = buildings["bldg_height"].fillna(buildings["osm_height_merged"])
+        buildings["bldg_floors"] = buildings["bldg_floors"].fillna(buildings["osm_floors_merged"])
         buildings["bldg_age"] = buildings["bldg_age"].fillna(buildings["osm_age_merged"])
         buildings["bldg_type"] = buildings["bldg_type"].fillna(buildings["osm_type_merged"])
         buildings["bldg_res_type"] = buildings["bldg_res_type"].fillna(buildings["osm_residential_type_merged"])
@@ -184,11 +186,12 @@ def _create_validation_set_and_mask_target_attributes(buildings: gpd.GeoDataFram
         "bldg_distance_closest_medium",
     ]
     bldgs_w_gt_attrs = buildings[buildings["source_dataset"].str.contains("osm|gov")]
-    val_mask_gt = sample_representative_validation_set_across_attributes(bldgs_w_gt_attrs, ["height", "type"], bldg_attrs, val_size=0.2)
+    val_mask_gt = sample_representative_validation_set_across_attributes(bldgs_w_gt_attrs, ["height", "floors", "type"], bldg_attrs, val_size=0.2)
     val_mask = buildings.index.isin(bldgs_w_gt_attrs.index[val_mask_gt])
 
     buildings["validation"] = val_mask
     buildings.loc[val_mask, "bldg_height"] = np.nan
+    buildings.loc[val_mask, "bldg_floors"] = np.nan
     buildings.loc[val_mask, "bldg_age"] = np.nan
     buildings.loc[val_mask, "bldg_type"] = np.nan
     buildings.loc[val_mask, "bldg_res_type"] = np.nan
@@ -281,6 +284,12 @@ def _calculate_neighbor_features(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFram
     buildings["neighbors_distance_low_medium_rise"] = neighbors.distance_to_building(buildings, "bldg_height", [10, 20])
     buildings["neighbors_distance_medium_rise"] = neighbors.distance_to_building(buildings, "bldg_height", [20, 30])
     buildings["neighbors_distance_high_rise"] = neighbors.distance_to_building(buildings, "bldg_height", [30, np.inf])
+
+    buildings["neighbors_closest_building_floors"] = neighbors.closest_building(buildings, "bldg_floors")
+    buildings["neighbors_distance_low_rise_floors"] = neighbors.distance_to_building(buildings, "bldg_floors", [0, 3])
+    buildings["neighbors_distance_low_medium_rise_floors"] = neighbors.distance_to_building(buildings, "bldg_floors", [3.5, 6])
+    buildings["neighbors_distance_medium_rise_floors"] = neighbors.distance_to_building(buildings, "bldg_floors", [6.5, 10])
+    buildings["neighbors_distance_high_rise_floors"] = neighbors.distance_to_building(buildings, "bldg_floors", [10.5, np.inf])
 
     buildings["neighbors_closest_msft_height"] = neighbors.closest_building(buildings, "bldg_msft_height")
     buildings["neighbors_distance_msft_low_rise"] = neighbors.distance_to_building(buildings, "bldg_msft_height", [0, 10])
@@ -427,6 +436,9 @@ def _calculate_building_buffer_features(buildings: gpd.GeoDataFrame) -> gpd.GeoD
         "bldg_max_height": ("bldg_height", "max"),
         "bldg_min_height": ("bldg_height", "min"),
         "bldg_std_height": ("bldg_height", "std"),
+        "bldg_max_floors": ("bldg_floors", "max"),
+        "bldg_min_floors": ("bldg_floors", "min"),
+        "bldg_std_floors": ("bldg_floors", "std"),
         "bldg_max_age": ("bldg_age", "max"),
         "bldg_min_age": ("bldg_age", "min"),
         "bldg_std_age": ("bldg_age", "std"),
@@ -475,7 +487,7 @@ def _calculate_building_buffer_features(buildings: gpd.GeoDataFrame) -> gpd.GeoD
     buildings = _add_h3_buffer_features(buildings, buildings, buffer_fts)
 
     h3_cells = pd.DataFrame(index=buildings["h3_index"].unique())
-    target_var_buffer_fts = {"bldg_avg_height": "bldg_height", "bldg_avg_age": "bldg_age"}
+    target_var_buffer_fts = {"bldg_avg_height": "bldg_height", "bldg_avg_floors": "bldg_floors", "bldg_avg_age": "bldg_age"}
     buildings = buffer.add_h3_buffer_mean_excluding_self(buildings, target_var_buffer_fts, H3_RES, H3_BUFFER_SIZES, grid_cells=h3_cells)
 
     for s in H3_BUFFER_SIZES:
@@ -483,6 +495,7 @@ def _calculate_building_buffer_features(buildings: gpd.GeoDataFrame) -> gpd.GeoD
         for cat, ft in [
             ("bldg", "age"),
             ("bldg", "height"),
+            ("bldg", "floors"),
             ("bldg", "msft_height"),
             ("bldg", "footprint_area"),
             ("bldg", "perimeter"),
