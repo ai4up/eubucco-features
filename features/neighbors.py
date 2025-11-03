@@ -6,8 +6,8 @@ import pandas as pd
 import util
 
 
-def closest_building(buildings: gpd.GeoDataFrame, attr: str) -> gpd.GeoDataFrame:
-    nearest = util.snearest_attr(buildings, buildings, attr=attr, max_distance=50)
+def closest_building(buildings: gpd.GeoDataFrame, attr: str, min_area: float = 0) -> gpd.GeoDataFrame:
+    nearest = util.snearest_attr(buildings, buildings[buildings.area > min_area], attr=attr, max_distance=50)
     return nearest[attr]
 
 
