@@ -155,11 +155,16 @@ def _preprocess(buildings: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 
 def _fill_missing_attributes_with_merged(buildings: gpd.GeoDataFrame) -> None:
     if "osm_height_merged" in buildings.columns:
-        buildings["bldg_height"] = buildings["bldg_height"].fillna(buildings["osm_height_merged"])
-        buildings["bldg_floors"] = buildings["bldg_floors"].fillna(buildings["osm_floors_merged"])
-        buildings["bldg_age"] = buildings["bldg_age"].fillna(buildings["osm_age_merged"])
-        buildings["bldg_type"] = buildings["bldg_type"].fillna(buildings["osm_type_merged"])
-        buildings["bldg_res_type"] = buildings["bldg_res_type"].fillna(buildings["osm_residential_type_merged"])
+        buildings["bldg_height"] = buildings["bldg_height"].fillna(
+            buildings[buildings["osm_height_confidence"] > 0.2]["osm_height_merged"])
+        buildings["bldg_floors"] = buildings["bldg_floors"].fillna(
+            buildings[buildings["osm_floors_confidence"] > 0.2]["osm_floors_merged"])
+        buildings["bldg_age"] = buildings["bldg_age"].fillna(
+            buildings[buildings["osm_age_confidence"] > 0.2]["osm_age_merged"])
+        buildings["bldg_type"] = buildings["bldg_type"].fillna(
+            buildings[buildings["osm_type_confidence"] > 0.2]["osm_type_merged"])
+        buildings["bldg_res_type"] = buildings["bldg_res_type"].fillna(
+            buildings[buildings["osm_residential_type_confidence"] > 0.2]["osm_residential_type_merged"])
 
     if "msft_height_merged" in buildings.columns:
         buildings["bldg_msft_height"] = buildings["bldg_msft_height"].fillna(buildings["msft_height_merged"])
